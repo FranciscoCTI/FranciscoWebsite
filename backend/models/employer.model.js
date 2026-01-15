@@ -29,6 +29,11 @@ const employerSchema = new mongoose.Schema(
         website: {
             type: String,
             required: true,
+        },
+        image:
+        {
+            type: String,
+            required: true,
         }
     }, { timestamps: true, collection: 'Employers' }
 );

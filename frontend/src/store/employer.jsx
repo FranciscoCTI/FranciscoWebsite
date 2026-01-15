@@ -10,19 +10,20 @@ export const useEmployerStore = create((set) => ({
         const data = await res.json();
         set({ employers: data.datum });
     },
-    createEmployer: async (newEmployer) => {
-        if (!newEmployer.name || !newEmployer.city || !newEmployer.country) {
+    createEmployer: async (formData) => {
+        const name = formData.get("name");
+        const city = formData.get("city");
+        const country = formData.get("country");
+        const image = formData.get("image");
+
+        if (!name || !city || !country || !image) {
             return { success: false, message: "Complete all the fields" }
         }
 
         try {
             const res = await fetch('/api/employers', {
                 method: 'POST',
-                headers:
-                {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(newEmployer),
+                body: formData
             });
             const data = await res.json();
 

@@ -16,18 +16,32 @@ export const getEmployers = async (req, res) => {
 };
 
 export const createEmployer = async (req, res) => {
+
+    const { name, city, country, contact, contactPhoneNumber, isCurrent, website } = req.body;
+
+    const imagePath = req.file ? req.file.filename : null;
+
     const employerInput = req.body;
 
-    if (!employerInput.name ||
-        !employerInput.city ||
-        !employerInput.country ||
-        !employerInput.contact ||
-        !employerInput.contactPhoneNumber ||
-        !employerInput.website) {
+    if (!name ||
+        !city ||
+        !country ||
+        !contact ||
+        !contactPhoneNumber ||
+        !website) {
         return res.status(400).json({ success: false, message: "Please provide all the fields" });
     }
 
-    const newEmployer = new Employer(employerInput);
+    const newEmployer = new Employer({
+        name,
+        city,
+        country,
+        contact,
+        contactPhoneNumber,
+        isCurrent,
+        website,
+        image: imagePath
+    });
 
     try {
         await newEmployer.save();

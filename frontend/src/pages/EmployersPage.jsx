@@ -43,13 +43,25 @@ const EmployersPage = () => {
 
     const [active, setActive] = useState(false);
 
+    const [selectedFile, setSelectedFile] = useState(null);
+
     const handleAddEmployer = async () => {
+
+        const formData = new FormData();
+        formData.append("name", newEmployer.name);
+        formData.append("city", newEmployer.city);
+        formData.append("country", newEmployer.country);
+        formData.append("contact", newEmployer.contact);
+        formData.append("contactPhoneNumber", newEmployer.contactPhoneNumber);
+        formData.append("isCurrent", active);
+        formData.append("website", newEmployer.website);
+        formData.append("image", selectedFile);
 
         const updatedEmployer = { ...newEmployer, isCurrent: active };
 
         setNewEmployer(updatedEmployer);
 
-        const { success, message } = await createEmployer(updatedEmployer);
+        const { success, message } = await createEmployer(formData);
 
         console.log("Success:", success);
         console.log("Message", message);
@@ -157,6 +169,12 @@ const EmployersPage = () => {
                                     value={newEmployer.website}
                                     onChange={(e) => setNewEmployer({ ...newEmployer, website: e.target.value })}
                                 />
+
+                                <input type="file"
+                                    accept='image/*'
+                                    onChange={(e) => setSelectedFile(e.target.files[0])}>
+
+                                </input>
 
                                 <Button colorScheme='blue' onClick={handleAddEmployer} w='full'>
                                     Add

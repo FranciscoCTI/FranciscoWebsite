@@ -7,6 +7,7 @@ import employerRoutes from './routes/employerRoutes.js';
 import technologiesRoutes from './routes/technologiesRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import cors from 'cors';
+import multer from 'multer';
 
 dotenv.config();
 
@@ -25,7 +26,16 @@ app.use(cors({
     allowedHeaders: ["Content-Type"],
 }));
 
-app.use('/employers', employerRoutes);
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+
+const upload = multer({ storage });
+
+app.use('/uploads', express.static('uploads'));
+
+app.use('/employers', upload.single('image'), employerRoutes);
 app.use('/technologies', technologiesRoutes);
 app.use('/projects', projectRoutes);
 
