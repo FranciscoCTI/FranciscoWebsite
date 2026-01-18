@@ -21,8 +21,6 @@ export const createEmployer = async (req, res) => {
 
     const imagePath = req.file ? req.file.filename : null;
 
-    const employerInput = req.body;
-
     if (!name ||
         !city ||
         !country ||
@@ -81,18 +79,23 @@ export const removeEmployer = async (req, res) => {
 };
 
 export const replaceEmployer = async (req, res) => {
-    const { id } = req.params;
-    const emp = req.body;
+    const { name, city, country, contact, contactPhoneNumber, isCurrent, website } = req.body;
 
-    console.log('process of replacing');
+    const updates = { name, city, country, contact, contactPhoneNumber, isCurrent, website };
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (req.file) {
+        updates.image = `${req.file.filename}`;
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
         return res.status(404).json({ success: false, message: 'Invalid employer id' });
     }
 
     try {
-        const updatedEmployer = await Employer.findByIdAndUpdate(id, emp, { new: true });
-        res.status(201).json({ success: true, data: updatedEmployer, message: 'Employer updated succesfully' });
+        const updated = await Employer.findByIdAndUpdate(req.params.id, updates, { new: true });
+        res.json(updated);
+
+        //res.status(201).json({ success: true, data: updated, message: 'Employer updated succesfully' });
     }
     catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });

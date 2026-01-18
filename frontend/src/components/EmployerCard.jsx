@@ -1,34 +1,37 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
     Box, Container, Heading, HStack, VStack,
-    IconButton, Text, useColorModeValue, Image,
-    useToast, Modal, useDisclosure, ModalOverlay,
+    IconButton, Text, Image,
+    Modal, useDisclosure, ModalOverlay,
     ModalContent, ModalHeader, ModalCloseButton,
     ModalBody, Input, ModalFooter, Button, Select, Wrap,
-    Stack, ChakraProvider, StatNumber, Link, Flex
+    Stack, ChakraProvider, StatNumber, Link, Flex, Switch
 } from '@chakra-ui/react';
 import { useProjectStore } from '../store/project';
 import { useEmployerStore } from '../store/employer';
 import Gallery from './Gallery';
 import ProjectInformation from './ProjectInformation';
+import Employer from '../../../backend/models/employer.model';
 
 const EmployerCard = ({ employer }) => {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const [updatedEmployer, setUpdatedEmployer] = useState(employer);
+    const { isOpen: isOpenEdit, onOpen: onOpenEdit, onClose: onCloseEdit } = useDisclosure();
 
-    const { fetchEmployers, removeEmployer } = useEmployerStore();
+    const [updatedEmployer, setUpdatedEmployer] = useState({});
 
-    const [name, setName] = useState('');
-    const [city, setCity] = useState('');
-    const [country, setCountry] = useState('');
-    const [contact, setContact] = useState('');
-    const [contactPhoneNumber, setContactPhoneNumber] = useState('');
-    const [isCurrent, setIsCurrent] = useState(false);
-    const [website, setWebsite] = useState('');
+    useEffect(() => {
+        if (isOpenEdit && employer) {
+            setUpdatedEmployer({ ...employer });   // initialize only once on open
+        }
+    }, [isOpenEdit]);
 
-    const employerName = employer?.name;
+    const { fetchEmployers, removeEmployer, updateEmployer } = useEmployerStore();
+
+    const [active, setActive] = useState(employer.isCurrent);
+
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const { projects, fetchProjects } = useProjectStore();
 
@@ -41,6 +44,12 @@ const EmployerCard = ({ employer }) => {
         onClose();
     };
 
+
+
+    const handleModalEditClose = () => {
+        onCloseEdit();
+    };
+
     const handleRemoveEmployer = () => {
 
         removeEmployer(employer._id);
@@ -48,9 +57,43 @@ const EmployerCard = ({ employer }) => {
         fetchEmployers();
     };
 
+    const handleEditEmployer = () => {
+        onOpenEdit();
+        setSelectedFile(employer.image);
+
+    };
+
     const handleModalOpen = () => {
         setUpdatedEmployer(employer);
         onOpen();
+    };
+
+    const handleFinishEditEmployer = async (id, updatedEmp) => {
+
+        try {
+            const formData = new FormData();
+
+            for (const [key, value] of Object.entries(updatedEmp)) {
+                if (key.toUpperCase() == "IMAGE") {
+                    formData.append(key, selectedFile.name)
+                }
+                else {
+                    formData.append(key, value);
+                }
+            }
+
+            if (selectedFile) {
+                formData.append("image", selectedFile);
+            }
+
+            await updateEmployer(id, formData);
+
+            console.log(`Updated employer: ${employer.name}`);
+            fetchEmployers();
+            onCloseEdit();
+        } catch (err) {
+            console.error("Error updating employer", err);
+        }
     };
 
     console.log("📌 Projects fetched:", projects);
@@ -83,12 +126,20 @@ const EmployerCard = ({ employer }) => {
                         <Heading as='h2' size='lg' mb={2} color={employer.isCurrent ? "green.700" : "yellow"} fontFamily={'monospace'} >
                             {employer.name}
                         </Heading>
-                        <Button colorScheme="red" size="sm" onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveEmployer(employer._id);
-                        }}>
-                            Remove
-                        </Button>
+                        <VStack>
+                            <Button colorScheme="red" size="sm" onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveEmployer(employer._id);
+                            }}>
+                                Remove
+                            </Button>
+                            <Button colorScheme="red" size="sm" onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditEmployer(employer._id);
+                            }}>
+                                Edit
+                            </Button>
+                        </VStack>
                     </Flex>
                     <VStack>
                         <HStack align="start" w='full'>
@@ -140,6 +191,81 @@ const EmployerCard = ({ employer }) => {
                                 ))};
                             </VStack>
                             {filteredProjects.length == 0 && <Box fontFamily={'monospace'}>No projects for this employer yet</Box>}
+                        </ModalBody>
+                    </ModalContent>
+                </Modal>
+
+                <Modal isOpen={isOpenEdit} onClose={handleModalEditClose} isCentered={true} fontFamily={'monospace'}>
+                    <ModalOverlay bg={"blackAlpha.600"} />
+                    <ModalContent maxW={{ base: "90%", md: "600px" }}
+                        borderRadius="none"
+                        boxShadow="xl"
+                        p={{ base: 2, md: 4 }}>
+                        <ModalHeader textAlign={'center'} fontFamily={'monospace'} fontSize={27}>{updatedEmployer.name}</ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody>
+                            <Box fontFamily={'monospace'} fontSize={13}>
+                                <VStack spacing={3} align={'flex-start'}>
+                                    <Input placeholder='Employer name'
+                                        name='name'
+                                        value={updatedEmployer.name || ""}
+                                        onChange={(e) => setUpdatedEmployer({ ...updatedEmployer, name: e.target.value })}
+                                    />
+                                    <Input placeholder='City'
+                                        name='city'
+                                        value={updatedEmployer.city}
+                                        onChange={(e) => setUpdatedEmployer({ ...updatedEmployer, city: e.target.value })}
+                                    />
+
+                                    <Input placeholder='Country'
+                                        name='country'
+                                        value={updatedEmployer.country}
+                                        onChange={(e) => setUpdatedEmployer({ ...updatedEmployer, country: e.target.value })}
+                                    />
+
+                                    <Input placeholder='Contact'
+                                        name='country'
+                                        value={updatedEmployer.contact}
+                                        onChange={(e) => setUpdatedEmployer({ ...updatedEmployer, contact: e.target.value })}
+                                    />
+
+                                    <Input
+                                        type="tel"
+                                        value={updatedEmployer.contactPhoneNumber}
+                                        onChange={(e) => setUpdatedEmployer({ ...updatedEmployer, contactPhoneNumber: Number(e.target.value.replace(/\D/g, "")) })}
+                                        placeholder="+56 9 1234 5678"
+                                    />
+
+                                    <HStack><Text>Is active job: </Text>
+                                        <Switch
+                                            isChecked={active}
+                                            onChange={(e) => {
+                                                const checked = e.target.checked;
+                                                setActive(checked);
+                                                setUpdatedEmployer({
+                                                    ...updatedEmployer,
+                                                    isCurrent: checked
+                                                });
+                                            }}
+                                        />
+                                    </HStack>
+
+                                    <Input placeholder='Website'
+                                        name='Website'
+                                        value={updatedEmployer.website}
+                                        onChange={(e) => setUpdatedEmployer({ ...updatedEmployer, website: e.target.value })}
+                                    />
+
+                                    <input type="file"
+                                        accept='image/*'
+                                        onChange={(e) => setSelectedFile(e.target.files[0])}>
+                                    </input>
+
+                                    <Button colorScheme='blue' onClick={() => handleFinishEditEmployer(updatedEmployer._id, updatedEmployer)} w='full'>
+                                        Edit
+                                    </Button>
+                                </VStack>
+                            </Box>
                         </ModalBody>
                     </ModalContent>
                 </Modal>
