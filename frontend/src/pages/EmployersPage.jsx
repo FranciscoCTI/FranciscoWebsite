@@ -173,7 +173,6 @@ const EmployersPage = () => {
                                 <input type="file"
                                     accept='image/*'
                                     onChange={(e) => setSelectedFile(e.target.files[0])}>
-
                                 </input>
 
                                 <Button colorScheme='blue' onClick={handleAddEmployer} w='full'>

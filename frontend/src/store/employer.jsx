@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { removeEmployer } from "../../../backend/controllers/employer.controller";
 
 export const useEmployerStore = create((set) => ({
     employers: [],
@@ -53,5 +52,32 @@ export const useEmployerStore = create((set) => ({
         set(state => ({
             employers: state.employers.filter(e => e._id !== id)
         }));
+    },
+
+    updateEmployer: async (id, formData) => {
+
+        const res = await fetch(`/api/employers/${id}`, {
+            method: 'PUT',
+            body: formData
+        });
+
+        if (!res.ok) {
+            const err = await res.text();
+            return { success: false, message: 'Employer not updated: ' + err };
+        }
+
+        // Optionally read the updated employer returned from backend
+        const data = await res.json();
+
+        // Update local store
+        set((state) => ({
+            employers: state.employers.map(e =>
+                e._id === id ? data.datum : e
+            )
+        }));
+
+        return { success: true, message: 'Employer updated successfully' };
     }
+
+
 }));

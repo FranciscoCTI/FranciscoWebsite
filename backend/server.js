@@ -35,7 +35,7 @@ const upload = multer({ storage });
 
 app.use('/uploads', express.static('uploads'));
 
-app.use('/employers', upload.single('image'), employerRoutes);
+app.use('/employers', employerRoutes);
 app.use('/technologies', technologiesRoutes);
 app.use('/projects', projectRoutes);
 
