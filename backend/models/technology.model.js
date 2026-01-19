@@ -11,7 +11,7 @@ const technologySchema = new mongoose.Schema(
             required: true,
         },
         year: {
-            type: String,
+            type: Number,
             required: true,
         },
         userLevel: {
