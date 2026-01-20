@@ -44,8 +44,6 @@ const EmployerCard = ({ employer }) => {
         onClose();
     };
 
-
-
     const handleModalEditClose = () => {
         onCloseEdit();
     };

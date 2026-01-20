@@ -20,7 +20,7 @@ const TechnologyCard = ({ technology }) => {
 
     const { isOpen: cardOpen, onOpen: cardOpening, onClose: cardClosing } = useDisclosure();
 
-    const { fetchEmployers } = useTechnologyStore();
+    const { fetchTechnologies, updateTechnology } = useTechnologyStore();
 
     const HandleEditTecnology = () => {
         cardOpening();
@@ -35,16 +35,10 @@ const TechnologyCard = ({ technology }) => {
     const handleFinishEditTechnology = async (id, updatedTech) => {
 
         try {
-            const formData = new FormData();
-
-            for (const [key, value] of Object.entries(updatedTech)) {
-                formData.append(key, value);
-            }
-
-            await updatedTech(id, formData);
+            await updateTechnology(id, updatedTech);
 
             console.log(`Updated employer: ${technology.name}`);
-            fetchEmployers();
+            fetchTechnologies();
             cardClosing();
         } catch (err) {
             console.error("Error updating employer", err);
