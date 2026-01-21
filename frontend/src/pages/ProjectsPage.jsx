@@ -4,6 +4,7 @@ import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow } from '@vis.gl/react
 //import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { Universities } from '../components/Universities';
 import MyMap from '../components/Map.jsx';
+import MyMapB from '../components/MapB.jsx';
 
 const ProjectsPage = () => {
 
@@ -20,6 +21,7 @@ const ProjectsPage = () => {
 
     return (
         <div>
+            <MyMapB content={projects}></MyMapB>
             <MyMap content={projects}></MyMap>
         </div>
     )
