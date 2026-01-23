@@ -22,7 +22,6 @@ const MyMap = ({ content }) => {
 
     const startPosition = { lat: -36.829550693894596, lng: -73.03672092503368 };
 
-    const [open, setOpen] = useState(false);
     const [zoom, setZoom] = useState(9);
     const [position, setPosition] = useState(startPosition);
 
