@@ -22,7 +22,7 @@ const ProjectsPage = () => {
 
     return (
         <div>
-            <GoogleMapSection></GoogleMapSection>
+            <GoogleMapSection projects={projects}></GoogleMapSection>
             {/*<MyMap content={projects}></MyMap>*/}
         </div>
     )

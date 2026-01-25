@@ -1,5 +1,5 @@
 import { useJsApiLoader, GoogleMap } from '@react-google-maps/api';
-import { React, useCallback, useState } from 'react'
+import { React, useCallback, useMemo, useState } from 'react'
 import {
     VStack, HStack, Text, Box, useColorModeValue,
     Modal,
@@ -11,16 +11,21 @@ import {
     ModalFooter,
     useDisclosure
 } from '@chakra-ui/react'
+import MarkerItem from './MarkerItem';
 
-function GoogleMapSection() {
+function GoogleMapSection({ projects }) {
 
     const containerStyle = {
-        height: '600px'
+        width: '100%',
+        height: '70vh',
+        borderRadius: '20px'
     };
 
-    const center = {
-        lat: -36.829, lng: -73.036
-    };
+    const center = useMemo(() => (
+        {
+            lat: -36.829550693894596, lng: -73.03672092503368
+        }
+    ), []);
 
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
@@ -31,7 +36,7 @@ function GoogleMapSection() {
 
     const onLoad = useCallback(function callback(map) {
         const bounds = new window.google.maps.LatLngBounds(center);
-        map.fitBounds(bounds);
+        //map.fitBounds(bounds);
 
         setMap(map)
     }, [center])
@@ -45,12 +50,15 @@ function GoogleMapSection() {
             <GoogleMap
                 mapContainerStyle={containerStyle}
                 center={center}
-                zoom={8}
+                zoom={12}
                 onLoad={onLoad}
                 onUnmount={onUnmount}
             >
                 {/* Child component such as markers*/}
-                <></>
+                {projects.map((item, index) => (
+                    <MarkerItem key={index}
+                        item={item} />
+                ))}
             </GoogleMap>
         </Box>
     ) : <></>
