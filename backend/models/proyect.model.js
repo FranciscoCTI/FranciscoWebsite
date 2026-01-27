@@ -8,11 +8,11 @@ const projectSchema = new mongoose.Schema(
         },
         latitude: {
             type: Number,
-            required: true,
+            required: false,
         },
         longitude: {
             type: Number,
-            required: true,
+            required: false,
         },
         type: {
             type: String,
@@ -29,7 +29,7 @@ const projectSchema = new mongoose.Schema(
         companyId:
         {
             type: String,
-            required: false,
+            required: true,
         },
         year:
         {

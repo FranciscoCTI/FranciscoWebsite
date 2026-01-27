@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import AECIcon from '../assets/AECIcon.png'
 import MarkerInfo from './MarkerInfo';
 
-function MarkerItem({ item }) {
+function MarkerItem({ item, clusterer }) {
 
     const [selectedItem, setSelectedItem] = useState(null);
 
@@ -11,6 +11,7 @@ function MarkerItem({ item }) {
         <div>
             <MarkerF
                 position={{ lat: Number(item.latitude), lng: Number(item.longitude) }}
+                clusterer={clusterer}
                 icon={{
                     url: AECIcon,
                     scaledSize:

@@ -6,7 +6,7 @@ export const Footer = () => {
     const text = useColorModeValue("gray.800", "yellow.300"); // light / dark text
 
     return (
-        <Box mt="10"
+        <Box mt="0"
             as="footer"
             bg={bg}
             py={4}
