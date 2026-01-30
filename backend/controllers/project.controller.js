@@ -18,16 +18,24 @@ export const getProjects = async (req, res) => {
 export const createProject = async (req, res) => {
     const projectInput = req.body;
 
+    const { title, type, companyId, description, year, myRoleOnIt } = req.body;
+
     if (!projectInput.title ||
-        !projectInput.latitude ||
-        !projectInput.longitude ||
         !projectInput.description ||
+        !projectInput.year ||
         !projectInput.type ||
         !projectInput.myRoleOnIt) {
         return res.status(400).json({ success: false, message: "Please provide all the fields" });
     }
 
-    const newProject = new Project(projectInput);
+    const newProject = new Project({
+        title,
+        type,
+        description,
+        myRoleOnIt,
+        companyId,
+        year,
+    });
 
     try {
         await newProject.save();

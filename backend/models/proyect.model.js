@@ -34,7 +34,7 @@ const projectSchema = new mongoose.Schema(
         year:
         {
             type: Number,
-            required: false
+            required: true
         }
 
     }, { timestamps: true, collection: 'Projects' }

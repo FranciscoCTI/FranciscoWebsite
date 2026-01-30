@@ -66,8 +66,12 @@ const ProjectsPage = () => {
     const handleAddProject = async () => {
 
         const formData = new FormData();
-        formData.append("Title", newProject.title);
-        formData.append("Type", newProject.type);
+        formData.append("title", newProject.title);
+        formData.append("type", newProject.type);
+        formData.append("description", newProject.description);
+        formData.append("companyId", newProject.companyId);
+        formData.append("myRoleOnIt", newProject.myRoleOnIt);
+        formData.append("year", newProject.year);
 
         setNewProject(newProject);
 
@@ -79,6 +83,8 @@ const ProjectsPage = () => {
         setNewProject({
             title: 'New project',
             type: '',
+            companyId: '',
+            myRoleOnIt: ''
         })
 
         onClose();
@@ -126,7 +132,7 @@ const ProjectsPage = () => {
                                     maxHeight={"150px"}
                                     overflowY={"auto"}>
                                     {years.map(y => (
-                                        <option key={y} value={y}>{y}</option>
+                                        <option key={y.toString()} value={y}>{y}</option>
                                     ))}
                                 </Select>
 
