@@ -20,6 +20,8 @@ export const createProject = async (req, res) => {
 
     const { title, type, companyId, description, year, myRoleOnIt } = req.body;
 
+    const imagePath = req.file ? req.file.filename : null;
+
     if (!projectInput.title ||
         !projectInput.description ||
         !projectInput.year ||
@@ -35,6 +37,7 @@ export const createProject = async (req, res) => {
         myRoleOnIt,
         companyId,
         year,
+        image: imagePath
     });
 
     try {

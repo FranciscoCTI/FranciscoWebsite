@@ -11,7 +11,8 @@ import {
     VStack, Container, Text, SimpleGrid, useColorModeValue, Button, Modal, useDisclosure, ModalOverlay,
     ModalContent, ModalHeader, ModalCloseButton, Box,
     ModalBody, Input, ModalFooter,
-    HStack, Select
+    HStack, Select,
+    Step
 } from '@chakra-ui/react'
 import { PROJECT_TYPES } from "../../../backend/models/Enums/ProjectTypes.js";
 import { useEmployerStore } from '../store/employer';
@@ -20,6 +21,8 @@ const ProjectsPage = () => {
 
     const { projects, fetchProjects, createProject } = useProjectStore();
     const { employers, fetchEmployers } = useEmployerStore();
+
+    const [selectedFile, setSelectedFile] = useState(null);
 
     useEffect(() => {
         fetchEmployers();
@@ -72,6 +75,7 @@ const ProjectsPage = () => {
         formData.append("companyId", newProject.companyId);
         formData.append("myRoleOnIt", newProject.myRoleOnIt);
         formData.append("year", newProject.year);
+        formData.append("image", selectedFile);
 
         setNewProject(newProject);
 
@@ -147,6 +151,11 @@ const ProjectsPage = () => {
                                     value={newProject.myRoleOnIt}
                                     onChange={(e) => setNewProject({ ...newProject, myRoleOnIt: e.target.value })}
                                 />
+
+                                <input type="file"
+                                    accept='image/*'
+                                    onChange={(e) => setSelectedFile(e.target.files[0])}>
+                                </input>
 
                                 <Button colorScheme='blue' onClick={handleAddProject} w='full'>
                                     Add

@@ -15,8 +15,9 @@ export const useProjectStore = create((set) => ({
         const description = formData.get("description");
         const employerId = formData.get("companyId");
         const myRoleOnIt = formData.get("myRoleOnIt");
+        const image = formData.get("image");
 
-        if (!title || !type || !description || !myRoleOnIt || !employerId) {
+        if (!title || !type || !description || !myRoleOnIt || !employerId || !image) {
             return { success: false, message: "Complete all the fields" }
         }
 
