@@ -24,6 +24,8 @@ const ProjectsPage = () => {
 
     const [selectedFile, setSelectedFile] = useState(null);
 
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
     useEffect(() => {
         fetchEmployers();
     }, []);
@@ -41,8 +43,6 @@ const ProjectsPage = () => {
 
     console.log('Google Maps API Key:', import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
     console.log('Google Maps ID:', import.meta.env.VITE_GOOGLE_PROJECTS_MAP_ID);
-
-    const { isOpen, onOpen, onClose } = useDisclosure();
 
     const [newProject, setNewProject] = useState({
         title: "",
