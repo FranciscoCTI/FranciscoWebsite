@@ -6,13 +6,16 @@ const projectSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        latitude: {
-            type: Number,
-            required: false,
-        },
-        longitude: {
-            type: Number,
-            required: false,
+        location: {
+            type: {
+                type: String,
+                enum: ["Point"],
+                default: "Point",
+            },
+            coordinates: {
+                type: [Number], // [lng, lat]
+                index: "2dsphere",
+            },
         },
         type: {
             type: String,

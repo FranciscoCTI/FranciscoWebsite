@@ -18,7 +18,7 @@ export const getProjects = async (req, res) => {
 export const createProject = async (req, res) => {
     const projectInput = req.body;
 
-    const { title, type, companyId, description, year, myRoleOnIt } = req.body;
+    const { title, type, companyId, description, year, myRoleOnIt, lat, lng } = req.body;
 
     const imagePath = req.file ? req.file.filename : null;
 
@@ -37,7 +37,11 @@ export const createProject = async (req, res) => {
         myRoleOnIt,
         companyId,
         year,
-        image: imagePath
+        image: imagePath,
+        location: {
+            type: "Point",
+            coordinates: [Number(lng), Number(lat)],
+        }
     });
 
     try {

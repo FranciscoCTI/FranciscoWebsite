@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useProjectStore } from '../store/project';
 import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow } from '@vis.gl/react-google-maps';
-//import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { Universities } from '../components/Universities';
 import MyMap from '../components/Map.jsx';
 import MyMapB from '../components/MapB.jsx';
@@ -16,6 +15,7 @@ import {
 } from '@chakra-ui/react'
 import { PROJECT_TYPES } from "../../../backend/models/Enums/ProjectTypes.js";
 import { useEmployerStore } from '../store/employer';
+import LocationPicker from '../components/LocationPicker.jsx';
 
 const ProjectsPage = () => {
 
@@ -51,6 +51,8 @@ const ProjectsPage = () => {
         myRoleOnIt: "",
         companyId: "",
         year: 2026,
+        latitude: "0",
+        longitude: '0'
     });
 
     useEffect(() => {
@@ -66,6 +68,11 @@ const ProjectsPage = () => {
         onClose();
     };
 
+    const handleLittleMapClick = () => {
+        console.log("Long: " + newProject.location.lat);
+        console.log("Lat: " + newProject.location.lng);
+    };
+
     const handleAddProject = async () => {
 
         const formData = new FormData();
@@ -76,6 +83,8 @@ const ProjectsPage = () => {
         formData.append("myRoleOnIt", newProject.myRoleOnIt);
         formData.append("year", newProject.year);
         formData.append("image", selectedFile);
+        formData.append("lat", newProject.location?.lat);
+        formData.append("lng", newProject.location?.lng);
 
         setNewProject(newProject);
 
@@ -152,9 +161,17 @@ const ProjectsPage = () => {
                                     onChange={(e) => setNewProject({ ...newProject, myRoleOnIt: e.target.value })}
                                 />
 
+                                <LocationPicker
+                                    value={newProject.location}
+                                    onChange={(location) =>
+                                        setNewProject({ ...newProject, location })
+                                    }
+                                />
+
                                 <input type="file"
                                     accept='image/*'
-                                    onChange={(e) => setSelectedFile(e.target.files[0])}>
+                                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                                    onClick={handleLittleMapClick}>
                                 </input>
 
                                 <Button colorScheme='blue' onClick={handleAddProject} w='full'>

@@ -7,10 +7,15 @@ function MarkerItem({ item, clusterer }) {
 
     const [selectedItem, setSelectedItem] = useState(null);
 
+    const toLatLng = (location) => ({
+        lat: location.coordinates[1],
+        lng: location.coordinates[0],
+    });
+
     return (
         <div>
             <MarkerF
-                position={{ lat: Number(item.latitude), lng: Number(item.longitude) }}
+                position={toLatLng(item.location)}
                 clusterer={clusterer}
                 icon={{
                     url: AECIcon,
@@ -26,7 +31,7 @@ function MarkerItem({ item, clusterer }) {
                 {
                     selectedItem &&
                     <OverlayView
-                        position={{ lat: Number(selectedItem.latitude), lng: Number(selectedItem.longitude) }}
+                        position={toLatLng(item.location)}
                         mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
                         <div
                             style={{
