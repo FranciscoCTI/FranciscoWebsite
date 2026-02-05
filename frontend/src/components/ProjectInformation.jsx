@@ -8,9 +8,6 @@ import {
 } from '@chakra-ui/react'
 
 const ProjectInformation = ({ project }) => {
-
-    console.log("This is the project" + project?.title);
-
     return (
         <>
             <ChakraProvider>

@@ -10,15 +10,18 @@ import {
     ModalFooter,
     useDisclosure,
     Center,
-    Button
+    Button,
+    Input, Select
 } from '@chakra-ui/react'
 import { CloseButton } from '@chakra-ui/react';
 import { useProjectStore } from '../store/project';
 import { useEmployerStore } from '../store/employer';
+import { PROJECT_TYPES } from "../../../backend/models/Enums/ProjectTypes.js";
 
 function MarkerInfo({ item, closeHandler }) {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen: isOpenEdit, onOpen: onOpenEdit, onClose: onCloseEdit } = useDisclosure();
 
     const [project, setProject] = useState(item);
 
@@ -26,8 +29,15 @@ function MarkerInfo({ item, closeHandler }) {
 
     const { employers, fetchEmployers } = useEmployerStore();
 
+    const [selectedFile, setSelectedFile] = useState(null);
+
     const getCompanyNameById = (id) =>
         employers.find(e => e._id === id)?.name ?? "Unknown company";
+
+    const years = [];
+    for (let y = 1950; y <= new Date().getFullYear(); y++) {
+        years.push(y);
+    }
 
     useEffect(() => {
         fetchProjects();
@@ -37,14 +47,28 @@ function MarkerInfo({ item, closeHandler }) {
         onClose();
     };
 
+    const handleModalEditClose = () => {
+        onCloseEdit();
+    };
+
     const handleMoreInfoClick = () => {
         setProject(item);
         onOpen();
     };
 
+    const handleEditClick = () => {
+        setProject(item);
+        onOpenEdit();
+    };
+
     const handleRemoveProject = () => {
         removeProject(project._id);
     };
+
+    const handleEditProject = () => {
+
+    };
+
 
     return (
         <div>
@@ -75,12 +99,13 @@ function MarkerInfo({ item, closeHandler }) {
                                 handleMoreInfoClick
                             }
                         >More info</Button>
-                        <Button m={0.5} colorScheme="yellow" size="xs" onClick={handleMoreInfoClick}>Edit</Button>
+                        <Button m={0.5} colorScheme="yellow" size="xs" onClick={handleEditClick}>Edit</Button>
                         <Button m={0.5} colorScheme="red" size="xs" onClick={handleRemoveProject}>Remove</Button>
                     </Flex>
                 </VStack>
             </Box>
 
+            //This is to show project information
             <Modal isOpen={isOpen}
                 onClose={handleModalClose}
                 isCentered={true}
@@ -144,7 +169,107 @@ function MarkerInfo({ item, closeHandler }) {
                     </ModalBody>
                 </ModalContent>
             </Modal>
-        </div>
+
+            //This is to edit project information
+            <Modal isOpen={isOpenEdit}
+                onClose={handleModalEditClose}
+                isCentered={true}
+                fontFamily={'monospace'}
+            >
+                <ModalOverlay bg={"blackAlpha.600"} />
+                <ModalContent maxW={{ base: "90%", md: "600px" }}
+                    borderRadius="none"
+                    boxShadow="xl"
+                    p={{ base: 2, md: 4 }}
+                >
+                    <ModalHeader textAlign={'center'}
+                        fontFamily={'monospace'}
+                        fontSize={27}>{project.title}
+                    </ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <Box fontFamily={'monospace'} fontSize={13} p={1}>
+                            <VStack spacing={3} align={'start'}>
+                                <Box p={3} bg={'white'} w={'full'} fontSize={15}>
+                                    <HStack p={'2'} align={'center'}>
+                                        <Text fontSize={25}>
+                                            Year:
+                                        </Text>
+                                        <Select value={project.year || ""}
+                                            onChange={(e) => setProject({ ...project, year: e.target.value })}
+                                            maxHeight={"150px"}
+                                            overflowY={"auto"}>
+                                            {years.map(y => (
+                                                <option key={y.toString()} value={y}>{y}</option>
+                                            ))}
+                                        </Select>
+                                    </HStack>
+                                    <HStack p={2} align={'center'}>
+                                        <Text m={0} fontSize={25}>
+                                            Type:
+                                        </Text>
+                                        <Select value={project.type || ""} onChange={(e) => setProject({ ...project, type: e.target.value })}
+                                            maxHeight={"150px"}
+                                            overflowY={"auto"}>
+                                            <option value="">Select project type</option>
+                                            {PROJECT_TYPES.map(y => (
+                                                <option key={y.value} value={y.label}>{y.label}</option>
+                                            ))}
+                                        </Select>
+                                    </HStack>
+                                    <HStack p={2} align={'start'}>
+                                        <Text m={0} fontSize={25}>
+                                            Description:
+                                        </Text>
+                                        <Input placeholder='Project description'
+                                            name='description'
+                                            value={project.description}
+                                            onChange={(e) => setProject({ ...project, description: e.target.value })}
+                                        />
+                                    </HStack>
+                                    <HStack p={2} align={'start'}>
+                                        <Text m={0} fontSize={25}>
+                                            My role on this project:
+                                        </Text>
+                                        <Input placeholder='My role on the project...'
+                                            name='myRole'
+                                            value={project.myRoleOnIt}
+                                            onChange={(e) => setProject({ ...project, myRoleOnIt: e.target.value })}
+                                        />
+                                    </HStack>
+                                    <HStack p={2} align={'center'}>
+                                        <Text m={0} fontSize={25}>
+                                            Company:
+                                        </Text>
+                                        <Select value={project.companyId || ""} onChange={(e) => setProject({ ...project, companyId: e.target.value })} maxHeight={"150px"} overflowY={"auto"}>
+                                            <option value=""></option>
+                                            {employers.map(y => (
+                                                <option key={y._id} value={y._id}>{y.name}</option>
+                                            ))}
+                                        </Select>
+                                    </HStack>
+                                    <Box align={'center'}>
+                                        <VStack>
+                                            <img src={`http://localhost:5000/uploads/${project.image}`}
+                                                style={{ padding: 7, width: "50%", height: "auto", objectFit: "contain" }}></img>
+                                            <input type="file"
+                                                accept='image/*'
+                                                onChange={(e) => setSelectedFile(e.target.files[0])}
+                                            >
+                                            </input>
+                                        </VStack>
+                                    </Box>
+                                    <Button align={'center'} margin={3}
+                                        colorScheme='yellow'
+                                        width={"50%"}
+                                        onClick={handleEditProject} w='full'>Edit</Button>
+                                </Box>
+                            </VStack>
+                        </Box>
+                    </ModalBody>
+                </ModalContent>
+            </Modal >
+        </div >
     )
 }
 
