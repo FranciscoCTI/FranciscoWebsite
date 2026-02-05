@@ -40,4 +40,19 @@ export const useProjectStore = create((set) => ({
             return { success: false, message: "Error creating the new project" };
         }
     },
+    removeProject: async (id) => {
+        const res = await fetch(`/api/projects/${id}`, {
+            method: 'DELETE',
+        });
+
+        if (!res.ok) {
+            // handle failure
+            const err = await res.text();
+            return { success: false, message: "project NOT removed" + err };
+        }
+
+        set(state => ({
+            projects: state.projects.filter(e => e._id !== id)
+        }))
+    }
 }));

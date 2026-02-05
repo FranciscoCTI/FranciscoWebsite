@@ -1,16 +1,16 @@
 import { MarkerF, OverlayView } from '@react-google-maps/api'
 import React, { useState } from 'react'
-import AECIcon from '../assets/AECIcon.png'
 import MarkerInfo from './MarkerInfo';
+import ICON_BY_TYPE from './Icons'
 
-function MarkerItem({ item, clusterer }) {
-
-    const [selectedItem, setSelectedItem] = useState(null);
+function MarkerItem({ item, clusterer, isSelected, onSelect, onClose }) {
 
     const toLatLng = (location) => ({
         lat: location.coordinates[1],
         lng: location.coordinates[0],
     });
+
+    const icon = ICON_BY_TYPE[item.type] || ICON_BY_TYPE[0];
 
     return (
         <div>
@@ -18,7 +18,7 @@ function MarkerItem({ item, clusterer }) {
                 position={toLatLng(item.location)}
                 clusterer={clusterer}
                 icon={{
-                    url: AECIcon,
+                    url: icon,
                     scaledSize:
                     {
                         width: 40,
@@ -26,23 +26,29 @@ function MarkerItem({ item, clusterer }) {
                     }
 
                 }}
-                onClick={() => setSelectedItem(item)}
+                onClick={(e) => {
+                    e.domEvent.stopPropagation();
+                    onSelect();
+                }}
             >
                 {
-                    selectedItem &&
-                    <OverlayView
-                        position={toLatLng(item.location)}
-                        mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
-                        <div
-                            style={{
-                                writingMode: 'horizontal-tb',
-                                whiteSpace: 'nowrap',
-                                transform: 'none'
-                            }}>
-                            <MarkerInfo item={selectedItem} closeHandler={() => setSelectedItem(null)}></MarkerInfo>
-                        </div>
-                    </OverlayView>
-                }
+                    isSelected && (
+                        <OverlayView
+                            position={toLatLng(item.location)}
+                            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
+                            <div
+                                onClick={(e) => e.stopPropagation()}
+                                style={{
+                                    writingMode: 'horizontal-tb',
+                                    whiteSpace: 'nowrap',
+                                    transform: 'none'
+                                }}>
+                                <MarkerInfo item={item}
+                                    closeHandler={onClose}>
+                                </MarkerInfo>
+                            </div>
+                        </OverlayView>
+                    )}
 
             </MarkerF>
         </div>

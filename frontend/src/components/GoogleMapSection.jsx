@@ -42,6 +42,8 @@ function GoogleMapSection({ projects }) {
 
     const [map, setMap] = useState(null);
 
+    const [selectedProjectId, setSelectedProjectId] = useState(null);
+
     const onLoad = useCallback(function callback(map) {
         const bounds = new window.google.maps.LatLngBounds(center);
         //map.fitBounds(bounds);
@@ -61,6 +63,7 @@ function GoogleMapSection({ projects }) {
                 zoom={12}
                 onLoad={onLoad}
                 onUnmount={onUnmount}
+                onClick={() => setSelectedProjectId(null)}
                 options={
                     {
                         disableDoubleClickZoom: true,
@@ -97,7 +100,10 @@ function GoogleMapSection({ projects }) {
                             <MarkerItem
                                 key={index}
                                 item={item}
-                                clusterer={clusterer}>
+                                clusterer={clusterer}
+                                isSelected={selectedProjectId === item._id}
+                                onSelect={() => setSelectedProjectId(item._id)}
+                                onClose={() => setSelectedProjectId(null)}>
                             </MarkerItem>
                         )
                         )}

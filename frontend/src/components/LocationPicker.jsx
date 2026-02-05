@@ -1,6 +1,6 @@
 import { Map, AdvancedMarker } from "@vis.gl/react-google-maps";
 import { APIProvider, Pin, InfoWindow } from '@vis.gl/react-google-maps';
-import AECIcon from '../assets/AECIcon.png'
+import AECIcon from '../assets/Icons/AECIcon.png'
 import { Icon } from "@chakra-ui/react";
 import { MdLocationOn } from "react-icons/md";
 import {
