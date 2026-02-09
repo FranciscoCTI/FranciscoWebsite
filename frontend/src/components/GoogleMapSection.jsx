@@ -1,5 +1,5 @@
 import { useJsApiLoader, GoogleMap } from '@react-google-maps/api';
-import { React, useCallback, useState } from 'react'
+import { React, useCallback, useMemo, useState, useEffect, useRef } from 'react'
 import {
     VStack, HStack, Text, Box, useColorModeValue,
     Modal,
@@ -11,27 +11,42 @@ import {
     ModalFooter,
     useDisclosure
 } from '@chakra-ui/react'
+import MarkerItem from './MarkerItem';
+import { MarkerClusterer } from '@react-google-maps/api';
 
-function GoogleMapSection() {
+function GoogleMapSection({ projects }) {
+
+    const textColor = useColorModeValue("black.800", "white.300"); // light / dark text
+    const backGroundColor = useColorModeValue("whiteAlpha.500", "blackAlpha.500"); // light / dark text
 
     const containerStyle = {
-        height: '600px'
+        width: '100%',
+        height: '70vh',
+        borderRadius: '20px'
     };
 
-    const center = {
-        lat: -36.829, lng: -73.036
-    };
+    const center = useMemo(() => (
+        {
+            lat: -36.829550693894596, lng: -73.03672092503368
+        }
+    ), []);
 
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
     })
 
+    const mapRef = useRef(null);
+    const mapInstance = useRef(null);
+    const markersRef = useRef([]);
+
     const [map, setMap] = useState(null);
+
+    const [selectedProjectId, setSelectedProjectId] = useState(null);
 
     const onLoad = useCallback(function callback(map) {
         const bounds = new window.google.maps.LatLngBounds(center);
-        map.fitBounds(bounds);
+        //map.fitBounds(bounds);
 
         setMap(map)
     }, [center])
@@ -45,13 +60,72 @@ function GoogleMapSection() {
             <GoogleMap
                 mapContainerStyle={containerStyle}
                 center={center}
-                zoom={8}
+                zoom={12}
                 onLoad={onLoad}
                 onUnmount={onUnmount}
+                onClick={() => setSelectedProjectId(null)}
+                options={
+                    {
+                        disableDoubleClickZoom: true,
+                        scrollwheel: true,
+                        streetViewControl: false,
+                        mapTypeControl: false,
+                        clickableIcons: false,
+                        styles: [
+                            {
+                                featureType: "poi.business",
+                                stylers: [{ visibility: "off" }],
+                            },
+                            {
+                                featureType: "poi",
+                                stylers: [{ visibility: "off" }],
+                            },
+                            {
+                                featureType: "transit",
+                                stylers: [{ visibility: "off" }],
+                            },
+                        ]
+                    }
+                }
             >
                 {/* Child component such as markers*/}
-                <></>
+
+                {/*projects.map((item, index) => (
+                    <MarkerItem key={index}
+                        item={item} />
+                ))*/}
+                <MarkerClusterer>
+                    {(clusterer) =>
+                        projects.map((item, index) => (
+                            <MarkerItem
+                                key={index}
+                                item={item}
+                                clusterer={clusterer}
+                                isSelected={selectedProjectId === item._id}
+                                onSelect={() => setSelectedProjectId(item._id)}
+                                onClose={() => setSelectedProjectId(null)}>
+                            </MarkerItem>
+                        )
+                        )}
+                </MarkerClusterer>
             </GoogleMap>
+            <Box position={'absolute'}
+                top="100px"
+                left="350px"
+                bg={backGroundColor}
+                p={3}
+            >
+                <VStack>
+                    <Text fontSize={30}
+                        fontWeight={'bold'}
+                        fontFamily={'monospace'}
+                        bg="transparent"
+                        textColor={textColor}
+                    >
+                        These are the projects where I have participated
+                    </Text>
+                </VStack>
+            </Box>
         </Box>
     ) : <></>
 }

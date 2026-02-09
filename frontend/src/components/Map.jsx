@@ -2,8 +2,7 @@ import { useEffect, useState, useRef, Button } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow, useMap, Marker } from '@vis.gl/react-google-maps';
 import { MarkerClusterer } from '@googleMaps/markerclusterer';
 import { GoogleMap, LoadScript } from '@react-google-maps/api';
-import uIcon from '../assets/UniversityIcon.png'
-import AECIcon from '../assets/AECIcon.png'
+import AECIcon from '../assets/Icons/AECIcon.png'
 import {
     VStack, HStack, Text, Box, useColorModeValue,
     Modal,

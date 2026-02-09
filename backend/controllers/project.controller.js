@@ -18,16 +18,31 @@ export const getProjects = async (req, res) => {
 export const createProject = async (req, res) => {
     const projectInput = req.body;
 
+    const { title, type, companyId, description, year, myRoleOnIt, lat, lng } = req.body;
+
+    const imagePath = req.file ? req.file.filename : null;
+
     if (!projectInput.title ||
-        !projectInput.latitude ||
-        !projectInput.longitude ||
         !projectInput.description ||
+        !projectInput.year ||
         !projectInput.type ||
         !projectInput.myRoleOnIt) {
         return res.status(400).json({ success: false, message: "Please provide all the fields" });
     }
 
-    const newProject = new Project(projectInput);
+    const newProject = new Project({
+        title,
+        type,
+        description,
+        myRoleOnIt,
+        companyId,
+        year,
+        image: imagePath,
+        location: {
+            type: "Point",
+            coordinates: [Number(lng), Number(lat)],
+        }
+    });
 
     try {
         await newProject.save();
@@ -62,18 +77,28 @@ export const removeProject = async (req, res) => {
 };
 
 export const replaceProject = async (req, res) => {
-    const { id } = req.params;
-    const proj = req.body;
+    const { title, location, type, description, myRoleOnIt, companyId, year } = req.body;
 
-    console.log('process of replacing');
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
         return res.status(404).json({ success: false, message: 'Invalid project id' });
     }
 
+    const updates = { title, type, description, myRoleOnIt, companyId, year };
+
+    if (location?.lat != null && location?.lng != null) {
+        updates.location = {
+            type: "Point",
+            coordinates: [location.lng, location.lat],
+        };
+    }
+
+    if (req.file) {
+        updates.image = `${req.file.filename}`;
+    }
+
     try {
-        const updatedProject = await Project.findByIdAndUpdate(id, emp, { new: true });
-        res.status(201).json({ success: true, data: updatedProject, message: 'Project updated succesfully' });
+        const updated = await Project.findByIdAndUpdate(req.params.id, { $set: updates }, { new: true, runValidators: true });
+        res.json({ success: true, data: updated });
     }
     catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });

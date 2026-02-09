@@ -1,0 +1,15 @@
+export const PROJECT_TYPES = [
+    { value: "0", label: "Health" },
+    { value: "1", label: "Education" },
+    { value: "2", label: "Housing" },
+    { value: "3", label: "Transport" },
+    { value: "4", label: "Religious" },
+    { value: "5", label: "Security" },
+    { value: "6", label: "Retail" },
+    { value: "7", label: "Industrial" },
+    { value: "8", label: "Juditial" },
+    { value: "9", label: "Hospitality" },
+    { value: "10", label: "Software" },
+    { value: "11", label: "Standarization" },
+    { value: "12", label: "Academia" },
+];

@@ -46,7 +46,7 @@ export const useEmployerStore = create((set) => ({
         if (!res.ok) {
             // handle failure
             const err = await res.text();
-            return { success: false, message: "employer NOT created" + err };
+            return { success: false, message: "employer NOT removed" + err };
         }
 
         set(state => ({

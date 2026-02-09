@@ -6,13 +6,16 @@ const projectSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        latitude: {
-            type: Number,
-            required: true,
-        },
-        longitude: {
-            type: Number,
-            required: true,
+        location: {
+            type: {
+                type: String,
+                enum: ["Point"],
+                default: "Point",
+            },
+            coordinates: {
+                type: [Number], // [lng, lat]
+                index: "2dsphere",
+            },
         },
         type: {
             type: String,
@@ -29,12 +32,17 @@ const projectSchema = new mongoose.Schema(
         companyId:
         {
             type: String,
-            required: false,
+            required: true,
         },
         year:
         {
             type: Number,
-            required: false
+            required: true
+        },
+        image:
+        {
+            type: String,
+            required: true,
         }
 
     }, { timestamps: true, collection: 'Projects' }

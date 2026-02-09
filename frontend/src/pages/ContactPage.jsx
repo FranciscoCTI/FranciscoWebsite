@@ -21,7 +21,7 @@ const ContactPage = () => {
                     color={text}
                     textAlign={'center'}
                 >
-                    I did all this website by myself so you can contact me at:
+                    I did all this website by myself just so you can contact me:
                 </Text>
                 <ContactItem name={"franciscofcch@gmail.com "}>
                     <HiOutlineMailOpen />
