@@ -5,10 +5,10 @@ import ICON_BY_TYPE from './Icons'
 
 function MarkerItem({ item, clusterer, isSelected, onSelect, onClose }) {
 
-    const toLatLng = (location) => ({
-        lat: location.coordinates[1],
-        lng: location.coordinates[0],
-    });
+    const toLatLng = (location) => {
+        const [lng, lat] = location.coordinates;
+        return { lat, lng };
+    };
 
     const icon = ICON_BY_TYPE[item.type] || ICON_BY_TYPE[0];
 

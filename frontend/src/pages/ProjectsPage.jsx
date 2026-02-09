@@ -23,6 +23,7 @@ const ProjectsPage = () => {
     const { employers, fetchEmployers } = useEmployerStore();
 
     const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -170,9 +171,19 @@ const ProjectsPage = () => {
 
                                 <input type="file"
                                     accept='image/*'
-                                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+
+                                        if (!file) return;
+
+                                        setSelectedFile(file);
+                                        setPreviewUrl(URL.createObjectURL(file));
+                                    }}
                                     onClick={handleLittleMapClick}>
                                 </input>
+
+                                {selectedFile && <img src={previewUrl ? previewUrl : `http://localhost:5000/uploads/${newProject.image}`}
+                                    style={{ padding: 7, width: "50%", height: "auto", objectFit: "contain" }}></img>}
 
                                 <Button colorScheme='blue' onClick={handleAddProject} w='full'>
                                     Add

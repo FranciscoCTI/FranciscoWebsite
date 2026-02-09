@@ -77,18 +77,28 @@ export const removeProject = async (req, res) => {
 };
 
 export const replaceProject = async (req, res) => {
-    const { id } = req.params;
-    const proj = req.body;
+    const { title, location, type, description, myRoleOnIt, companyId, year } = req.body;
 
-    console.log('process of replacing');
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
         return res.status(404).json({ success: false, message: 'Invalid project id' });
     }
 
+    const updates = { title, type, description, myRoleOnIt, companyId, year };
+
+    if (location?.lat != null && location?.lng != null) {
+        updates.location = {
+            type: "Point",
+            coordinates: [location.lng, location.lat],
+        };
+    }
+
+    if (req.file) {
+        updates.image = `${req.file.filename}`;
+    }
+
     try {
-        const updatedProject = await Project.findByIdAndUpdate(id, emp, { new: true });
-        res.status(201).json({ success: true, data: updatedProject, message: 'Project updated succesfully' });
+        const updated = await Project.findByIdAndUpdate(req.params.id, { $set: updates }, { new: true, runValidators: true });
+        res.json({ success: true, data: updated });
     }
     catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });

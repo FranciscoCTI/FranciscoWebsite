@@ -54,5 +54,35 @@ export const useProjectStore = create((set) => ({
         set(state => ({
             projects: state.projects.filter(e => e._id !== id)
         }))
+    },
+    updateProject: async (id, formData) => {
+        const res = await fetch(`/api/projects/${id}`, {
+            method: 'PUT',
+            body: formData
+        });
+
+        if (!res.ok) {
+            const err = await res.text();
+            return { success: false, message: 'Project not updated: ' + err };
+        }
+
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            return { success: false, message: "Invalid server response" };
+        }
+
+        if (!data?.data?._id) {
+            return { success: false, message: 'Malformed project returned' };
+        }
+
+        set((state) => ({
+            projects: state.projects.map(e =>
+                e._id === data.data._id ? data.data : e
+            )
+        }));
+
+        return { success: true, message: 'Project updated successfully' };
     }
 }));

@@ -25,11 +25,12 @@ function MarkerInfo({ item, closeHandler }) {
 
     const [project, setProject] = useState(item);
 
-    const { projects, fetchProjects, createProject, removeProject } = useProjectStore();
+    const { projects, fetchProjects, removeProject, updateProject } = useProjectStore();
 
     const { employers, fetchEmployers } = useEmployerStore();
 
     const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     const getCompanyNameById = (id) =>
         employers.find(e => e._id === id)?.name ?? "Unknown company";
@@ -58,6 +59,7 @@ function MarkerInfo({ item, closeHandler }) {
 
     const handleEditClick = () => {
         setProject(item);
+        setSelectedFile(project.image);
         onOpenEdit();
     };
 
@@ -65,8 +67,32 @@ function MarkerInfo({ item, closeHandler }) {
         removeProject(project._id);
     };
 
-    const handleEditProject = () => {
+    const handleEditProject = async (id, updatedProj) => {
 
+        try {
+            const formData = new FormData();
+
+            for (const [key, value] of Object.entries(updatedProj)) {
+                if (key.toUpperCase() == "IMAGE") {
+                    formData.append(key, selectedFile.name)
+                }
+                else {
+                    formData.append(key, value);
+                }
+            }
+
+            if (selectedFile) {
+                formData.append("image", selectedFile);
+            }
+
+            await updateProject(id, formData);
+
+            console.log(`Updated project: ${project.title}`);
+            fetchProjects();
+            onCloseEdit();
+        } catch (err) {
+            console.error("Error updating project", err);
+        }
     };
 
 
@@ -250,11 +276,18 @@ function MarkerInfo({ item, closeHandler }) {
                                     </HStack>
                                     <Box align={'center'}>
                                         <VStack>
-                                            <img src={`http://localhost:5000/uploads/${project.image}`}
+                                            <img src={previewUrl ? previewUrl : `http://localhost:5000/uploads/${project.image}`}
                                                 style={{ padding: 7, width: "50%", height: "auto", objectFit: "contain" }}></img>
                                             <input type="file"
                                                 accept='image/*'
-                                                onChange={(e) => setSelectedFile(e.target.files[0])}
+                                                onChange={(e) => {
+                                                    const file = e.target.files[0];
+
+                                                    if (!file) return;
+
+                                                    setSelectedFile(file);
+                                                    setPreviewUrl(URL.createObjectURL(file));
+                                                }}
                                             >
                                             </input>
                                         </VStack>
@@ -262,7 +295,7 @@ function MarkerInfo({ item, closeHandler }) {
                                     <Button align={'center'} margin={3}
                                         colorScheme='yellow'
                                         width={"50%"}
-                                        onClick={handleEditProject} w='full'>Edit</Button>
+                                        onClick={() => handleEditProject(project._id, project)} w='full'>Edit</Button>
                                 </Box>
                             </VStack>
                         </Box>
