@@ -15,7 +15,7 @@ import {
 import { COUNTRIES } from "../../../backend/models/Enums/Countries.js"
 
 
-export const FilteringBar = ({ filterText, onChange }) => {
+export const FilteringBar = ({ filterText, onChange, onChangeCountry }) => {
 
     return (
         <Container
@@ -29,7 +29,7 @@ export const FilteringBar = ({ filterText, onChange }) => {
                 <VStack>
                     <Text color={'white'}>By name</Text>
                     <input
-                        style={{ height: "40px" }}
+                        style={{ height: "40px", borderRadius: "10px" }}
                         type="text"
                         placeholder="Filter projects…"
                         value={filterText}
@@ -44,6 +44,7 @@ export const FilteringBar = ({ filterText, onChange }) => {
                         type="text"
                         placeholder="Filter projects…"
                         value={filterText}
+                        onChange={(e) => onChangeCountry(e.target.value)}
                     >
                         {COUNTRIES.map((c) => (
                             <option key={c}>

@@ -17,6 +17,7 @@ import { CloseButton } from '@chakra-ui/react';
 import { useProjectStore } from '../store/project';
 import { useEmployerStore } from '../store/employer';
 import { PROJECT_TYPES } from "../../../backend/models/Enums/ProjectTypes.js";
+import { Link } from "react-router-dom";
 
 function MarkerInfo({ item, closeHandler }) {
 
@@ -184,9 +185,11 @@ function MarkerInfo({ item, closeHandler }) {
                                         <Text color={'yellow'} m={0} fontSize={25}>
                                             Company:
                                         </Text>
-                                        <Text color={'yellow'}>
-                                            {getCompanyNameById(project.companyId)}
-                                        </Text>
+                                        <Link color='blue' to={`/employers?selected=${project.companyId}`} >
+                                            <Text color={'magenta'}>
+                                                {getCompanyNameById(project.companyId)}
+                                            </Text>
+                                        </Link>
                                     </HStack>
                                     <img src={`http://localhost:5000/uploads/${project.image}`} style={{ padding: 7, width: "100%", height: "auto", objectFit: "contain" }}></img>
                                 </Box>

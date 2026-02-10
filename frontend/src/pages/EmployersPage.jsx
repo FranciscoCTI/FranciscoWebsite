@@ -5,7 +5,8 @@ import {
     ModalContent, ModalHeader, ModalCloseButton, Box,
     ModalBody, Input, ModalFooter,
     HStack,
-    Select
+    Select,
+    filter
 } from '@chakra-ui/react'
 import EmployerCard from '../components/EmployerCard';
 import { createEmployer } from '../../../backend/controllers/employer.controller';
@@ -30,9 +31,11 @@ const EmployersPage = () => {
 
 
     const [filterText, setFilterText] = useState("");
+    const [filterCountry, setFilterCountry] = useState("");
 
     const filteredEmployers = employers.filter(emp =>
-        emp?.name?.toLowerCase().includes(filterText.toLowerCase())
+        emp?.name?.toLowerCase().includes(filterText.toLowerCase()) &&
+        emp?.country.toLowerCase().includes(filterCountry.toLowerCase())
     );
 
     const [newEmployer, setNewEmployer] = useState({
@@ -102,7 +105,7 @@ const EmployersPage = () => {
                     >
                         These are all the employers that I´ve had
                     </Text>
-                    <FilteringBar value={filterText} onChange={setFilterText}></FilteringBar>
+                    <FilteringBar value={filterText} onChange={setFilterText} onChangeCountry={setFilterCountry}></FilteringBar>
                     <SimpleGrid
                         columns={{ base: 1, sm: 2, md: 3 }}
                         spacing={10}
