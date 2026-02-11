@@ -228,7 +228,7 @@ function MarkerInfo({ item, closeHandler }) {
                     <ModalBody>
                         <Box fontFamily={'monospace'} fontSize={13} p={1}>
                             <VStack spacing={3} align={'start'}>
-                                <Box p={3} bg={backGroundColor} w={'full'} fontSize={15} textColor={'black'}>
+                                <Box p={3} w={'full'} fontSize={15}>
                                     <HStack p={'2'} align={'center'}>
                                         <Text fontSize={25}>
                                             Year:
