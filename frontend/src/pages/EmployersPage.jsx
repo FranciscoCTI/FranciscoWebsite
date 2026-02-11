@@ -1,7 +1,7 @@
 import { React, useState, useEffect } from 'react'
 import { useEmployerStore } from '../store/employer';
 import {
-    VStack, Container, Text, SimpleGrid, useColorModeValue, Button, Modal, useDisclosure, ModalOverlay,
+    VStack, Container, Text, SimpleGrid, useColorModeValue, useColorMode, Button, Modal, useDisclosure, ModalOverlay,
     ModalContent, ModalHeader, ModalCloseButton, Box,
     ModalBody, Input, ModalFooter,
     HStack,
@@ -9,17 +9,17 @@ import {
     filter
 } from '@chakra-ui/react'
 import EmployerCard from '../components/EmployerCard';
-import { createEmployer } from '../../../backend/controllers/employer.controller';
-import Employer from '../../../backend/models/employer.model';
 import { Switch } from "@chakra-ui/react";
 import { FilteringBar } from '../components/FilteringBar';
 import { COUNTRIES } from "../../../backend/models/Enums/Countries.js"
 
 const EmployersPage = () => {
 
-    const text = useColorModeValue("black.800", "yellow.300"); // light / dark text
-
     console.log("Started rendering EmployersPage");
+
+    const backGroundColor = useColorModeValue('white', "gray.800");
+    const intermediateColor = useColorModeValue('blue', "red");
+    const textColor = useColorModeValue("black", "yellow");
 
     const { employers, fetchEmployers, createEmployer } = useEmployerStore();
 
@@ -94,13 +94,12 @@ const EmployersPage = () => {
 
     return (
         <>
-            <Container maxW='container.xl' py={3}>
+            <Container maxW='container.xl' py={3} bg={backGroundColor} textColor={textColor}>
                 <VStack spacing={3}>
                     <Text my={5}
                         fontSize={'30'}
                         fontWeight={'bold'}
                         fontFamily={'monospace'}
-                        color={text}
                         textAlign={'center'}
                     >
                         These are all the employers that I´ve had

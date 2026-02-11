@@ -5,7 +5,7 @@ import {
     Modal, useDisclosure, ModalOverlay,
     ModalContent, ModalHeader, ModalCloseButton,
     ModalBody, Input, ModalFooter, Button, Select, Wrap,
-    Stack, ChakraProvider, StatNumber, Link, Flex, Switch
+    Stack, ChakraProvider, StatNumber, Link, Flex, Switch, useColorModeValue
 } from '@chakra-ui/react';
 import { useProjectStore } from '../store/project';
 import { useEmployerStore } from '../store/employer';
@@ -14,6 +14,11 @@ import ProjectInformation from './ProjectInformation';
 import Employer from '../../../backend/models/employer.model';
 
 const EmployerCard = ({ employer }) => {
+
+    const backGroundColor = useColorModeValue('white', "gray.800");
+    const intermediateColor = useColorModeValue('blue.100', "gray.500");
+    const textColor = useColorModeValue("black", "yellow");
+    const placeholderColor = useColorModeValue("gray.500", "yellow.600");
 
     const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -104,7 +109,7 @@ const EmployerCard = ({ employer }) => {
         <>
             <ChakraProvider>
                 <Box fontFamily={'monospace'}
-                    bg={'black'}
+                    bg={intermediateColor}
                     borderRadius="0"
                     boxShadow="md"
                     p={4}
@@ -125,13 +130,13 @@ const EmployerCard = ({ employer }) => {
                             {employer.name}
                         </Heading>
                         <VStack>
-                            <Button colorScheme="red" size="sm" onClick={(e) => {
+                            <Button bg={'red'} size="sm" onClick={(e) => {
                                 e.stopPropagation();
                                 handleRemoveEmployer(employer._id);
                             }}>
                                 Remove
                             </Button>
-                            <Button colorScheme="red" size="sm" onClick={(e) => {
+                            <Button bg={'yellow'} textColor={'Black'} size="sm" onClick={(e) => {
                                 e.stopPropagation();
                                 handleEditEmployer(employer._id);
                             }}>
@@ -141,7 +146,7 @@ const EmployerCard = ({ employer }) => {
                     </Flex>
                     <VStack>
                         <HStack align="start" w='full'>
-                            <Text fontSize='s' mb={0}>
+                            <Text fontSize='s' mb={0} color={employer.isCurrent ? 'Black' : 'yellow'}>
                                 {employer.city} - {employer.country}
                             </Text>
                         </HStack>
