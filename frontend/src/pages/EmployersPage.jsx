@@ -1,21 +1,25 @@
 import { React, useState, useEffect } from 'react'
 import { useEmployerStore } from '../store/employer';
 import {
-    VStack, Container, Text, SimpleGrid, useColorModeValue, Button, Modal, useDisclosure, ModalOverlay,
+    VStack, Container, Text, SimpleGrid, useColorModeValue, useColorMode, Button, Modal, useDisclosure, ModalOverlay,
     ModalContent, ModalHeader, ModalCloseButton, Box,
     ModalBody, Input, ModalFooter,
-    HStack
+    HStack,
+    Select,
+    filter
 } from '@chakra-ui/react'
 import EmployerCard from '../components/EmployerCard';
-import { createEmployer } from '../../../backend/controllers/employer.controller';
-import Employer from '../../../backend/models/employer.model';
 import { Switch } from "@chakra-ui/react";
+import { FilteringBar } from '../components/FilteringBar';
+import { COUNTRIES } from "../../../backend/models/Enums/Countries.js"
 
 const EmployersPage = () => {
 
-    const text = useColorModeValue("black.800", "yellow.300"); // light / dark text
-
     console.log("Started rendering EmployersPage");
+
+    const backGroundColor = useColorModeValue('white', "gray.800");
+    const intermediateColor = useColorModeValue('blue', "red");
+    const textColor = useColorModeValue("black", "yellow");
 
     const { employers, fetchEmployers, createEmployer } = useEmployerStore();
 
@@ -24,6 +28,15 @@ const EmployersPage = () => {
     useEffect(() => {
         fetchEmployers();
     }, []);
+
+
+    const [filterText, setFilterText] = useState("");
+    const [filterCountry, setFilterCountry] = useState("");
+
+    const filteredEmployers = employers.filter(emp =>
+        emp?.name?.toLowerCase().includes(filterText.toLowerCase()) &&
+        emp?.country.toLowerCase().includes(filterCountry.toLowerCase())
+    );
 
     const [newEmployer, setNewEmployer] = useState({
         name: "",
@@ -81,22 +94,23 @@ const EmployersPage = () => {
 
     return (
         <>
-            <Container maxW='container.xl' py={3}>
-                <VStack spacing={6}>
-                    <Text my={10}
+            <Container maxW='container.xl' py={3} bg={backGroundColor} textColor={textColor}>
+                <VStack spacing={3}>
+                    <Text my={5}
                         fontSize={'30'}
                         fontWeight={'bold'}
                         fontFamily={'monospace'}
-                        color={text}
                         textAlign={'center'}
                     >
                         These are all the employers that I´ve had
                     </Text>
+                    <FilteringBar value={filterText} onChange={setFilterText} onChangeCountry={setFilterCountry}></FilteringBar>
                     <SimpleGrid
                         columns={{ base: 1, sm: 2, md: 3 }}
                         spacing={10}
+                        mt={6}
                     >
-                        {employers.map((emp) => (
+                        {filteredEmployers.map((emp) => (
                             (emp != null && emp.name != "") &&
                             (<EmployerCard key={emp._id} employer={emp} />)
                         ))
@@ -130,16 +144,23 @@ const EmployersPage = () => {
                                     value={newEmployer.name}
                                     onChange={(e) => setNewEmployer({ ...newEmployer, name: e.target.value })}
                                 />
+
+                                <Select
+                                    placeholder="Select country"
+                                    value={newEmployer.country}
+                                    onChange={(e) => setNewEmployer({ ...newEmployer, country: e.target.value })}
+                                >
+                                    {COUNTRIES.map((c) => (
+                                        <option key={c}>
+                                            {c}
+                                        </option>
+                                    ))}
+                                </Select>
+
                                 <Input placeholder='City'
                                     name='city'
                                     value={newEmployer.city}
                                     onChange={(e) => setNewEmployer({ ...newEmployer, city: e.target.value })}
-                                />
-
-                                <Input placeholder='Country'
-                                    name='country'
-                                    value={newEmployer.country}
-                                    onChange={(e) => setNewEmployer({ ...newEmployer, country: e.target.value })}
                                 />
 
                                 <Input placeholder='Contact'

@@ -17,8 +17,14 @@ import { CloseButton } from '@chakra-ui/react';
 import { useProjectStore } from '../store/project';
 import { useEmployerStore } from '../store/employer';
 import { PROJECT_TYPES } from "../../../backend/models/Enums/ProjectTypes.js";
+import { Link } from "react-router-dom";
 
 function MarkerInfo({ item, closeHandler }) {
+
+    const backGroundColor = useColorModeValue('white', "gray.800");
+    const intermediateColor = useColorModeValue('blue.100', "gray.500");
+    const textColor = useColorModeValue("black", "yellow");
+    const placeholderColor = useColorModeValue("gray.500", "yellow.600");
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isOpenEdit, onOpen: onOpenEdit, onClose: onCloseEdit } = useDisclosure();
@@ -98,7 +104,7 @@ function MarkerInfo({ item, closeHandler }) {
 
     return (
         <div>
-            <Box bg="white"
+            <Box bg={backGroundColor}
                 position='absolute'
                 transform="translate(-50%)" padding={2}
                 fontWeight={'bold'}
@@ -107,9 +113,9 @@ function MarkerInfo({ item, closeHandler }) {
                 <VStack align={'end'}>
                     <HStack spacing={2} align={'left'}>
                         <Box fontSize="20px"
-                            color="black"
                             whiteSpace="nowrap"
-                            padding={1}>
+                            padding={1} color={textColor}
+                        >
                             {project.title}
                         </Box>
                         <CloseButton size={'sm'}
@@ -119,14 +125,15 @@ function MarkerInfo({ item, closeHandler }) {
                     <Flex justify="flex-end" w="100%" p={1}
                     >
                         <Button m={0.5}
-                            colorScheme="blue"
+                            textColor={'white'}
+                            bg="blue"
                             size="xs"
                             onClick={
                                 handleMoreInfoClick
                             }
                         >More info</Button>
-                        <Button m={0.5} colorScheme="yellow" size="xs" onClick={handleEditClick}>Edit</Button>
-                        <Button m={0.5} colorScheme="red" size="xs" onClick={handleRemoveProject}>Remove</Button>
+                        <Button bg={'yellow'} textColor={'Black'} m={0.5} size="xs" onClick={handleEditClick}>Edit</Button>
+                        <Button bg={'red'} textColor={'Black'} m={0.5} disabled size="xs" onClick={handleRemoveProject}>Remove</Button>
                     </Flex>
                 </VStack>
             </Box>
@@ -141,52 +148,57 @@ function MarkerInfo({ item, closeHandler }) {
                 <ModalContent maxW={{ base: "90%", md: "600px" }}
                     borderRadius="none"
                     boxShadow="xl"
-                    p={{ base: 2, md: 4 }} bg={'white'}>
-                    <ModalHeader textAlign={'center'} fontFamily={'monospace'} fontSize={27}>{project.title}</ModalHeader>
+                    p={{ base: 2, md: 4 }} bg={backGroundColor}>
+                    <ModalHeader textColor={textColor}
+                        textAlign={'center'}
+                        fontFamily={'monospace'}
+                        fontSize={27}>{project.title}</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <Box fontFamily={'monospace'} fontSize={13} p={1}>
+                        <Box fontFamily={'monospace'} fontSize={13} p={1} bg={backGroundColor}>
                             <VStack spacing={3} align={'start'}>
-                                <Box p={3} bg={'black'} w={'full'} fontSize={15}>
+                                <Box p={3} bg={backGroundColor} w={'full'} fontSize={15}>
                                     <HStack p={'2'} align={'center'}>
-                                        <Text color={'yellow'} fontSize={25}>
+                                        <Text color={textColor} fontSize={25}>
                                             Year:
                                         </Text>
-                                        <Text color={'yellow'} >
+                                        <Text color={textColor} >
                                             {project.year}
                                         </Text>
                                     </HStack>
                                     <HStack p={2} align={'center'}>
-                                        <Text f color={'yellow'} m={0} fontSize={25}>
+                                        <Text f color={textColor} m={0} fontSize={25}>
                                             Type:
                                         </Text>
-                                        <Text color={'yellow'} >
+                                        <Text color={textColor}>
                                             {project.type}
                                         </Text>
                                     </HStack>
                                     <HStack p={2} align={'start'}>
-                                        <Text f color={'yellow'} m={0} fontSize={25}>
+                                        <Text f color={textColor} m={0} fontSize={25}>
                                             Description:
                                         </Text>
-                                        <Text color={'yellow'} >
+                                        <Text color={textColor}>
                                             {project.description}
                                         </Text>
                                     </HStack>
                                     <HStack p={2} align={'start'}>
-                                        <Text color={'yellow'} m={0} fontSize={25}>
+                                        <Text color={textColor} m={0} fontSize={25}>
                                             My role on this project:
                                         </Text>
-                                        <Text color={'yellow'}>
+                                        <Text color={textColor}>
                                             {project.myRoleOnIt}
                                         </Text>
                                     </HStack>
                                     <HStack p={2} align={'center'}>
-                                        <Text color={'yellow'} m={0} fontSize={25}>
+                                        <Text color={textColor} m={0} fontSize={25}>
                                             Company:
                                         </Text>
-                                        <Text color={'yellow'}>
-                                            {getCompanyNameById(project.companyId)}
-                                        </Text>
+                                        <Link color='blue' to={`/employers?selected=${project.companyId}`} >
+                                            <Text color={'magenta'}>
+                                                {getCompanyNameById(project.companyId)}
+                                            </Text>
+                                        </Link>
                                     </HStack>
                                     <img src={`http://localhost:5000/uploads/${project.image}`} style={{ padding: 7, width: "100%", height: "auto", objectFit: "contain" }}></img>
                                 </Box>
@@ -216,7 +228,7 @@ function MarkerInfo({ item, closeHandler }) {
                     <ModalBody>
                         <Box fontFamily={'monospace'} fontSize={13} p={1}>
                             <VStack spacing={3} align={'start'}>
-                                <Box p={3} bg={'white'} w={'full'} fontSize={15}>
+                                <Box p={3} w={'full'} fontSize={15}>
                                     <HStack p={'2'} align={'center'}>
                                         <Text fontSize={25}>
                                             Year:
