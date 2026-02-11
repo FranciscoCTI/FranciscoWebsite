@@ -1,7 +1,7 @@
 import { GoogleMap, LoadScript, useJsApiLoader } from "@react-google-maps/api";
 import { useRef, useState } from 'react';
 import MarkerItem from '../components/MarkerItem.jsx';
-import { RegularMapStyle } from '../components/MapStyles.js';
+import { RegularMapStyle, NightMapStyle } from '../components/MapStyles.js';
 import loader from '../components/GoogleMapsLoader.js';
 
 const center = {

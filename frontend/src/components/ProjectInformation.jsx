@@ -4,16 +4,27 @@ import {
     VStack, HStack, Box, Button, useColorModeValue, useDisclosure, Modal, ModalOverlay,
     ModalContent, ModalHeader, ModalCloseButton,
     ModalBody, Input, ModalFooter, ChakraProvider, Text,
-    Center
+    Center,
+    Img,
+    Flex
 } from '@chakra-ui/react'
+import ICON_BY_TYPE from './Icons'
 
 const ProjectInformation = ({ project }) => {
     return (
         <>
             <ChakraProvider>
-                <Box fontFamily={'monospace'} margin={1} border={'2px solid black'} p={4}>
+                <Box fontFamily={'monospace'}
+                    margin={1}
+                    border={'2px solid black'}
+                    p={4}
+                    bg={'gray.200'}
+                    textColor={'black'}>
                     <VStack spacing={3} align={'flex-start'}>
-                        <Text fontSize={25}>{project.title}</Text>
+                        <HStack w="100%" justify="space-between">
+                            <Text fontSize={25}>{project.title}</Text>
+                            <img src={ICON_BY_TYPE[project.type]} style={{ width: "50px", height: "50px", objectFit: "cover" }}></img>
+                        </HStack>
                         <HStack w={'100%'}>
                             <Text flex={1} fontWeight={'bold'}>Year: </Text>
                             <Text flex={5}>{project.year}</Text>

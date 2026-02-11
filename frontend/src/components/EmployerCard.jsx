@@ -130,7 +130,7 @@ const EmployerCard = ({ employer }) => {
                             {employer.name}
                         </Heading>
                         <VStack>
-                            <Button bg={'red'} size="sm" onClick={(e) => {
+                            <Button isDisabled bg={'red'} textColor={'White'} size="sm" onClick={(e) => {
                                 e.stopPropagation();
                                 handleRemoveEmployer(employer._id);
                             }}>
@@ -159,7 +159,10 @@ const EmployerCard = ({ employer }) => {
                     <ModalContent maxW={{ base: "90%", md: "600px" }}
                         borderRadius="none"
                         boxShadow="xl"
-                        p={{ base: 2, md: 4 }}>
+                        p={{ base: 2, md: 4 }}
+                        borderWidth={10}
+                        borderColor={'black'}>
+
                         <ModalHeader textAlign={'center'} fontFamily={'monospace'} fontSize={27}>{updatedEmployer.name}</ModalHeader>
                         <ModalCloseButton />
                         <ModalBody>

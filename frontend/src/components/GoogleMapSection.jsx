@@ -9,15 +9,19 @@ import {
     ModalCloseButton,
     ModalBody,
     ModalFooter,
-    useDisclosure
+    useDisclosure,
+    useColorMode
 } from '@chakra-ui/react'
 import MarkerItem from './MarkerItem';
 import { MarkerClusterer } from '@react-google-maps/api';
+import { RegularMapStyle, NightMapStyle } from '../components/MapStyles.js';
 
 function GoogleMapSection({ projects }) {
 
     const textColor = useColorModeValue("black.800", "white.300"); // light / dark text
     const backGroundColor = useColorModeValue("whiteAlpha.500", "blackAlpha.500"); // light / dark text
+
+    const { colorMode } = useColorMode();
 
     const containerStyle = {
         width: '100%',
@@ -35,10 +39,6 @@ function GoogleMapSection({ projects }) {
         id: 'google-map-script',
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
     })
-
-    const mapRef = useRef(null);
-    const mapInstance = useRef(null);
-    const markersRef = useRef([]);
 
     const [map, setMap] = useState(null);
 
@@ -64,36 +64,15 @@ function GoogleMapSection({ projects }) {
                 onLoad={onLoad}
                 onUnmount={onUnmount}
                 onClick={() => setSelectedProjectId(null)}
-                options={
-                    {
-                        disableDoubleClickZoom: true,
-                        scrollwheel: true,
-                        streetViewControl: false,
-                        mapTypeControl: false,
-                        clickableIcons: false,
-                        styles: [
-                            {
-                                featureType: "poi.business",
-                                stylers: [{ visibility: "off" }],
-                            },
-                            {
-                                featureType: "poi",
-                                stylers: [{ visibility: "off" }],
-                            },
-                            {
-                                featureType: "transit",
-                                stylers: [{ visibility: "off" }],
-                            },
-                        ]
-                    }
-                }
+                options={{
+                    disableDoubleClickZoom: true,
+                    scrollwheel: true,
+                    streetViewControl: false,
+                    mapTypeControl: false,
+                    clickableIcons: false,
+                    styles: colorMode === "dark" ? NightMapStyle : RegularMapStyle, disableDefaultUI: true
+                }}
             >
-                {/* Child component such as markers*/}
-
-                {/*projects.map((item, index) => (
-                    <MarkerItem key={index}
-                        item={item} />
-                ))*/}
                 <MarkerClusterer>
                     {(clusterer) =>
                         projects.map((item, index) => (
