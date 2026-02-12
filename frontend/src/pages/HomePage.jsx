@@ -32,7 +32,8 @@ const HomePage = () => {
 
                 <CarrerTimeline />
 
-                <BriefInfo information={"What interest me is to create solutions to real problems using technology. For this what i´ve used is: BIM technology, web and desktop software development. What i´m looking for right now is to be part of a company where i can develop AEC software using my 15 years of experience in BIM, architecture and the construction industry in general"} moreInfo={"About BIM"} title={"Interest areas"}>
+                <BriefInfo title={"Interest areas"}
+                    information={"What interest me overall is to create solutions to real problems using technology. It also drives me the feeling to be taking away time consuming and exhausting work from people, so they can do more interesting task or just enjoy life. For this objectives, what i´ve used so far is: BIM technology, web and desktop software development. What i´m looking for right now is to be part of a company where i can develop AEC software using my 15 years of experience in BIM, architecture and the construction industry in general"} moreInfo={"About BIM"} >
                     <Link fontSize={20} href={whatIsBIM} isExternal color="blue.500">
                         {"What is BIM"}
                     </Link></BriefInfo>
