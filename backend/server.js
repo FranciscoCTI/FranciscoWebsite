@@ -8,6 +8,7 @@ import technologiesRoutes from './routes/technologiesRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import cors from 'cors';
 import multer from 'multer';
+import path from "path";
 
 dotenv.config();
 
@@ -15,16 +16,20 @@ const app = express();
 
 const PORT = process.env.PORT || 5000;
 
+const __dirname = path.resolve();
+
 const connectionString = process.env.MONGO_URI;
 
 app.use(express.json());
 
-app.use(cors({
-    origin: "http://localhost:5173",   // Vite default port
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials: true,
-    allowedHeaders: ["Content-Type"],
-}));
+if (process.env.NODE_ENV != "production") {
+    app.use(cors({
+        origin: "http://localhost:5173",   // Vite default port
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        credentials: true,
+        allowedHeaders: ["Content-Type"],
+    }));
+}
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
@@ -35,9 +40,9 @@ const upload = multer({ storage });
 
 app.use('/uploads', express.static('uploads'));
 
-app.use('/employers', employerRoutes);
-app.use('/technologies', technologiesRoutes);
-app.use('/projects', projectRoutes);
+app.use('/api/employers', employerRoutes);
+app.use('/api/technologies', technologiesRoutes);
+app.use('/api/projects', projectRoutes);
 
 app.post('/new-employer', async (req, res) => {
     const emplo = req.body;
@@ -82,51 +87,18 @@ app.get("/contact", (req, res) => {
     res.send("Information for contacting Francisco");
 })
 
-app.get("/", (req, res) => {
-    res.send("El servidor está listo");
-})
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "frontend", "dist")));
 
-app.get("/hola", (req, res) => {
-    res.send("El servidor está saludando");
-});
+    console.log("This is the main location: " + __dirname);
 
-app.get("/perritos", (req, res) => {
-    res.send({
-        "animal": "dog",
-        "name": "Luna",
-        "breed": "Labrador Retriever",
-        "age": 3,
-        "color": "black",
-        "weightKg": 28,
-        "vaccinated": true,
-        "traits": [
-            "friendly",
-            "energetic",
-            "loyal"
-        ],
-        "favoriteActivities": [
-            "fetch",
-            "swimming",
-            "long walks"
-        ],
-        "owner": {
-            "name": "Francisco",
-            "city": "Santiago",
-            "country": "Chile"
-        }
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
     });
-    console.log("Se ha enviado un perrito en JSON");
-});
+}
 
 app.listen(PORT, () => {
     connectDB();
     console.log("Server started at http://localhost:" + PORT);
-});
-
-app.use((req, res, next) => {
-    res.setHeader(
-        "Content-Security-Policy",
-        "default-src 'self'; connect-src 'self' http://localhost:5000/employers;"
-    );
-    next();
+    console.log("NODE_ENV:", process.env.NODE_ENV);
 });
