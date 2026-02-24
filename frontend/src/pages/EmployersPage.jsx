@@ -1,12 +1,11 @@
 import { React, useState, useEffect } from 'react'
 import { useEmployerStore } from '../store/employer';
 import {
-    VStack, Container, Text, SimpleGrid, useColorModeValue, useColorMode, Button, Modal, useDisclosure, ModalOverlay,
+    VStack, Container, Text, SimpleGrid, useColorModeValue, Button, Modal, useDisclosure, ModalOverlay,
     ModalContent, ModalHeader, ModalCloseButton, Box,
     ModalBody, Input, ModalFooter,
     HStack,
-    Select,
-    filter
+    Select
 } from '@chakra-ui/react'
 import EmployerCard from '../components/EmployerCard';
 import { Switch } from "@chakra-ui/react";
@@ -18,7 +17,6 @@ const EmployersPage = () => {
     console.log("Started rendering EmployersPage");
 
     const backGroundColor = useColorModeValue('white', "gray.800");
-    const intermediateColor = useColorModeValue('blue', "red");
     const textColor = useColorModeValue("black", "yellow");
 
     const { employers, fetchEmployers, createEmployer } = useEmployerStore();
