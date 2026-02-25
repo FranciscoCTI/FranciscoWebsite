@@ -20,7 +20,8 @@
     "dotenv": "^17.2.1",
     "express": "^4.22.1",
     "mongoose": "^8.16.5",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "cross-env": "^10.1.0"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
