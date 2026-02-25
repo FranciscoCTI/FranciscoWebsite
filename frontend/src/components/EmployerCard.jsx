@@ -150,7 +150,7 @@ const EmployerCard = ({ employer }) => {
                                 {employer.city} - {employer.country}
                             </Text>
                         </HStack>
-                        <img src={`http://localhost:5000/uploads/${employer.image}`} style={{ width: "350px", height: "300px", objectFit: "contain" }}></img>
+                        <img src={`/uploads/${employer.image}`} style={{ width: "350px", height: "300px", objectFit: "contain" }}></img>
                     </VStack>
                 </Box>
 
