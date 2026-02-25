@@ -108,7 +108,6 @@ const ProjectsPage = () => {
         <div>
             <GoogleMapSection projects={projects}></GoogleMapSection>
             <CreationBar onClickCreate={onOpen}></CreationBar>
-            {/*<MyMap content={projects}></MyMap>*/}
 
             <Modal isOpen={isOpen} onClose={handleModalClose} isCentered={true} fontFamily={'monospace'}>
                 <ModalOverlay bg={"blackAlpha.600"} />
