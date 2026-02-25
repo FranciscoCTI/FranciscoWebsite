@@ -1,6 +1,6 @@
-import AECIcon from "../assets/icons/AECIcon.png";
-import ProgrammingIcon from "../assets/icons/vintagePC.png";
-import AcademiaIcon from "../assets/icons/UniversityIcon.png";
+import AECIcon from "../assets/Icons/AECIcon.png";
+import ProgrammingIcon from "../assets/Icons/vintagePC.png";
+import AcademiaIcon from "../assets/Icons/UniversityIcon.png";
 import StandarizationIcon from "../assets/Icons/StandarizationIcon.png"
 
 const ICON_BY_TYPE = {
