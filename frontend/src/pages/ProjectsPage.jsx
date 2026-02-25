@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useProjectStore } from '../store/project';
 import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow } from '@vis.gl/react-google-maps';
-import { Universities } from '../components/Universities';
-import MyMap from '../components/Map.jsx';
-import MyMapB from '../components/MapB.jsx';
 import GoogleMapSection from '../components/GoogleMapSection.jsx';
 import { CreationBar } from '../components/CreationBar.jsx';
 import {
