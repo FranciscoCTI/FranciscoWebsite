@@ -200,7 +200,7 @@ function MarkerInfo({ item, closeHandler }) {
                                             </Text>
                                         </Link>
                                     </HStack>
-                                    <img src={`http://localhost:5000/uploads/${project.image}`} style={{ padding: 7, width: "100%", height: "auto", objectFit: "contain" }}></img>
+                                    <img src={`/uploads/${project.image}`} style={{ padding: 7, width: "100%", height: "auto", objectFit: "contain" }}></img>
                                 </Box>
                             </VStack>
                         </Box>
