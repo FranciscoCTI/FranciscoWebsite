@@ -105,6 +105,14 @@ const EmployerCard = ({ employer }) => {
 
     console.log("📌 Projects from this employer:", filteredProjects);
 
+    const normalizeUrl = (url) => {
+        if (!url) return "";
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            return url;
+        }
+        return `https://${url}`;
+    };
+
     return (
         <>
             <ChakraProvider>
@@ -186,7 +194,7 @@ const EmployerCard = ({ employer }) => {
                                     </HStack>
                                     <HStack align={'start'} w={'100%'}>
                                         <Text flex={1} fontWeight={'bold'}>Website: </Text>
-                                        <Link flex={5} href={updatedEmployer.website} isExternal color={'blue.500'}>{updatedEmployer.website}</Link>
+                                        <Link flex={5} href={normalizeUrl(updatedEmployer.website)} isExternal color={'blue.500'}>{updatedEmployer.website}</Link>
                                     </HStack>
                                 </VStack>
                             </Box>
