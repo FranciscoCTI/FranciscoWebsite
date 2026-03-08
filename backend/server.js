@@ -38,6 +38,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+app.get("/api/APS", (req, res) => {
+    res.send("APS viewer");
+})
+
 app.use('/uploads', express.static('uploads'));
 
 app.use('/api/employers', employerRoutes);
@@ -86,6 +90,7 @@ app.put('/update-employer/:id', async (req, res) => {
 app.get("/contact", (req, res) => {
     res.send("Information for contacting Francisco");
 })
+
 
 if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "frontend", "dist")));

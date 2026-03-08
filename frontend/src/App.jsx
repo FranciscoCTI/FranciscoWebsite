@@ -9,6 +9,7 @@ import TechnologiesPage from "./pages/TechnologiesPage";
 import { Footer } from "./components/Footer";
 import ContactPage from "./pages/ContactPage";
 import { useEmployerStore } from "./store/employer";
+import { APSPage } from "./pages/APSPage";
 
 function App() {
   const { employers } = useEmployerStore();
@@ -24,6 +25,7 @@ function App() {
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/technologies" element={<TechnologiesPage />} />
           <Route path="/Contact" element={<ContactPage />} />
+          <Route path="/APS" element={<APSPage />} />
         </Routes>
       </Box>
       <Footer></Footer>
