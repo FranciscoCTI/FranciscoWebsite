@@ -29,6 +29,6 @@ function App() {
       <Footer></Footer>
     </Flex>
   )
-};
+}
 
 export default App;
