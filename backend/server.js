@@ -91,6 +91,30 @@ app.get("/contact", (req, res) => {
     res.send("Information for contacting Francisco");
 })
 
+app.get("/api/token", async (req, res) => {
+
+    const response = await fetch(
+        "https://developer.api.autodesk.com/authentication/v2/token",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({
+                client_id: process.env.APS_CLIENT_ID,
+                client_secret: process.env.APS_CLIENT_SECRET,
+                grant_type: "client_credentials",
+                scope: "data:read"
+            })
+        }
+    );
+
+    const data = await response.json();
+
+    res.json(data);
+
+});
+
 
 if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "frontend", "dist")));
