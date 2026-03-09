@@ -32,7 +32,7 @@ const NavBar = () => {
                             color: "black",
                         }}
                     >
-                        Francisco Contreras / AEC Developer
+                        Francisco Contreras : AEC Developer
                     </Link>
                 </Text>
                 <HStack spacing={2} alignItems={"center"} fontFamily={'monospace'}>
@@ -49,6 +49,11 @@ const NavBar = () => {
                     <Link to={"/Technologies"}>
                         <Button borderRadius={0}>
                             Technologies
+                        </Button>
+                    </Link>
+                    <Link to={"/APS"}>
+                        <Button borderRadius={0}>
+                            APS
                         </Button>
                     </Link>
                     <Link to={"/contact"}>
