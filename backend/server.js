@@ -18,10 +18,10 @@ const PORT = process.env.PORT || 5000;
 
 const __dirname = path.resolve();
 
-const connectionString = process.env.MONGO_URI;
-
 app.use(express.json());
 
+//this is only useful in development, in production the frontend and backend are served from the 
+// same origin, so CORS is not needed
 if (process.env.NODE_ENV != "production") {
     app.use(cors({
         origin: "http://localhost:5173",   // Vite default port
@@ -87,7 +87,7 @@ app.put('/update-employer/:id', async (req, res) => {
 );
 
 
-app.get("/contact", (req, res) => {
+app.get("/api/contact", (req, res) => {
     res.send("Information for contacting Francisco");
 })
 
