@@ -19,6 +19,18 @@ export const initViewer = (container) => {
                             .then(data => onTokenReady(data.access_token, data.expires_in));
                     }
                 };
+
+                const options1 = {
+                    env: 'AutodeskProduction1',
+                    api: 'streamingV2',
+                    documentId: 'tests/unittest/models/glTF/duck.gltf',
+                    getAccessToken: (onTokenReady) => {
+                        // Replace with your actual MERN backend endpoint
+                        fetch('/api/token')
+                            .then(response => response.json())
+                            .then(data => onTokenReady(data.access_token, data.expires_in));
+                    }
+                };
                 window.Autodesk.Viewing.Initializer(options, res);
             });
         }
@@ -26,7 +38,7 @@ export const initViewer = (container) => {
         // 3. Mount the Viewer
         initializerPromise.then(() => {
             const config = {
-                extensions: ['Autodesk.DocumentBrowser']
+                extensions: ['Autodesk.DocumentBrowser', 'MiPrimeraExtension', 'ToolBarExtension']
             };
 
             // Ensure we are passing the raw DOM element from the React Ref
@@ -54,6 +66,7 @@ export function loadModel(viewer, urn) {
 
     window.Autodesk.Viewing.Document.load(
         documentId,
+        //this is the success callback, where we get the document object that contains all the info about the model and its viewables
         (doc) => {
 
             const viewable = doc.getRoot().getDefaultGeometry();
@@ -62,6 +75,7 @@ export function loadModel(viewer, urn) {
 
             zoomToWalls(viewer);
         },
+        //this is the error callback, where we can handle any issues that arise during the loading process
         (err) => console.error(err)
     );
 
