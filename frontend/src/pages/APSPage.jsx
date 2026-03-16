@@ -5,6 +5,7 @@ import { set } from 'mongoose';
 import '../css/APSPage.css';
 import miPrimeraExtension from '../extensions/miPrimeraExtension';
 import ToolBarExtension from '../extensions/toolBarExtension';
+import CustomGeometryExtension from '../extensions/customGeometryExtension';
 
 export const APSPage = ({ urn }) => {
 
