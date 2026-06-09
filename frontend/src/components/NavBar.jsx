@@ -3,6 +3,7 @@ import { Container, Flex, Text, HStack, Button, Icon, useColorMode } from '@chak
 import { Link } from 'react-router-dom';
 import { IoMoon } from 'react-icons/io5';
 import { LuSun } from 'react-icons/lu';
+import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, UserButton, SignInButton } from "@clerk/clerk-react";
 
 const NavBar = () => {
 
@@ -67,6 +68,16 @@ const NavBar = () => {
                         }
                     </Button>
                 </HStack>
+                <SignedIn>
+                    <UserButton />
+                </SignedIn>
+                <SignedOut>
+                    <SignInButton mode="modal">
+                        <Button bg="blue.500" color="white" borderRadius={0} _hover={{ bg: "blue.600" }}>
+                            Sign In
+                        </Button>
+                    </SignInButton>
+                </SignedOut>
             </Flex>
         </Container >
     )

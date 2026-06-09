@@ -14,6 +14,7 @@
     "@clerk/clerk-react": "^5.61.8",
     "@emotion/react": "^11.14.0",
     "@googlemaps/js-api-loader": "^2.0.2",
+    "@tailwindcss/vite": "^4.3.0",
     "@vis.gl/react-google-maps": "^1.5.5",
     "franciscowebsite": "file:..",
     "react": "^19.1.0",

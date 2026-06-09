@@ -4,6 +4,7 @@ import App from './App.jsx'
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import { BrowserRouter } from "react-router-dom";
 import theme from "./Themes/theme.js";
+import "./main.css";
 
 createRoot(document.getElementById('root')).render(
   <ChakraProvider theme={theme}>

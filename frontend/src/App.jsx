@@ -10,16 +10,18 @@ import { Footer } from "./components/Footer";
 import ContactPage from "./pages/ContactPage";
 import { APSPage } from "./pages/APSPage";
 import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, UserButton } from "@clerk/clerk-react";
+import "./App.css";
 
 function App() {
 
   return (
-    <Flex direction={"column"} minHeight={"100vh"}>
-      <Box flex="1">
-        <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
-          <SignedIn>
+    <>
+      <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
+        <Flex direction={"column"} minHeight={"100vh"}>
+          <Box flex="1">
+
             <NavBar />
-            <div><UserButton /></div>
+
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/create" element={<CreatePage />} />
@@ -29,15 +31,12 @@ function App() {
               <Route path="/Contact" element={<ContactPage />} />
               <Route path="/APS" element={<APSPage urn="dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9Qcm95ZWN0b0Nhc2FfMjAyNV9hLnJ2dA" />} />
             </Routes>
-          </SignedIn>
-          <SignedOut>
-            <div>You are signed out</div>
-            <RedirectToSignIn />
-          </SignedOut>
-        </ClerkProvider>
-      </Box>
-      <Footer></Footer>
-    </Flex>
+
+          </Box>
+          <Footer></Footer>
+        </Flex>
+      </ClerkProvider>
+    </>
   )
 }
 
