@@ -9,6 +9,7 @@ import projectRoutes from './routes/projectRoutes.js';
 import cors from 'cors';
 import multer from 'multer';
 import path from "path";
+import { clerkClient } from "@clerk/express";
 
 dotenv.config();
 
@@ -27,7 +28,7 @@ if (process.env.NODE_ENV != "production") {
         origin: "http://localhost:5173",   // Vite default port
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         credentials: true,
-        allowedHeaders: ["Content-Type"],
+        allowedHeaders: ["Content-Type", "Authorization"],
     }));
 }
 
