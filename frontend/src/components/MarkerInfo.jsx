@@ -18,6 +18,7 @@ import { useProjectStore } from '../store/project';
 import { useEmployerStore } from '../store/employer';
 import { PROJECT_TYPES } from "../../../backend/models/Enums/ProjectTypes.js";
 import { Link } from "react-router-dom";
+import { SignedIn, SignedOut, RedirectToSignIn, UserButton, SignInButton } from "@clerk/clerk-react";
 
 function MarkerInfo({ item, closeHandler }) {
 
@@ -132,8 +133,11 @@ function MarkerInfo({ item, closeHandler }) {
                                 handleMoreInfoClick
                             }
                         >More info</Button>
-                        <Button bg={'yellow'} textColor={'Black'} m={0.5} size="xs" onClick={handleEditClick}>Edit</Button>
-                        <Button bg={'red'} textColor={'Black'} m={0.5} disabled size="xs" onClick={handleRemoveProject}>Remove</Button>
+
+                        <SignedIn>
+                            <Button bg={'yellow'} textColor={'Black'} m={0.5} size="xs" onClick={handleEditClick}>Edit</Button>
+                            <Button bg={'red'} textColor={'Black'} m={0.5} size="xs" onClick={handleRemoveProject}>Remove</Button>
+                        </SignedIn>
                     </Flex>
                 </VStack>
             </Box>

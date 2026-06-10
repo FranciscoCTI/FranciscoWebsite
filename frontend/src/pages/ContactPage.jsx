@@ -8,6 +8,7 @@ import { FaLinkedin } from "react-icons/fa6";
 import { FaGithub } from "react-icons/fa";
 import { SiAutodesk } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
+import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, UserButton, SignInButton } from "@clerk/clerk-react";
 
 const ContactPage = () => {
     const text = useColorModeValue("black.800", "yellow.300"); // light / dark text

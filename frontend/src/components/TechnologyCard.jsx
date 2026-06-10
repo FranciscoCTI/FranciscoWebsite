@@ -8,6 +8,7 @@ import {
     Stack, Link, Spacer, Collapse
 } from '@chakra-ui/react';
 import { useTechnologyStore } from '../store/technology';
+import { SignedIn, SignedOut, RedirectToSignIn, UserButton, SignInButton } from "@clerk/clerk-react";
 
 const TechnologyCard = ({ technology }) => {
 
@@ -89,10 +90,12 @@ const TechnologyCard = ({ technology }) => {
                 <Spacer></Spacer>
                 <VStack>
                     <img src={"/" + techName + ".png"} style={{ width: "150px", height: "150px", objectFit: "contain" }}></img>
-                    <Button colorScheme="red" size="sm" onClick={(e) => {
-                        e.stopPropagation();
-                        HandleEditTecnology(technology._id);
-                    }}>Edit</Button>
+                    <SignedIn>
+                        <Button colorScheme="red" size="sm" onClick={(e) => {
+                            e.stopPropagation();
+                            HandleEditTecnology(technology._id);
+                        }}>Edit</Button>
+                    </SignedIn>
                 </VStack>
             </HStack>
             <Button onClick={onToggle} size="lg" mt={5} colorScheme="yellow" variant="outline">

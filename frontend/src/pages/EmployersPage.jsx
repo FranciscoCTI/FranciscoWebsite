@@ -11,6 +11,7 @@ import EmployerCard from '../components/EmployerCard';
 import { Switch } from "@chakra-ui/react";
 import { FilteringBar } from '../components/FilteringBar';
 import { COUNTRIES } from "../../../backend/models/Enums/Countries.js"
+import { SignedIn, SignedOut, RedirectToSignIn, UserButton, SignInButton } from "@clerk/clerk-react";
 
 const EmployersPage = () => {
 
@@ -114,7 +115,9 @@ const EmployersPage = () => {
                         ))
                         }
                     </SimpleGrid>
-                    <Button borderRadius={0} onClick={onOpen}>Add new employer</Button>
+                    <SignedIn>
+                        <Button borderRadius={0} onClick={onOpen}>Add new employer</Button>
+                    </SignedIn>
                     {
                         employers.length === 0 &&
                         (
