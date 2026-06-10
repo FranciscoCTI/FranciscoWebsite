@@ -12,6 +12,7 @@ import { useEmployerStore } from '../store/employer';
 import Gallery from './Gallery';
 import ProjectInformation from './ProjectInformation';
 import Employer from '../../../backend/models/employer.model';
+import { SignedIn, SignedOut, RedirectToSignIn, UserButton, SignInButton } from "@clerk/clerk-react";
 
 const EmployerCard = ({ employer }) => {
 
@@ -137,20 +138,22 @@ const EmployerCard = ({ employer }) => {
                         <Heading as='h2' size='lg' mb={2} color={employer.isCurrent ? "green.700" : "yellow"} fontFamily={'monospace'} >
                             {employer.name}
                         </Heading>
-                        <VStack>
-                            <Button isDisabled bg={'red'} textColor={'White'} size="sm" onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveEmployer(employer._id);
-                            }}>
-                                Remove
-                            </Button>
-                            <Button bg={'yellow'} textColor={'Black'} size="sm" onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditEmployer(employer._id);
-                            }}>
-                                Edit
-                            </Button>
-                        </VStack>
+                        <SignedIn>
+                            <VStack>
+                                <Button bg={'red'} textColor={'White'} size="sm" onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveEmployer(employer._id);
+                                }}>
+                                    Remove
+                                </Button>
+                                <Button bg={'yellow'} textColor={'Black'} size="sm" onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditEmployer(employer._id);
+                                }}>
+                                    Edit
+                                </Button>
+                            </VStack>
+                        </SignedIn>
                     </Flex>
                     <VStack>
                         <HStack align="start" w='full'>

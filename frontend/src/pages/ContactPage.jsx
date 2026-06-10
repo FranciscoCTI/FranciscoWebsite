@@ -14,44 +14,38 @@ const ContactPage = () => {
     const text = useColorModeValue("black.800", "yellow.300"); // light / dark text
     return (
         <>
+            <VStack mt={5}>
+                <Text my={10}
+                    fontSize={'30'}
+                    fontWeight={'bold'}
+                    fontFamily={'monospace'}
+                    color={text}
+                    textAlign={'center'}
+                >
+                    I did all this website by myself just so you can contact me:
+                </Text>
+                <ContactItem name={"franciscofcch@gmail.com "}>
+                    <HiOutlineMailOpen />
+                </ContactItem>
 
-            <SignedIn>
-                <VStack mt={5}>
-                    <Text my={10}
-                        fontSize={'30'}
-                        fontWeight={'bold'}
-                        fontFamily={'monospace'}
-                        color={text}
-                        textAlign={'center'}
-                    >
-                        I did all this website by myself just so you can contact me:
-                    </Text>
-                    <ContactItem name={"franciscofcch@gmail.com "}>
-                        <HiOutlineMailOpen />
-                    </ContactItem>
+                <ContactItem name={"+569 83790046"}>
+                    <FaPhoneAlt></FaPhoneAlt>
+                </ContactItem>
 
-                    <ContactItem name={"+569 83790046"}>
-                        <FaPhoneAlt></FaPhoneAlt>
-                    </ContactItem>
+                <ContactItem name={"Linkedin"} website={"https://www.linkedin.com/in/francisco-contreras-chavez-147bbb33/"}>
+                    <FaLinkedin></FaLinkedin>
+                </ContactItem>
 
-                    <ContactItem name={"Linkedin"} website={"https://www.linkedin.com/in/francisco-contreras-chavez-147bbb33/"}>
-                        <FaLinkedin></FaLinkedin>
-                    </ContactItem>
+                <ContactItem name={"GitHub"} website={"https://github.com/FranciscoCTI"}>
+                    <FaGithub></FaGithub>
+                </ContactItem>
 
-                    <ContactItem name={"GitHub"} website={"https://github.com/FranciscoCTI"}>
-                        <FaGithub></FaGithub>
-                    </ContactItem>
+                <ContactItem name={"Autodesk AppStore"} website={"https://apps.autodesk.com/en/Publisher/PublisherHomepage?ID=98UZMV6JE92L"}>
+                    <SiAutodesk></SiAutodesk></ContactItem>
 
-                    <ContactItem name={"Autodesk AppStore"} website={"https://apps.autodesk.com/en/Publisher/PublisherHomepage?ID=98UZMV6JE92L"}>
-                        <SiAutodesk></SiAutodesk></ContactItem>
-
-                    <ContactItem name={"Constru-Fast"} website={"https://www.constru-fast.com"}>
-                        <LuConstruction></LuConstruction></ContactItem>
-                </VStack>
-            </SignedIn>
-            <SignedOut>
-                <div>You are signed out, sign in on the top left corner </div>
-            </SignedOut>
+                <ContactItem name={"Constru-Fast"} website={"https://www.constru-fast.com"}>
+                    <LuConstruction></LuConstruction></ContactItem>
+            </VStack>
         </>
     )
 }

@@ -3,7 +3,7 @@ import { Container, Flex, Text, HStack, Button, Icon, useColorMode } from '@chak
 import { Link } from 'react-router-dom';
 import { IoMoon } from 'react-icons/io5';
 import { LuSun } from 'react-icons/lu';
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, UserButton, SignInButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, RedirectToSignIn, UserButton, SignInButton } from "@clerk/clerk-react";
 
 const NavBar = () => {
 
