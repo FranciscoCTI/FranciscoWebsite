@@ -19,9 +19,7 @@ function App() {
       <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
         <Flex direction={"column"} minHeight={"100vh"}>
           <Box flex="1">
-
             <NavBar />
-
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/create" element={<CreatePage />} />
@@ -29,9 +27,8 @@ function App() {
               <Route path="/projects" element={<ProjectsPage />} />
               <Route path="/technologies" element={<TechnologiesPage />} />
               <Route path="/Contact" element={<ContactPage />} />
-              <Route path="/APS" element={<APSPage urn="dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9Qcm95ZWN0b0Nhc2FfMjAyNV9hLnJ2dA" />} />
+              <Route path="/APS" element={<APSPage />} />
             </Routes>
-
           </Box>
           <Footer></Footer>
         </Flex>
