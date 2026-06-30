@@ -1,5 +1,4 @@
 import { Autocomplete } from "@react-google-maps/api";
-import CustomGeometryExtension from "../extensions/customGeometryExtension";
 
 export const initViewer = (container) => {
 
@@ -28,7 +27,7 @@ export const initViewer = (container) => {
         initializerPromise.then(() => {
             const config = {
                 extensions: [
-                    'Autodesk.DocumentBrowser', 'CustomGeometryExtension'
+                    'Autodesk.DocumentBrowser', 'CustomGeometryExtension', 'SceneBuilderExtension'
                 ]
             };
 

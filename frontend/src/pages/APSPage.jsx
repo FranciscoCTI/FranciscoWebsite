@@ -2,7 +2,8 @@ import React, { useRef, useEffect, useState } from 'react'
 import { Box, Center, Container, Spacer, Divider, HStack, Stack, Flex, Link, Text, VStack, Select } from '@chakra-ui/react';
 import { getAccessToken } from "../services/apsToken";
 import CustomGeometryExtension from '../extensions/customGeometryExtension';
-import { initViewer } from './APSScripts';
+import SceneBuilderExtension from '../extensions/SceneBuilderExtension';
+import { initViewer, loadModel } from './APSScripts';
 
 const AVAILABLE_MODELS = [
     { name: "Architectural House", urn: "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9Qcm95ZWN0b0Nhc2FfMjAyNV9hLnJ2dA" },
