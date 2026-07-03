@@ -15,8 +15,21 @@ CustomGeometryExtension.prototype.load = function () {
     }
 
     var geom = new THREE.SphereGeometry(10, 28, 28);
-    var material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: false });
 
+    var material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+
+
+    var zIndex = 500;
+
+    while (zIndex > 0) {
+        var materialParalele = new THREE.MeshBasicMaterial({ color: "#ff4500", wireframe: true });
+        var aBox = new THREE.BoxGeometry(20, 10, 3);
+        var paralelepiped = new THREE.Mesh(aBox, materialParalele);
+        paralelepiped.position.set(-50, -50, zIndex);
+        viewer.overlays.addMesh(paralelepiped, "custom-scene");
+
+        zIndex -= 10;
+    }
 
     var index = 50;
     while (index < 1000) {
@@ -30,18 +43,17 @@ CustomGeometryExtension.prototype.load = function () {
             var torus = new THREE.Mesh(torusGeom, material);
             torus.position.set(index, otherIndex, 0);
             viewer.overlays.addMesh(torus, "custom-scene");
-            otherIndex += 50;
 
+            var otherOtherIndex = 0;
 
             while (otherOtherIndex < 1000) {
-                var boxGeom = new THREE.BoxGeometry(10, 10, 10);
+                var boxGeom = new THREE.BoxGeometry(10, 10, 20);
                 var box = new THREE.Mesh(boxGeom, material);
                 box.position.set(index, otherIndex, otherOtherIndex);
                 viewer.overlays.addMesh(box, "custom-scene");
                 otherOtherIndex += 50;
             }
-
-            var otherOtherIndex = 0;
+            otherIndex += 50;
         }
         index += 50;
     }

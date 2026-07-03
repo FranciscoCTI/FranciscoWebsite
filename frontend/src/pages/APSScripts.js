@@ -27,7 +27,7 @@ export const initViewer = (container) => {
         initializerPromise.then(() => {
             const config = {
                 extensions: [
-                    'Autodesk.DocumentBrowser', /*'CustomGeometryExtension',*/ 'SceneBuilderExtension'
+                    'Autodesk.DocumentBrowser', 'CustomGeometryExtension' /*,'SceneBuilderExtension'*/
                 ]
             };
 
