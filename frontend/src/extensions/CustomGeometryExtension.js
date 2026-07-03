@@ -64,4 +64,5 @@ CustomGeometryExtension.prototype.unload = function () {
 
 };
 
+
 Autodesk.Viewing.theExtensionManager.registerExtension('CustomGeometryExtension', CustomGeometryExtension);

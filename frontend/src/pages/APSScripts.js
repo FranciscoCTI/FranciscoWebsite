@@ -27,11 +27,19 @@ export const initViewer = (container) => {
         initializerPromise.then(() => {
             const config = {
                 extensions: [
-                    'Autodesk.DocumentBrowser', 'CustomGeometryExtension' /*,'SceneBuilderExtension'*/
+                    'Autodesk.DocumentBrowser', 'CustomGeometryExtension', 'SceneBuilderExtension'
                 ]
             };
 
             const viewer = new window.Autodesk.Viewing.GuiViewer3D(container, config);
+
+            viewer.loadExtension("SceneBuilderExtension")
+                .then(() => viewer.loadExtension("CustomGeometryExtension"))
+                .then(() => {
+                    viewer.setTheme("light-theme");
+                    resolve(viewer);
+                })
+                .catch(reject);
 
             const startedCode = viewer.start();
             if (startedCode > 0) {
@@ -71,23 +79,29 @@ export function loadModel(viewer, urn) {
 }
 
 export const zoomToWalls = (viewer) => {
-    viewer.search("Wall", (dbIds) => {
-        if (dbIds.length > 0) {
-            viewer.select(dbIds);
-            viewer.isolate(dbIds);
-            viewer.fitToView(dbIds);
 
-            console.log(`Found and zoomed to ${dbIds.length} walls.`);
-        } else {
-            console.warn("No walls found in this model.");
+    const terms = ["Muro Básico", "Wall", "Basic Wall"];
 
-            // EMERGENCY DEBUG: Let's see what categories actually exist in your model
-            const tree = viewer.model.getData().instanceTree;
-            console.log("Instance Tree object:", tree);
-            alert("Check your console (F12) to see the real property names!");
-        }
-    }, (err) => {
-        console.error("Search failed:", err);
+    const results = new Set();
+
+    let remaining = terms.length;
+
+    terms.forEach(term => {
+        viewer.search(term, (dbIds) => {
+            dbIds.forEach(id => results.add(id));
+
+            remaining--;
+
+            if (remaining === 0) {
+                const ids = [...results];
+
+                viewer.select(ids);
+                viewer.isolate(ids);
+                viewer.fitToView(ids);
+
+                console.log(ids);
+            }
+        });
     });
 }
 
@@ -110,6 +124,33 @@ export const zoomToDoors = (viewer) => {
         }
     }, (err) => {
         console.error("Search failed:", err);
+    });
+}
+
+export const zoomToRoofs = (viewer) => {
+
+    const terms = ["Cubierta", "Roof", "Techo"];
+
+    const results = new Set();
+
+    let remaining = terms.length;
+
+    terms.forEach(term => {
+        viewer.search(term, (dbIds) => {
+            dbIds.forEach(id => results.add(id));
+
+            remaining--;
+
+            if (remaining === 0) {
+                const ids = [...results];
+
+                viewer.select(ids);
+                viewer.isolate(ids);
+                viewer.fitToView(ids);
+
+                console.log(ids);
+            }
+        });
     });
 }
 

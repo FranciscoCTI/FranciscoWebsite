@@ -99,10 +99,45 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
             return true;
         });
 
+        return true;
     }
 
     unload() {
         return true;
+    }
+
+    async createBigSphere() {
+        console.log("Some action from the extension");
+
+        var viewer = this.viewer;
+
+        const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
+
+        const modelBuilder = await ext.addNewModel({
+            conserveMemory: false,
+            modelNameOverride: 'sphere model'
+        });
+
+        const materials = {
+            purple: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 1) }),
+            red: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 0) }),
+            green: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 1, 0) }),
+            blue: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 0, 1) })
+        };
+
+        Object.keys(materials).forEach(name => {
+            modelBuilder.addMaterial(name, materials[name]);
+        });
+
+        //Sphere
+        var sphereSize = new THREE.SphereGeometry(80, 32, 16);
+        var SphGeom = new THREE.BufferGeometry().fromGeometry(sphereSize);
+        modelBuilder.addGeometry(SphGeom);
+        const transformSph = new THREE.Matrix4().makeTranslation(-50, -50, -10);
+        modelBuilder.addFragment(SphGeom, 'blue', transformSph);
+
+        // Refresh the viewer so the controls "unstick"
+        viewer.impl.invalidate(true, true, true);
     }
 }
 
