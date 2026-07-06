@@ -8,19 +8,23 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
         var viewer = this.viewer;
 
+        console.log("The current urn is: " + viewer.currentUrn);
+
         viewer.addEventListener(Autodesk.Viewing.OBJECT_TREE_CREATED_EVENT, async () => {
 
             await viewer.loadExtension('Autodesk.Viewing.SceneBuilder');
             const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
 
-            const modelBuilder = await ext.addNewModel({
+            this.modelBuilder = await ext.addNewModel({
                 conserveMemory: false,
                 modelNameOverride: 'geometry model'
             });
 
+            const modelBuilder = this.modelBuilder;
+
             const materials = {
                 purple: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 1) }),
-                red: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 0) }),
+                red: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 0), transparent: true, opacity: 0.7 }),
                 green: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 1, 0) }),
                 blue: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 0, 1) })
             };
@@ -30,6 +34,7 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
                 modelBuilder.addMaterial(name, materials[name]);
             });
 
+            /*
             //Slabs
             var slabSize = new THREE.BoxGeometry(100, 100, 1);
             var slabRed = new THREE.BufferGeometry().fromGeometry(slabSize);
@@ -84,6 +89,7 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
             modelBuilder.addGeometry(SphGeom);
             const transformSph = new THREE.Matrix4().makeTranslation(100, 10, 4);
             modelBuilder.addFragment(SphGeom, 'blue', transformSph);
+            */
 
             // FIX: Check for the function and use the correct order
             if (modelBuilder && typeof modelBuilder.done === 'function') {
@@ -111,33 +117,107 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
         var viewer = this.viewer;
 
-        const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
+        console.log("The current urn is: " + viewer.currentUrn);
 
-        const modelBuilder = await ext.addNewModel({
-            conserveMemory: false,
-            modelNameOverride: 'sphere model'
-        });
-
-        const materials = {
-            purple: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 1) }),
-            red: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 0) }),
-            green: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 1, 0) }),
-            blue: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 0, 1) })
-        };
-
-        Object.keys(materials).forEach(name => {
-            modelBuilder.addMaterial(name, materials[name]);
-        });
+        const modelBuilder = this.modelBuilder;
 
         //Sphere
-        var sphereSize = new THREE.SphereGeometry(80, 32, 16);
-        var SphGeom = new THREE.BufferGeometry().fromGeometry(sphereSize);
-        modelBuilder.addGeometry(SphGeom);
-        const transformSph = new THREE.Matrix4().makeTranslation(-50, -50, -10);
-        modelBuilder.addFragment(SphGeom, 'blue', transformSph);
+        if (viewer.currentUrn == "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9Qcm95ZWN0b0Nhc2FfMjAyNV9hLnJ2dA") {
+            var sphereSize = new THREE.SphereGeometry(10, 32, 16);
+            var SphGeom = new THREE.BufferGeometry().fromGeometry(sphereSize);
+            modelBuilder.addGeometry(SphGeom);
+            const transformSph = new THREE.Matrix4().makeTranslation(-50, -50, -10);
+            modelBuilder.addFragment(SphGeom, 'blue', transformSph);
+        }
+
+        // FIX: Check for the function and use the correct order
+        if (modelBuilder && typeof modelBuilder.done === 'function') {
+            modelBuilder.done();
+        } else if (modelBuilder && typeof modelBuilder.consolidate === 'function') {
+            modelBuilder.consolidate();
+        }
 
         // Refresh the viewer so the controls "unstick"
         viewer.impl.invalidate(true, true, true);
+
+
+        return true;
+    }
+
+    async createBuildingClearance() {
+        console.log("Creating clearance");
+
+        var viewer = this.viewer;
+
+        const modelBuilder = this.modelBuilder;
+
+        const urn = viewer.currentUrn;
+
+        const fragments = modelBuilder.sceneFragments || modelBuilder.fragments;
+
+        if (fragments && fragments.lenght > 0) { return false; }
+
+        if (urn) {
+            switch (urn) {
+                case "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9Qcm95ZWN0b0Nhc2FfMjAyNV9hLnJ2dA":
+
+                    this.createHouseClearance(modelBuilder);
+
+                    break;
+
+                case "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9DQ1NfRVNUXzAxLnJ2dA":
+
+                    this.createTunnelClearance(modelBuilder);
+
+                    break;
+
+                case "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9DQVBKX0NlbnRybyUyMGRlJTIwSnVzdGljaWElMjBWYWxkaXZpYShFc3QpLnJ2dA":
+
+                    this.createJuditialClearance(modelBuilder);
+
+                    break;
+
+                default:
+                    break;
+            }
+
+        }
+
+    }
+
+    createHouseClearance(modelBuilder) {
+        var slabSize = new THREE.BoxGeometry(75, 65, 29);
+        var slabRed = new THREE.BufferGeometry().fromGeometry(slabSize);
+        var idSlabRed = modelBuilder.addGeometry(slabRed);
+
+        console.log("Box geometry added");
+
+        var transformBotSlab = new THREE.Matrix4().makeTranslation(0, 0, 0);
+
+        modelBuilder.addFragment(idSlabRed, 'red', transformBotSlab);
+        return true;
+    }
+
+    createTunnelClearance(modelBuilder) {
+        var slabSize = new THREE.BoxGeometry(300, 35, 35);
+        var slabRed = new THREE.BufferGeometry().fromGeometry(slabSize);
+        var idSlabRed = modelBuilder.addGeometry(slabRed);
+
+        var transformBotSlab = new THREE.Matrix4().makeTranslation(0, 0, -5);
+
+        modelBuilder.addFragment(idSlabRed, 'red', transformBotSlab);
+        return true;
+    }
+
+    createJuditialClearance(modelBuilder) {
+        var slabSize = new THREE.BoxGeometry(400, 130, 100);
+        var slabRed = new THREE.BufferGeometry().fromGeometry(slabSize);
+        var idSlabRed = modelBuilder.addGeometry(slabRed);
+
+        var transformBotSlab = new THREE.Matrix4().makeTranslation(0, 0, -5);
+
+        modelBuilder.addFragment(idSlabRed, 'red', transformBotSlab);
+        return true;
     }
 }
 

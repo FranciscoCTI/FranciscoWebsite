@@ -122,10 +122,10 @@ export const APSPage = () => {
                                     console.log(sceneExt);
 
                                     if (sceneExt) {
-                                        sceneExt.createBigSphere();
+                                        sceneExt.createBuildingClearance();
                                     }
                                 }}>
-                                Method from extension
+                                Create building clearance
                             </Button>
                         </VStack>
                     </Box>

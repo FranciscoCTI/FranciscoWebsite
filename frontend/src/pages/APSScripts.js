@@ -27,14 +27,14 @@ export const initViewer = (container) => {
         initializerPromise.then(() => {
             const config = {
                 extensions: [
-                    'Autodesk.DocumentBrowser', 'CustomGeometryExtension', 'SceneBuilderExtension'
+                    'Autodesk.DocumentBrowser', /*'CustomGeometryExtension', */'SceneBuilderExtension'
                 ]
             };
 
             const viewer = new window.Autodesk.Viewing.GuiViewer3D(container, config);
 
             viewer.loadExtension("SceneBuilderExtension")
-                .then(() => viewer.loadExtension("CustomGeometryExtension"))
+                /*.then(() => viewer.loadExtension("CustomGeometryExtension"))*/
                 .then(() => {
                     viewer.setTheme("light-theme");
                     resolve(viewer);
@@ -59,6 +59,8 @@ export function loadModel(viewer, urn) {
 
     const cleanUrn = urn.replace(/^urn:/, "");
 
+    viewer.currentUrn = urn;
+
     const documentId = "urn:" + cleanUrn;
 
     window.Autodesk.Viewing.Document.load(
@@ -69,6 +71,14 @@ export function loadModel(viewer, urn) {
             const viewable = doc.getRoot().getDefaultGeometry();
 
             viewer.loadDocumentNode(doc, viewable);
+
+            console.log("The doc: " + doc);
+
+            const currentUrn = doc.getRoot().data.urn;
+
+            console.log("The urn: " + currentUrn);
+
+            viewer.currentUrn = currentUrn;
 
             zoomToWalls(viewer);
         },
