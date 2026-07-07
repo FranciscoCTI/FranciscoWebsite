@@ -127,6 +127,20 @@ export const APSPage = () => {
                                 }}>
                                 Create building clearance
                             </Button>
+
+                            <Button w={"100%"}
+                                onClick={async () => {
+
+                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+
+                                    console.log(sceneExt);
+
+                                    if (sceneExt) {
+                                        sceneExt.markAccessPoints();
+                                    }
+                                }}>
+                                Mark access points
+                            </Button>
                         </VStack>
                     </Box>
 

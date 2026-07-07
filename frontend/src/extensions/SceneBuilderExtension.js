@@ -26,7 +26,8 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
                 purple: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 1) }),
                 red: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 0), transparent: true, opacity: 0.7 }),
                 green: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 1, 0) }),
-                blue: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 0, 1) })
+                blue: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 0, 1) }),
+                yellow: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 1, 0) })
             };
             console.log("Materials created")
 
@@ -153,9 +154,13 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
         const urn = viewer.currentUrn;
 
-        const fragments = modelBuilder.sceneFragments || modelBuilder.fragments;
+        let fragments = modelBuilder.model.getFragmentList();
 
-        if (fragments && fragments.lenght > 0) { return false; }
+        //fragments = modelBuilder.sceneFragments || modelBuilder.fragments;
+
+        if (fragments && fragments.geoms.geoms.length > 1) {
+            return false;
+        }
 
         if (urn) {
             switch (urn) {
@@ -217,6 +222,89 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         var transformBotSlab = new THREE.Matrix4().makeTranslation(0, 0, -5);
 
         modelBuilder.addFragment(idSlabRed, 'red', transformBotSlab);
+        return true;
+    }
+
+    async markAccessPoints() {
+        console.log("Creating access points");
+
+        var viewer = this.viewer;
+
+        const modelBuilder = this.modelBuilder;
+
+        const urn = viewer.currentUrn;
+
+        const shape = new THREE.Shape();
+
+        shape.moveTo(0, 0);
+        shape.lineTo(1, 0);
+        shape.lineTo(1, 2);
+        shape.lineTo(2, 2);
+        shape.lineTo(0, 4);
+        shape.lineTo(-2, 2);
+        shape.lineTo(-1, 2);
+        shape.lineTo(-1, 0);
+        shape.lineTo(0, 0);
+
+        const extrudeSettings = {
+            amount: 0.3,          // r71 uses "amount", not "depth"
+            bevelEnabled: false,
+            steps: 1
+        };
+
+        const extrudeGeom = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+
+        //Acces 1
+        const accesArrow1 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow1);
+        const transformAccesArrow1 = new THREE.Matrix4().makeTranslation(-30, 2.5, -8);
+
+        const rZ = Math.PI / 2; // Radians
+        const rotation90 = new THREE.Matrix4().makeRotationZ(-rZ);
+        const combinedTransformArr1 = transformAccesArrow1.multiply(rotation90);
+        modelBuilder.addFragment(accesArrow1, 'yellow', combinedTransformArr1);
+
+        //Acces 2
+        const accesArrow2 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow2);
+        const transformAccesArrow2 = new THREE.Matrix4().makeTranslation(9, -22, -8);
+        modelBuilder.addFragment(accesArrow2, 'yellow', transformAccesArrow2);
+
+        //Acces 3
+        const accesArrow3 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow3);
+        const transformAccesArrow3 = new THREE.Matrix4().makeTranslation(0, -16, -8);
+        const rotation90Counter = new THREE.Matrix4().makeRotationZ(rZ);
+        const combinedTransformArr3 = transformAccesArrow3.multiply(rotation90Counter);
+        modelBuilder.addFragment(accesArrow3, 'yellow', combinedTransformArr3);
+
+        //Acces 4
+        const accesArrow4 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow4);
+        const transformAccesArrow4 = new THREE.Matrix4().makeTranslation(24, 7, -8);
+
+        const rotation45 = new THREE.Matrix4().makeRotationZ(rZ - (rZ / 2));
+        const combinedTransformArr4 = transformAccesArrow4.multiply(rotation45).multiply(rotation90Counter);
+        modelBuilder.addFragment(accesArrow4, 'yellow', combinedTransformArr4);
+
+        //Acces 5
+        const accesArrow5 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow5);
+        const transformAccesArrow5 = new THREE.Matrix4().makeTranslation(11, 11, -8);
+
+        const rZ180 = Math.PI;
+        const rotation180 = new THREE.Matrix4().makeRotationZ(rZ180);
+        const combinedTransformArr5 = transformAccesArrow5.multiply(rotation180);
+        modelBuilder.addFragment(accesArrow5, 'yellow', combinedTransformArr5);
+
+
+
+
+
+
+
+
+
         return true;
     }
 }
