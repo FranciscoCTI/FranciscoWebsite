@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { Box, Center, Container, Spacer, Divider, HStack, Stack, Flex, Link, Text, VStack, Select, Button } from '@chakra-ui/react';
 import { getAccessToken } from "../services/apsToken";
-import CustomGeometryExtension from '../extensions/customGeometryExtension';
+//import CustomGeometryExtension from '../extensions/customGeometryExtension';
 import SceneBuilderExtension from '../extensions/SceneBuilderExtension';
 import { initViewer, loadModel, zoomToDoors, zoomToRoofs, zoomToWalls } from './APSScripts';
 
