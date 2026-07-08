@@ -147,6 +147,11 @@ export const APSPage = () => {
                                 Mark access points
                             </Button>
                         </VStack>
+                        <VStack spacing={2} align={'stretch'} mt={4}>
+                            <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
+                                Camera points:</Text>
+                            <Button w={"100%"}></Button>
+                        </VStack>
                     </Box>
 
                     {/* THE 3D VIEWING CANVAS */}
