@@ -1,7 +1,24 @@
 class SceneBuilderExtension extends Autodesk.Viewing.Extension {
     constructor(viewer, options) {
         super(viewer, options);
+
+        const materials = {
+            purple: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 1) }),
+            red: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 0), transparent: true, opacity: 0.7 }),
+            green: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 1, 0) }),
+            blue: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 0, 1) }),
+            yellow: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 1, 0) })
+        };
+        this.materials = materials;
     }
+
+    registerMaterials(modelBuilder) {
+        Object.keys(this.materials).forEach(name => {
+            modelBuilder.addMaterial(name, this.materials[name].clone());
+        });
+
+    }
+
 
     async load() {
         console.log("SceneBuilderExtension has been loaded.");
@@ -16,81 +33,13 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
             const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
 
             this.modelBuilder = await ext.addNewModel({
-                conserveMemory: false,
+                conserveMemory: true,
                 modelNameOverride: 'geometry model'
             });
 
             const modelBuilder = this.modelBuilder;
 
-            const materials = {
-                purple: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 1) }),
-                red: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 0), transparent: true, opacity: 0.7 }),
-                green: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 1, 0) }),
-                blue: new THREE.MeshPhongMaterial({ color: new THREE.Color(0, 0, 1) }),
-                yellow: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 1, 0) })
-            };
-            console.log("Materials created")
-
-            Object.keys(materials).forEach(name => {
-                modelBuilder.addMaterial(name, materials[name]);
-            });
-
-            /*
-            //Slabs
-            var slabSize = new THREE.BoxGeometry(100, 100, 1);
-            var slabRed = new THREE.BufferGeometry().fromGeometry(slabSize);
-            let idSlabRed = modelBuilder.addGeometry(slabRed);
-
-            var slabSizeYellow = new THREE.BoxGeometry(100, 100, 1);
-            var slabYellow = new THREE.BufferGeometry().fromGeometry(slabSizeYellow);
-            let idSlabYellow = modelBuilder.addGeometry(slabYellow);
-            console.log("Box geometry added");
-
-            const transformTopSlab = new THREE.Matrix4().makeTranslation(0, 0, 20);
-            const transformBotSlab = new THREE.Matrix4().makeTranslation(0, 0, -14);
-
-            modelBuilder.addFragment(idSlabRed, 'red', transformBotSlab);
-            modelBuilder.addFragment(idSlabYellow, 'green', transformTopSlab);
-
-            //Columns
-            var column = new THREE.BoxGeometry(2, 2, 35);
-            var column1 = new THREE.BufferGeometry().fromGeometry(column);
-            var column2 = new THREE.BufferGeometry().fromGeometry(column);
-            var column3 = new THREE.BufferGeometry().fromGeometry(column);
-            var column4 = new THREE.BufferGeometry().fromGeometry(column);
-
-            var off = 48;
-            const transformColumn1 = new THREE.Matrix4().makeTranslation(+off, +off, 2);
-            const transformColumn2 = new THREE.Matrix4().makeTranslation(+off, -off, 2);
-            const transformColumn3 = new THREE.Matrix4().makeTranslation(-off, -off, 2);
-            const transformColumn4 = new THREE.Matrix4().makeTranslation(-off, +off, 2);
-
-            modelBuilder.addFragment(column1, 'red', transformColumn1);
-            modelBuilder.addFragment(column2, 'red', transformColumn2);
-            modelBuilder.addFragment(column3, 'red', transformColumn3);
-            modelBuilder.addFragment(column4, 'red', transformColumn4);
-            console.log("Columns created");
-
-            const transformZero = new THREE.Matrix4().makeTranslation(0, 0, 0);
-
-            //Cone
-            var cylSize = new THREE.CylinderGeometry(5, 1, 25, 32);
-            var cylGeom = new THREE.BufferGeometry().fromGeometry(cylSize);
-            let idCyl = modelBuilder.addGeometry(cylGeom);
-            const transformCyl = new THREE.Matrix4().makeTranslation(100, 10, -10);
-            const rY = Math.PI / 2; // Radians
-            const rotation = new THREE.Matrix4().makeRotationX(rY);
-            const combinedTransformCyl = transformCyl.multiply(rotation);
-
-            modelBuilder.addFragment(cylGeom, 'red', combinedTransformCyl);
-
-            //Sphere
-            var sphereSize = new THREE.SphereGeometry(8, 32, 16);
-            var SphGeom = new THREE.BufferGeometry().fromGeometry(sphereSize);
-            modelBuilder.addGeometry(SphGeom);
-            const transformSph = new THREE.Matrix4().makeTranslation(100, 10, 4);
-            modelBuilder.addFragment(SphGeom, 'blue', transformSph);
-            */
+            this.registerMaterials(modelBuilder);
 
             // FIX: Check for the function and use the correct order
             if (modelBuilder && typeof modelBuilder.done === 'function') {
@@ -101,7 +50,6 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
             // Refresh the viewer so the controls "unstick"
             viewer.impl.invalidate(true, true, true);
-
 
             return true;
         });
@@ -150,13 +98,23 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
         var viewer = this.viewer;
 
-        const modelBuilder = this.modelBuilder;
+        const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
+
+        this.sceneModel = this.modelBuilder.model;
+        this.viewer.impl.unloadModel(this.sceneModel);
+
+        const modelBuilder = await ext.addNewModel({
+            conserveMemory: true,
+            modelNameOverride: 'geometry model'
+        });
+
+        this.modelBuilder = modelBuilder;
+
+        this.registerMaterials(modelBuilder);
 
         const urn = viewer.currentUrn;
 
         let fragments = modelBuilder.model.getFragmentList();
-
-        //fragments = modelBuilder.sceneFragments || modelBuilder.fragments;
 
         if (fragments && fragments.geoms.geoms.length > 1) {
             return false;
@@ -186,6 +144,19 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
                     break;
             }
 
+            // FIX: Check for the function and use the correct order
+            if (modelBuilder && typeof modelBuilder.done === 'function') {
+                modelBuilder.done();
+            } else if (modelBuilder && typeof modelBuilder.consolidate === 'function') {
+                modelBuilder.consolidate();
+            }
+
+            // Refresh the viewer so the controls "unstick"
+            viewer.impl.invalidate(true, true, true);
+
+
+            return true;
+
         }
 
     }
@@ -199,8 +170,10 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
         var transformBotSlab = new THREE.Matrix4().makeTranslation(0, 0, 0);
 
+        this.registerMaterials(modelBuilder);
+
         modelBuilder.addFragment(idSlabRed, 'red', transformBotSlab);
-        return true;
+
     }
 
     createTunnelClearance(modelBuilder) {
@@ -211,7 +184,7 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         var transformBotSlab = new THREE.Matrix4().makeTranslation(0, 0, -5);
 
         modelBuilder.addFragment(idSlabRed, 'red', transformBotSlab);
-        return true;
+
     }
 
     createJuditialClearance(modelBuilder) {
@@ -222,7 +195,7 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         var transformBotSlab = new THREE.Matrix4().makeTranslation(0, 0, -5);
 
         modelBuilder.addFragment(idSlabRed, 'red', transformBotSlab);
-        return true;
+
     }
 
     async markAccessPoints() {
@@ -230,7 +203,19 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
         var viewer = this.viewer;
 
-        const modelBuilder = this.modelBuilder;
+        this.sceneModel = this.modelBuilder.model;
+        this.viewer.impl.unloadModel(this.sceneModel);
+
+        const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
+
+        const modelBuilder = await ext.addNewModel({
+            conserveMemory: true,
+            modelNameOverride: 'geometry model'
+        });
+
+        this.modelBuilder = modelBuilder;
+
+        this.registerMaterials(modelBuilder);
 
         const urn = viewer.currentUrn;
 
@@ -247,14 +232,61 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         shape.lineTo(0, 0);
 
         const extrudeSettings = {
-            amount: 0.3,          // r71 uses "amount", not "depth"
+            amount: 0.3,
             bevelEnabled: false,
             steps: 1
         };
 
         const extrudeGeom = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-        //Acces 1
+        let fragments = modelBuilder.model.getFragmentList();
+
+        if (fragments && fragments.geoms.geoms.length > 1) {
+            return false;
+        }
+
+        if (urn) {
+            switch (urn) {
+                case "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9Qcm95ZWN0b0Nhc2FfMjAyNV9hLnJ2dA":
+
+                    //Acces 1
+                    this.AccessArrowsInHouse(extrudeGeom, modelBuilder);
+
+                    break;
+
+                case "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9DQ1NfRVNUXzAxLnJ2dA":
+
+                    this.AccessArrowsInTunnel(extrudeGeom, modelBuilder);
+
+                    break;
+
+                case "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9DQVBKX0NlbnRybyUyMGRlJTIwSnVzdGljaWElMjBWYWxkaXZpYShFc3QpLnJ2dA":
+
+                    this.AccessArrowsInJuditial(extrudeGeom, modelBuilder);
+
+                    break;
+
+                default:
+                    break;
+            }
+
+            // FIX: Check for the function and use the correct order
+            if (modelBuilder && typeof modelBuilder.done === 'function') {
+                modelBuilder.done();
+            } else if (modelBuilder && typeof modelBuilder.consolidate === 'function') {
+                modelBuilder.consolidate();
+            }
+
+            // Refresh the viewer so the controls "unstick"
+            viewer.impl.invalidate(true, true, true);
+
+            return true;
+
+        }
+        return true;
+    }
+
+    AccessArrowsInHouse(extrudeGeom, modelBuilder) {
         const accesArrow1 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
         modelBuilder.addGeometry(accesArrow1);
         const transformAccesArrow1 = new THREE.Matrix4().makeTranslation(-30, 2.5, -8);
@@ -296,16 +328,122 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         const rotation180 = new THREE.Matrix4().makeRotationZ(rZ180);
         const combinedTransformArr5 = transformAccesArrow5.multiply(rotation180);
         modelBuilder.addFragment(accesArrow5, 'yellow', combinedTransformArr5);
+    }
 
+    AccessArrowsInTunnel(extrudeGeom, modelBuilder) {
+        const accesArrow1 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow1);
+        const transformAccesArrow1 = new THREE.Matrix4().makeTranslation(133, 15, -8);
+        const rZ = Math.PI; // Radians
+        const rotation90 = new THREE.Matrix4().makeRotationZ(rZ);
+        const combinedTransformArr1 = transformAccesArrow1.multiply(rotation90);
+        modelBuilder.addFragment(accesArrow1, 'yellow', combinedTransformArr1);
 
+        const accesArrow2 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow2);
+        const transformAccesArrow2 = new THREE.Matrix4().makeTranslation(138, 15, -8);
+        const combinedTransformArr2 = transformAccesArrow2.multiply(rotation90);
+        modelBuilder.addFragment(accesArrow2, 'yellow', combinedTransformArr2);
 
+        const accesArrow3 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow3);
+        const transformAccesArrow3 = new THREE.Matrix4().makeTranslation(149, -13, -8);
+        const rZ45 = Math.PI / 4; // Radians
+        const rotation45 = new THREE.Matrix4().makeRotationZ(rZ45);
+        const combinedTransformArr3 = transformAccesArrow3.multiply(rotation45);
+        modelBuilder.addFragment(accesArrow3, 'yellow', combinedTransformArr3);
 
+        const accesArrow4 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow4);
+        const transformAccesArrow4 = new THREE.Matrix4().makeTranslation(-150, -2, -8);
+        const rZCounter = Math.PI / 2; // Radians
+        const rotation90Counter = new THREE.Matrix4().makeRotationZ(-rZCounter);
+        const combinedTransformArr4 = transformAccesArrow4.multiply(rotation90Counter);
+        modelBuilder.addFragment(accesArrow4, 'yellow', combinedTransformArr4);
 
+        /*
+        
+        modelBuilder.addFragment(accesArrow1, 'yellow', combinedTransformArr1);
 
+        //Acces 2
+        const accesArrow2 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow2);
+        const transformAccesArrow2 = new THREE.Matrix4().makeTranslation(9, -22, -8);
+        //modelBuilder.addFragment(accesArrow2, 'yellow', transformAccesArrow2);
 
+        //Acces 3
+        const accesArrow3 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow3);
+        const transformAccesArrow3 = new THREE.Matrix4().makeTranslation(0, -16, -8);
+        const rotation90Counter = new THREE.Matrix4().makeRotationZ(rZ);
+        const combinedTransformArr3 = transformAccesArrow3.multiply(rotation90Counter);
+        //modelBuilder.addFragment(accesArrow3, 'yellow', combinedTransformArr3);
 
+        //Acces 4
+        const accesArrow4 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow4);
+        const transformAccesArrow4 = new THREE.Matrix4().makeTranslation(24, 7, -8);
 
-        return true;
+        const rotation45 = new THREE.Matrix4().makeRotationZ(rZ - (rZ / 2));
+        const combinedTransformArr4 = transformAccesArrow4.multiply(rotation45).multiply(rotation90Counter);
+        //modelBuilder.addFragment(accesArrow4, 'yellow', combinedTransformArr4);
+
+        //Acces 5
+        const accesArrow5 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow5);
+        const transformAccesArrow5 = new THREE.Matrix4().makeTranslation(11, 11, -8);
+
+        const rZ180 = Math.PI;
+        const rotation180 = new THREE.Matrix4().makeRotationZ(rZ180);
+        const combinedTransformArr5 = transformAccesArrow5.multiply(rotation180);
+        //modelBuilder.addFragment(accesArrow5, 'yellow', combinedTransformArr5);
+        */
+    }
+
+    AccessArrowsJuditial(extrudeGeom, modelBuilder) {
+        /*
+        const accesArrow1 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow1);
+        const transformAccesArrow1 = new THREE.Matrix4().makeTranslation(-30, 2.5, -8);
+
+        const rZ = Math.PI / 2; // Radians
+        const rotation90 = new THREE.Matrix4().makeRotationZ(-rZ);
+        const combinedTransformArr1 = transformAccesArrow1.multiply(rotation90);
+        modelBuilder.addFragment(accesArrow1, 'yellow', combinedTransformArr1);
+
+        //Acces 2
+        const accesArrow2 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow2);
+        const transformAccesArrow2 = new THREE.Matrix4().makeTranslation(9, -22, -8);
+        modelBuilder.addFragment(accesArrow2, 'yellow', transformAccesArrow2);
+
+        //Acces 3
+        const accesArrow3 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow3);
+        const transformAccesArrow3 = new THREE.Matrix4().makeTranslation(0, -16, -8);
+        const rotation90Counter = new THREE.Matrix4().makeRotationZ(rZ);
+        const combinedTransformArr3 = transformAccesArrow3.multiply(rotation90Counter);
+        modelBuilder.addFragment(accesArrow3, 'yellow', combinedTransformArr3);
+
+        //Acces 4
+        const accesArrow4 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow4);
+        const transformAccesArrow4 = new THREE.Matrix4().makeTranslation(24, 7, -8);
+
+        const rotation45 = new THREE.Matrix4().makeRotationZ(rZ - (rZ / 2));
+        const combinedTransformArr4 = transformAccesArrow4.multiply(rotation45).multiply(rotation90Counter);
+        modelBuilder.addFragment(accesArrow4, 'yellow', combinedTransformArr4);
+
+        //Acces 5
+        const accesArrow5 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
+        modelBuilder.addGeometry(accesArrow5);
+        const transformAccesArrow5 = new THREE.Matrix4().makeTranslation(11, 11, -8);
+
+        const rZ180 = Math.PI;
+        const rotation180 = new THREE.Matrix4().makeRotationZ(rZ180);
+        const combinedTransformArr5 = transformAccesArrow5.multiply(rotation180);
+        modelBuilder.addFragment(accesArrow5, 'yellow', combinedTransformArr5);
+        */
     }
 }
 
