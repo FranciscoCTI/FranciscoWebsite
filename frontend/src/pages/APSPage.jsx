@@ -1,6 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { Box, Center, Container, Spacer, Divider, HStack, Stack, Flex, Link, Text, VStack, Select } from '@chakra-ui/react';
+import { Box, Center, Container, Spacer, Divider, HStack, Stack, Flex, Link, Text, VStack, Select, Button } from '@chakra-ui/react';
 import { getAccessToken } from "../services/apsToken";
+import CustomGeometryExtension from '../extensions/customGeometryExtension';
+import SceneBuilderExtension from '../extensions/SceneBuilderExtension';
+import { initViewer, loadModel, zoomToDoors, zoomToRoofs, zoomToWalls } from './APSScripts';
 
 const AVAILABLE_MODELS = [
     { name: "Architectural House", urn: "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9Qcm95ZWN0b0Nhc2FfMjAyNV9hLnJ2dA" },
@@ -22,6 +25,7 @@ export const APSPage = () => {
         initViewer(viewerContainer.current).then((v) => {
             viewer = v;
             viewerInstance.current = v;
+
 
             // Assuming you have a loadModel function
             if (selectedUrn) {
@@ -91,6 +95,58 @@ export const APSPage = () => {
                                 </option>
                             ))}
                         </Select>
+
+                        <VStack spacing={2} align={'stretch'} mt={4}>
+                            <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
+                                Elements selection:</Text>
+                            <Button w={"100%"}
+                                onClick={() => zoomToDoors(viewerInstance.current)}>
+                                Select all the doors
+                            </Button>
+
+                            <Button w={"100%"}
+                                onClick={() => zoomToWalls(viewerInstance.current)}>
+                                Select all the walls
+                            </Button>
+
+                            <Button w={"100%"}
+                                onClick={() => zoomToRoofs(viewerInstance.current)}>
+                                Select all the roofs
+                            </Button>
+
+                        </VStack>
+
+                        <VStack spacing={2} align={'stretch'} mt={4}>
+                            <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
+                                Elements Creation:</Text>
+                            <Button w={"100%"}
+                                onClick={async () => {
+
+                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+
+                                    console.log(sceneExt);
+
+                                    if (sceneExt) {
+                                        sceneExt.createBuildingClearance();
+                                    }
+                                }}>
+                                Create building clearance
+                            </Button>
+
+                            <Button w={"100%"}
+                                onClick={async () => {
+
+                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+
+                                    console.log(sceneExt);
+
+                                    if (sceneExt) {
+                                        sceneExt.markAccessPoints();
+                                    }
+                                }}>
+                                Mark access points
+                            </Button>
+                        </VStack>
                     </Box>
 
                     {/* THE 3D VIEWING CANVAS */}
@@ -104,75 +160,3 @@ export const APSPage = () => {
     );
 };
 
-export const initViewer = (container) => {
-
-    let initializerPromise = null;
-    return new Promise((resolve, reject) => {
-        // 1. Critical Check: Is the Autodesk library loaded from the <script> tag?
-        if (typeof Autodesk === 'undefined') {
-            return reject(new Error("Autodesk Viewer library not found. Check your index.html scripts."));
-        }
-
-        // 2. Singleton Initializer: APS should only be initialized ONCE per session
-        if (!initializerPromise) {
-            initializerPromise = new Promise((res) => {
-
-                const options = {
-                    env: 'AutodeskProduction',
-                    getAccessToken: (onTokenReady) => {
-                        fetch('/api/token')
-                            .then(response => response.json())
-                            .then(data => onTokenReady(data.access_token, data.expires_in));
-                    }
-                };
-
-                window.Autodesk.Viewing.Initializer(options, res);
-            });
-        }
-
-        // 3. Mount the Viewer
-        initializerPromise.then(() => {
-            const config = {
-                extensions: ['Autodesk.DocumentBrowser']
-            };
-
-            // Ensure we are passing the raw DOM element from the React Ref
-            const viewer = new window.Autodesk.Viewing.GuiViewer3D(container, config);
-
-            const startedCode = viewer.start();
-            if (startedCode > 0) {
-                return reject(new Error(`Viewer failed to start with code: ${startedCode}`));
-            }
-
-            viewer.setTheme('light-theme');
-            viewer.fitToView();
-            resolve(viewer);
-        });
-    });
-}
-
-function loadModel(viewer, urn) {
-
-    console.log("URN value:", urn);
-    console.log("URN type:", typeof urn);
-
-    const cleanUrn = urn.replace(/^urn:/, "");
-
-    const documentId = "urn:" + cleanUrn;
-
-    window.Autodesk.Viewing.Document.load(
-        documentId,
-        (doc) => {
-
-            const viewable = doc.getRoot().getDefaultGeometry();
-
-            viewer.loadDocumentNode(doc, viewable).then(() => {
-                viewer.addEventListener(window.Autodesk.Viewing.GEOMETRY_LOADED_EVENT, () => {
-                    viewer.fitToView();
-                }, { once: true });
-            });
-        },
-        (err) => console.error(err)
-    );
-
-}
