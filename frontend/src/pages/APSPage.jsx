@@ -1,14 +1,14 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { Box, Center, Container, Spacer, Divider, HStack, Stack, Flex, Link, Text, VStack, Select, Button } from '@chakra-ui/react';
+import { Box, Center, Container, Spacer, Divider, HStack, Stack, Flex, Link, Text, VStack, Select, Button, Image } from '@chakra-ui/react';
 import { getAccessToken } from "../services/apsToken";
 //import CustomGeometryExtension from '../extensions/customGeometryExtension';
 import SceneBuilderExtension from '../extensions/SceneBuilderExtension';
 import { initViewer, loadModel, zoomToDoors, zoomToRoofs, zoomToWalls } from './APSScripts';
 
 const AVAILABLE_MODELS = [
-    { name: "Architectural House", urn: "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9Qcm95ZWN0b0Nhc2FfMjAyNV9hLnJ2dA" },
-    { name: "Hydrical airport tunnel", urn: "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9DQ1NfRVNUXzAxLnJ2dA" },
-    { name: "Structural juditial building", urn: "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9DQVBKX0NlbnRybyUyMGRlJTIwSnVzdGljaWElMjBWYWxkaXZpYShFc3QpLnJ2dA" }
+    { name: "House - Architectural", urn: "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9Qcm95ZWN0b0Nhc2FfMjAyNV9hLnJ2dA" },
+    { name: "Hydrical tunnel on airport ", urn: "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9DQ1NfRVNUXzAxLnJ2dA" },
+    { name: "Judicial building - Structural", urn: "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9DQVBKX0NlbnRybyUyMGRlJTIwSnVzdGljaWElMjBWYWxkaXZpYShFc3QpLnJ2dA" }
 ];
 
 export const APSPage = () => {
@@ -147,11 +147,130 @@ export const APSPage = () => {
                                 Mark access points
                             </Button>
                         </VStack>
-                        <VStack spacing={2} align={'stretch'} mt={4}>
-                            <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
-                                Camera points:</Text>
-                            <Button w={"100%"}></Button>
-                        </VStack>
+                    </Box>
+
+                    {/* FLOATING OVERLAY PANEL (Positioned on the top-right) */}
+                    <Box
+                        position="absolute"
+                        top="20px"
+                        right="20px"
+                        zIndex="10"
+                        bg="white"
+                        p={4}
+                        borderRadius="md"
+                        boxShadow="xl"
+                        width="230px"
+                        border="1px solid"
+                        borderColor="gray.200"
+                        m={2}
+                        cursor={'pointer'}
+                        visibility={selectedUrn === AVAILABLE_MODELS[0].urn ? 'visible' : 'hidden'}
+                        maxH="550px"
+                        overflowY="auto"
+                    >
+                        <Box position="relative" cursor="pointer">
+                            <Image src="src/assets/PlacesOnHouse/BookShelf.png"
+                                alt="BookShelf"
+                                width="100%" mt={2} onClick={async () => {
+
+                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+
+                                    console.log(sceneExt);
+
+                                    if (sceneExt) {
+                                        sceneExt.goToBookShelf();
+                                    }
+                                }} />
+                            <Text position="absolute"
+                                bottom="5px"
+                                left="5px"
+                                color="white"
+                                fontWeight="bold"
+                                fontSize="sm"
+                                bg="rgba(0, 0, 0, 0.6)"
+                                px={2}
+                                py={1}
+                                borderRadius="md">
+                                BookShelf</Text>
+                        </Box>
+                        <Box position="relative" cursor="pointer">
+                            <Image src="src/assets/PlacesOnHouse/Kitchen.png"
+                                alt="Kitchen"
+                                width="100%" mt={2} onClick={async () => {
+
+                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+
+                                    console.log(sceneExt);
+
+                                    if (sceneExt) {
+                                        sceneExt.goToKitchen();
+                                    }
+                                }} />
+                            <Text position="absolute"
+                                bottom="5px"
+                                left="5px"
+                                color="white"
+                                fontWeight="bold"
+                                fontSize="sm"
+                                bg="rgba(0, 0, 0, 0.6)"
+                                px={2}
+                                py={1}
+                                borderRadius="md">
+                                Kitchen
+                            </Text>
+                        </Box>
+                        <Box position="relative" cursor="pointer">
+                            <Image src="src/assets/PlacesOnHouse/MasterBedroom.png"
+                                alt="MasterBedroom"
+                                width="100%" mt={2} onClick={async () => {
+
+                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+
+                                    console.log(sceneExt);
+
+                                    if (sceneExt) {
+                                        sceneExt.goToMasterBedroom();
+                                    }
+                                }} />
+                            <Text position="absolute"
+                                bottom="5px"
+                                left="5px"
+                                color="white"
+                                fontWeight="bold"
+                                fontSize="sm"
+                                bg="rgba(0, 0, 0, 0.6)"
+                                px={2}
+                                py={1}
+                                borderRadius="md">
+                                Master Bedroom
+                            </Text>
+                        </Box>
+                        <Box position="relative" cursor="pointer">
+                            <Image src="src/assets/PlacesOnHouse/KidsBedroom.png"
+                                alt="KidsBedroom"
+                                width="100%" mt={2} onClick={async () => {
+
+                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+
+                                    console.log(sceneExt);
+
+                                    if (sceneExt) {
+                                        sceneExt.goToKidsBedroom();
+                                    }
+                                }} />
+                            <Text position="absolute"
+                                bottom="5px"
+                                left="5px"
+                                color="white"
+                                fontWeight="bold"
+                                fontSize="sm"
+                                bg="rgba(0, 0, 0, 0.6)"
+                                px={2}
+                                py={1}
+                                borderRadius="md">
+                                Kids Bedroom
+                            </Text>
+                        </Box>
                     </Box>
 
                     {/* THE 3D VIEWING CANVAS */}
@@ -160,7 +279,7 @@ export const APSPage = () => {
                         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
                     />
                 </Box>
-            </Container>
+            </Container >
         </>
     );
 };

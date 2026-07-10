@@ -96,7 +96,11 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
     async createBuildingClearance() {
         console.log("Creating clearance");
 
-        var viewer = this.viewer;
+        const viewer = this.viewer;
+        const camera = viewer.navigation.getCamera();
+
+        console.log("The camera position: " + camera.position);
+        console.log("The camera target: " + camera.target);
 
         const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
 
@@ -286,6 +290,81 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         return true;
     }
 
+    async goToBookShelf() {
+        console.log("Moving camera to bookshelf");
+
+        var viewer = this.viewer;
+        viewer.navigation.toPerspective();
+
+        const position = new THREE.Vector3(-6.58, -5.19, -6.30);
+        const target = new THREE.Vector3(1.54, 111.19, -53.88);
+
+        await this.goToPlace(viewer, position, target);
+
+    }
+
+    async goToKitchen() {
+        console.log("Moving camera to kitchen");
+
+        var viewer = this.viewer;
+        viewer.navigation.toPerspective();
+
+        const position = new THREE.Vector3(4.94, 4.40, -6.30);
+        const target = new THREE.Vector3(31.44, -108.82, -54.77);
+
+        await this.goToPlace(viewer, position, target);
+    }
+
+    async goToMasterBedroom() {
+        console.log("Moving camera to master bedroom");
+
+        var viewer = this.viewer;
+        viewer.navigation.toPerspective();
+
+        const position = new THREE.Vector3(-20.65, -24.10, - 6.30);
+        const target = new THREE.Vector3(99.27, -3.25, -38.77);
+
+        await this.goToPlace(viewer, position, target);
+    }
+
+    async goToKidsBedroom() {
+        console.log("Moving camera to kids' bedroom");
+
+        var viewer = this.viewer;
+        viewer.navigation.toPerspective();
+
+        const position = new THREE.Vector3(-4.32, -3.97, 2.22);
+        const target = new THREE.Vector3(68.12, -91.88, -51.59);
+
+        await this.goToPlace(viewer, position, target);
+    }
+
+    async goToPlace(viewer, position, target) {
+
+        viewer.navigation.setView(position, target);
+
+        console.log(viewer.toolController.getToolNames());
+
+        viewer.prefs.set('bimWalkToolPopup', false);
+
+        viewer.setActiveNavigationTool("bimwalk");
+
+        this.setCameraUp();
+
+        console.log("Camera moved succesfully");
+    }
+
+    setCameraUp() {
+        var viewer = this.viewer;
+
+        viewer.navigation.setWorldUpVector(
+            new THREE.Vector3(0, 0, 1),
+            true
+        );
+
+        viewer.navigation.orientCameraUp();
+    }
+
     AccessArrowsInHouse(extrudeGeom, modelBuilder) {
         const accesArrow1 = new THREE.BufferGeometry().fromGeometry(extrudeGeom);
         modelBuilder.addGeometry(accesArrow1);
@@ -445,6 +524,8 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         modelBuilder.addFragment(accesArrow5, 'yellow', combinedTransformArr5);
         */
     }
+
+
 }
 
 Autodesk.Viewing.theExtensionManager.registerExtension('SceneBuilderExtension', SceneBuilderExtension);
