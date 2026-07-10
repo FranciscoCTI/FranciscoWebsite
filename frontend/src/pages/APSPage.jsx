@@ -11,6 +11,8 @@ const AVAILABLE_MODELS = [
     { name: "Judicial building - Structural", urn: "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9DQVBKX0NlbnRybyUyMGRlJTIwSnVzdGljaWElMjBWYWxkaXZpYShFc3QpLnJ2dA" }
 ];
 
+const chileanLandscape = "/vista-lago-pehoe-y-macizo-1.png";
+
 export const APSPage = () => {
 
     const viewerContainer = useRef(null);
@@ -169,7 +171,7 @@ export const APSPage = () => {
                         overflowY="auto"
                     >
                         <Box position="relative" cursor="pointer">
-                            <Image src="src/assets/PlacesOnHouse/BookShelf.png"
+                            <Image src={"/PlacesOnHouse/BookShelf.PNG"}
                                 alt="BookShelf"
                                 width="100%" mt={2} onClick={async () => {
 
@@ -194,7 +196,7 @@ export const APSPage = () => {
                                 BookShelf</Text>
                         </Box>
                         <Box position="relative" cursor="pointer">
-                            <Image src="src/assets/PlacesOnHouse/Kitchen.png"
+                            <Image src="/PlacesOnHouse/Kitchen.PNG"
                                 alt="Kitchen"
                                 width="100%" mt={2} onClick={async () => {
 
@@ -220,7 +222,7 @@ export const APSPage = () => {
                             </Text>
                         </Box>
                         <Box position="relative" cursor="pointer">
-                            <Image src="src/assets/PlacesOnHouse/MasterBedroom.png"
+                            <Image src="/PlacesOnHouse/MasterBedroom.PNG"
                                 alt="MasterBedroom"
                                 width="100%" mt={2} onClick={async () => {
 
@@ -246,7 +248,7 @@ export const APSPage = () => {
                             </Text>
                         </Box>
                         <Box position="relative" cursor="pointer">
-                            <Image src="src/assets/PlacesOnHouse/KidsBedroom.png"
+                            <Image src="/PlacesOnHouse/KidsBedroom.PNG"
                                 alt="KidsBedroom"
                                 width="100%" mt={2} onClick={async () => {
 
