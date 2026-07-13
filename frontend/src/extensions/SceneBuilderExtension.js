@@ -10,12 +10,61 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
             yellow: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 1, 0) })
         };
         this.materials = materials;
+
+        this.interactiveObjects = [];
+
+        this.instanceId = Math.random().toString(36).substring(2, 8);
+        console.log("Constructor:", this.instanceId);
+
+        //Set up raycasting
+        viewer.impl.canvas.addEventListener("click", (e) => {
+            this.onCanvasClick(e);
+        });
+    }
+
+    onCanvasClick(event) {
+
+        console.log("SceneBuilderExtension instance id:", this.instanceId);
+        //alert(this.instanceId);
+
+        console.log("Canvas clicked");
+
+        const THREE = window.THREE;
+
+        const rect = this.viewer.canvas.getBoundingClientRect();
+
+        const mouse = new THREE.Vector2(
+            ((event.clientX - rect.left) / rect.width) * 2 - 1,
+            -((event.clientY - rect.top) / rect.height) * 2 + 1
+        );
+
+        const mouseString = "X: " + mouse.x + " / Y: " + mouse.y;
+        alert(mouseString);
+
+        const raycaster = new THREE.Raycaster();
+
+        console.log(window.THREE === THREE);
+        console.log("Camera type:" + this.viewer.impl.camera);
+
+        raycaster.setFromCamera(mouse, this.viewer.impl.camera.orthographicCamera);
+
+        const hits = raycaster.intersectObjects(this.interactiveObjects, true);
+
+        if (hits.length === 0) {
+            return;
+        }
+
+        const obj = hits[0].object;
+
+        console.log(obj.userData);
+
     }
 
     registerMaterials(modelBuilder) {
         Object.keys(this.materials).forEach(name => {
             modelBuilder.addMaterial(name, this.materials[name].clone());
         });
+
 
     }
 
@@ -26,6 +75,9 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         var viewer = this.viewer;
 
         console.log("The current urn is: " + viewer.currentUrn);
+
+        console.log("SceneBuilderExtension instance id:", this.instanceId);
+
 
         viewer.addEventListener(Autodesk.Viewing.OBJECT_TREE_CREATED_EVENT, async () => {
 
@@ -525,7 +577,38 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         */
     }
 
+    async AddElementWithInteractivity() {
+        const viewer = this.viewer;
 
+        console.log("Adding element with interactivity");
+
+        const geometryBall = new THREE.SphereGeometry(15, 32, 16);
+        const materialBall = new THREE.MeshPhongMaterial({
+            color: 0xff0000
+        });
+
+        viewer.impl.createOverlayScene('interactiveOverlay');
+
+        const meshBall = new THREE.Mesh(geometryBall, materialBall);
+        meshBall.position.set(0, 40, 0);
+
+        meshBall.userData = {
+            name: 'Interactive Ball',
+            color: 'Red',
+            id: '99',
+            city: 'Concepción'
+
+        };
+
+        this.interactiveObjects.push(meshBall);
+
+        viewer.impl.addOverlay('interactiveOverlay', meshBall);
+
+        // Redraw
+        viewer.impl.invalidate(true, true, true);
+
+        console.log("Added interactive ball overlay");
+    }
 }
 
 Autodesk.Viewing.theExtensionManager.registerExtension('SceneBuilderExtension', SceneBuilderExtension);
