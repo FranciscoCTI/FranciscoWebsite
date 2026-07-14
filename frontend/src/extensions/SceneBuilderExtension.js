@@ -1,6 +1,10 @@
+import MarkerPropertyPanel from '../classes/propertyPanel';
+
 class SceneBuilderExtension extends Autodesk.Viewing.Extension {
     constructor(viewer, options) {
         super(viewer, options);
+
+        this.markerPanel = new MarkerPropertyPanel(viewer);
 
         const materials = {
             purple: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 1) }),
@@ -31,7 +35,13 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
         const THREE = window.THREE;
 
-        const rect = this.viewer.canvas.getBoundingClientRect();
+        this.viewer.impl.sceneUpdated(true);
+
+        this.interactiveObjects.forEach(obj => {
+            obj.updateMatrixWorld(true);
+        });
+
+        const rect = this.viewer.impl.canvas.getBoundingClientRect();
 
         const mouse = new THREE.Vector2(
             ((event.clientX - rect.left) / rect.width) * 2 - 1,
@@ -39,14 +49,31 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         );
 
         const mouseString = "X: " + mouse.x + " / Y: " + mouse.y;
-        alert(mouseString);
-
         const raycaster = new THREE.Raycaster();
 
         console.log(window.THREE === THREE);
         console.log("Camera type:" + this.viewer.impl.camera);
 
-        raycaster.setFromCamera(mouse, this.viewer.impl.camera.orthographicCamera);
+        //raycaster.setFromCamera(mouse, this.viewer.impl.camera);
+
+        raycaster.ray.origin = this.viewer.impl.camera.position;
+
+        const mesh = this.interactiveObjects[0];
+
+        const worldPos = new THREE.Vector3();
+        mesh.getWorldPosition(worldPos);
+
+        const direction = worldPos.clone()
+            .sub(raycaster.ray.origin)
+            .normalize();
+
+        raycaster.ray.direction = direction;
+
+        console.log(raycaster.ray.origin);
+        console.log(raycaster.ray.direction);
+
+        console.log("Pos: " + this.viewer.navigation.getPosition());
+        console.log("Target: " + this.viewer.navigation.getTarget());
 
         const hits = raycaster.intersectObjects(this.interactiveObjects, true);
 
@@ -55,6 +82,8 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         }
 
         const obj = hits[0].object;
+
+        this.markerPanel.showMarker(obj);
 
         console.log(obj.userData);
 
@@ -394,8 +423,6 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
     async goToPlace(viewer, position, target) {
 
         viewer.navigation.setView(position, target);
-
-        console.log(viewer.toolController.getToolNames());
 
         viewer.prefs.set('bimWalkToolPopup', false);
 
