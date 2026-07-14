@@ -72,12 +72,6 @@ export async function loadModel(viewer, urn) {
         viewer.impl.unloadModel(model);
     });
 
-    viewer.impl.invalidate(true, true, true);
-
-    viewer.fitToView();
-    viewer.navigation.setCameraUpVector(new THREE.Vector3(0, 0, 1));
-    viewer.navigation.setWorldUpVector(new THREE.Vector3(0, 0, 1));
-
     window.Autodesk.Viewing.Document.load(
         documentId,
         //this is the success callback, where we get the document object that contains all the info about the model and its viewables
@@ -100,11 +94,18 @@ export async function loadModel(viewer, urn) {
 
             viewer.currentUrn = currentUrn;
 
-            viewer.fitToView();
+            const position = new THREE.Vector3(100, 100, 30);
+            const target = new THREE.Vector3(0, 0, 0);
+
+            viewer.navigation.setView(position, target);
+            viewer.navigation.setWorldUpVector(new THREE.Vector3(0, 0, 1));
+            viewer.navigation.setCameraUpVector(new THREE.Vector3(0, 0, 1));
 
             viewer.setActiveNavigationTool("orbit");
-            viewer.navigation.setCameraUpVector(new THREE.Vector3(0, 0, 1));
-            viewer.navigation.setWorldUpVector(new THREE.Vector3(0, 0, 1));
+
+            viewer.fitToView();
+
+            viewer.impl.invalidate(true);
         },
         //this is the error callback, where we can handle any issues that arise during the loading process
         (err) => console.error(err)
