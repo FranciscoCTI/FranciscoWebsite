@@ -4,14 +4,14 @@ export default class MarkerPropertyPanel extends Autodesk.Viewing.UI.PropertyPan
         super(viewer.container, "Marker Properties", "Marker Properties");
     }
 
-    showMarker(marker) {
+    showMarker(object) {
 
         this.removeAllProperties();
 
-        this.addProperty("Name", marker.userData.name);
-        this.addProperty("Color", marker.userData.color);
-        this.addProperty("Id", marker.userData.id);
-        this.addProperty("City", marker.userData.city);
+        this.addProperty("Name", object.name);
+        this.addProperty("Color", object.color);
+        this.addProperty("Id", object.id);
+        this.addProperty("City", object.city);
 
         this.setVisible(true);
     }

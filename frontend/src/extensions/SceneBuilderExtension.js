@@ -15,7 +15,7 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         };
         this.materials = materials;
 
-        this.interactiveObjects = [];
+        this.markerProperties = {};
 
         this.instanceId = Math.random().toString(36).substring(2, 8);
         console.log("Constructor:", this.instanceId);
@@ -28,52 +28,44 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
     onCanvasClick(event) {
 
-        console.log("SceneBuilderExtension instance id:", this.instanceId);
-        //alert(this.instanceId);
-
-        console.log("Canvas clicked");
-
         const THREE = window.THREE;
 
+        const viewer = this.viewer;
+
+        const rect = this.viewer.impl.canvas.getBoundingClientRect();
+
+        const hit = this.viewer.impl.hitTest(
+            event.clientX - rect.left,
+            event.clientY - rect.top,
+            true
+        );
+
+        if (hit) {
+            //alert("This is the BIM model: " + hit.dbId);
+
+            const props = this.markerProperties[hit.object.geometry.id];
+
+            this.markerPanel.showMarker(props);
+        }
+
+        /*
+        //in the case of a overlay element
         this.viewer.impl.sceneUpdated(true);
 
         this.interactiveObjects.forEach(obj => {
             obj.updateMatrixWorld(true);
         });
 
-        const rect = this.viewer.impl.canvas.getBoundingClientRect();
-
-        const mouse = new THREE.Vector2(
-            ((event.clientX - rect.left) / rect.width) * 2 - 1,
-            -((event.clientY - rect.top) / rect.height) * 2 + 1
-        );
-
-        const mouseString = "X: " + mouse.x + " / Y: " + mouse.y;
         const raycaster = new THREE.Raycaster();
 
-        console.log(window.THREE === THREE);
-        console.log("Camera type:" + this.viewer.impl.camera);
+        console.log("cast ray" + viewer.impl.castRay.length);
+        console.log("Client to world" + viewer.impl.clientToWorld.length);
 
-        //raycaster.setFromCamera(mouse, this.viewer.impl.camera);
+        const vp = this.viewer.impl.clientToViewport(event.clientX - rect.left, event.clientY - rect.top);
+        const ray = viewer.impl.viewportToRay(vp.x, vp.y);
 
-        raycaster.ray.origin = this.viewer.impl.camera.position;
-
-        const mesh = this.interactiveObjects[0];
-
-        const worldPos = new THREE.Vector3();
-        mesh.getWorldPosition(worldPos);
-
-        const direction = worldPos.clone()
-            .sub(raycaster.ray.origin)
-            .normalize();
-
-        raycaster.ray.direction = direction;
-
-        console.log(raycaster.ray.origin);
-        console.log(raycaster.ray.direction);
-
-        console.log("Pos: " + this.viewer.navigation.getPosition());
-        console.log("Target: " + this.viewer.navigation.getTarget());
+        raycaster.ray.origin.copy(ray.origin);
+        raycaster.ray.direction.copy(ray.direction);
 
         const hits = raycaster.intersectObjects(this.interactiveObjects, true);
 
@@ -85,7 +77,8 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
         this.markerPanel.showMarker(obj);
 
-        console.log(obj.userData);
+        console.log(hit.userData);
+        */
 
     }
 
@@ -282,6 +275,76 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         modelBuilder.addFragment(idSlabRed, 'red', transformBotSlab);
 
     }
+
+    async createMarker(position) {
+        console.log("Creating marker at " + position.toString());
+
+        var viewer = this.viewer;
+
+        this.sceneModel = this.modelBuilder.model;
+        this.viewer.impl.unloadModel(this.sceneModel);
+
+        const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
+
+        const modelBuilder = await ext.addNewModel({
+            conserveMemory: true,
+            modelNameOverride: 'geometry model'
+        });
+
+        this.modelBuilder = modelBuilder;
+
+        this.registerMaterials(modelBuilder);
+
+        const sphereGeom = new THREE.SphereGeometry(5, 32, 16);
+
+        const sphereBuffer = new THREE.BufferGeometry().fromGeometry(sphereGeom);
+
+        modelBuilder.addGeometry(sphereBuffer);
+
+        let transformSphere = new THREE.Matrix4();
+
+        let geomId = 0;
+        let aCity = '-';
+
+        switch (position) {
+            case PositionAtTunnel.START:
+                transformSphere = new THREE.Matrix4().makeTranslation(-140, 20, -5);
+                aCity = 'Concepción';
+                break;
+            case PositionAtTunnel.HALFWAY:
+                transformSphere = new THREE.Matrix4().makeTranslation(0, 20, -5);
+                aCity = 'Chillán';
+                break;
+            case PositionAtTunnel.EXITA:
+                transformSphere = new THREE.Matrix4().makeTranslation(140, 20, -5);
+                aCity = 'Talca';
+                break;
+            case PositionAtTunnel.EXITB:
+                transformSphere = new THREE.Matrix4().makeTranslation(0, 20, 50);
+                aCity = 'Temuco';
+                break;
+            default:
+                console.warn("Unknown tunnel position:", position);
+                transformSphere = new THREE.Matrix4(); // Identity matrix
+                break;
+        }
+
+
+        geomId = sphereBuffer.id;
+
+        let userData = {
+            name: position.toString(),
+            color: 'blue',
+            id: geomId,
+            city: aCity
+        };
+
+        this.markerProperties[geomId] = userData;
+
+        modelBuilder.addFragment(sphereBuffer, "blue", transformSphere, { dbId: geomId });
+
+    }
+
 
     async markAccessPoints() {
         console.log("Creating access points");
@@ -605,31 +668,13 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
     }
 
     async AddElementWithInteractivity() {
+
         const viewer = this.viewer;
 
-        console.log("Adding element with interactivity");
-
-        const geometryBall = new THREE.SphereGeometry(15, 32, 16);
-        const materialBall = new THREE.MeshPhongMaterial({
-            color: 0xff0000
-        });
-
-        viewer.impl.createOverlayScene('interactiveOverlay');
-
-        const meshBall = new THREE.Mesh(geometryBall, materialBall);
-        meshBall.position.set(0, 40, 0);
-
-        meshBall.userData = {
-            name: 'Interactive Ball',
-            color: 'Red',
-            id: '99',
-            city: 'Concepción'
-
-        };
-
-        this.interactiveObjects.push(meshBall);
-
-        viewer.impl.addOverlay('interactiveOverlay', meshBall);
+        this.createMarker(PositionAtTunnel.START);
+        this.createMarker(PositionAtTunnel.HALFWAY);
+        this.createMarker(PositionAtTunnel.EXITA);
+        this.createMarker(PositionAtTunnel.EXITB);
 
         // Redraw
         viewer.impl.invalidate(true, true, true);
@@ -637,6 +682,13 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         console.log("Added interactive ball overlay");
     }
 }
+
+export const PositionAtTunnel = Object.freeze({
+    START: "Start",
+    HALFWAY: "Vent half-way",
+    EXITA: "Exit A",
+    EXITB: "Exit B"
+});
 
 Autodesk.Viewing.theExtensionManager.registerExtension('SceneBuilderExtension', SceneBuilderExtension);
 
