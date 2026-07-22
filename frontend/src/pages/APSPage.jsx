@@ -318,7 +318,7 @@ export const APSPage = () => {
                                     await sceneExt.AddElementWithInteractivity();
                                 }
                             }}>
-                            Add interactivity
+                            Elements with props
                         </Button>
                     </Box>
 

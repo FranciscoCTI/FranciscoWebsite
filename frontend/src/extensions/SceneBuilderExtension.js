@@ -30,8 +30,6 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
         const THREE = window.THREE;
 
-        const viewer = this.viewer;
-
         const rect = this.viewer.impl.canvas.getBoundingClientRect();
 
         const hit = this.viewer.impl.hitTest(
@@ -46,39 +44,12 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
             const props = this.markerProperties[hit.object.geometry.id];
 
             this.markerPanel.showMarker(props);
+
+        } else {
+            if (this.markerPanel) {
+                this.markerPanel.setVisible(false);
+            }
         }
-
-        /*
-        //in the case of a overlay element
-        this.viewer.impl.sceneUpdated(true);
-
-        this.interactiveObjects.forEach(obj => {
-            obj.updateMatrixWorld(true);
-        });
-
-        const raycaster = new THREE.Raycaster();
-
-        console.log("cast ray" + viewer.impl.castRay.length);
-        console.log("Client to world" + viewer.impl.clientToWorld.length);
-
-        const vp = this.viewer.impl.clientToViewport(event.clientX - rect.left, event.clientY - rect.top);
-        const ray = viewer.impl.viewportToRay(vp.x, vp.y);
-
-        raycaster.ray.origin.copy(ray.origin);
-        raycaster.ray.direction.copy(ray.direction);
-
-        const hits = raycaster.intersectObjects(this.interactiveObjects, true);
-
-        if (hits.length === 0) {
-            return;
-        }
-
-        const obj = hits[0].object;
-
-        this.markerPanel.showMarker(obj);
-
-        console.log(hit.userData);
-        */
 
     }
 
@@ -176,13 +147,29 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         console.log("The camera position: " + camera.position);
         console.log("The camera target: " + camera.target);
 
+        viewer.select([]);
+        viewer.isolate([]);
+
+        if (viewer.selectionSet) {
+            viewer.selectionSet.clear();
+        }
+
         const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
+
+        // 1. Get the total count of fragments in this modelBuilder instance
+        let modelBuilder = this.modelBuilder;
+        const count = modelBuilder.fragList.getCount();
+
+        // 2. Loop backwards from the end to remove each fragment
+        for (let fragId = count - 1; fragId >= 0; fragId--) {
+            modelBuilder.removeFragment(fragId);
+        }
 
         this.sceneModel = this.modelBuilder.model;
         this.viewer.impl.unloadModel(this.sceneModel);
 
-        const modelBuilder = await ext.addNewModel({
-            conserveMemory: true,
+        modelBuilder = await ext.addNewModel({
+            conserveMemory: false,
             modelNameOverride: 'geometry model'
         });
 
@@ -279,21 +266,7 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
     async createMarker(position) {
         console.log("Creating marker at " + position.toString());
 
-        var viewer = this.viewer;
-
-        this.sceneModel = this.modelBuilder.model;
-        this.viewer.impl.unloadModel(this.sceneModel);
-
-        const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
-
-        const modelBuilder = await ext.addNewModel({
-            conserveMemory: true,
-            modelNameOverride: 'geometry model'
-        });
-
-        this.modelBuilder = modelBuilder;
-
-        this.registerMaterials(modelBuilder);
+        let modelBuilder = this.modelBuilder;
 
         const sphereGeom = new THREE.SphereGeometry(5, 32, 16);
 
@@ -304,24 +277,24 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         let transformSphere = new THREE.Matrix4();
 
         let geomId = 0;
-        let aCity = '-';
+        let aDescription = '-';
+        let aColor = "";
 
         switch (position) {
             case PositionAtTunnel.START:
-                transformSphere = new THREE.Matrix4().makeTranslation(-140, 20, -5);
-                aCity = 'Concepción';
-                break;
-            case PositionAtTunnel.HALFWAY:
-                transformSphere = new THREE.Matrix4().makeTranslation(0, 20, -5);
-                aCity = 'Chillán';
+                transformSphere = new THREE.Matrix4().makeTranslation(-155, 0, -8);
+                aDescription = 'This is the start of the tunnel ';
+                aColor = "yellow";
                 break;
             case PositionAtTunnel.EXITA:
-                transformSphere = new THREE.Matrix4().makeTranslation(140, 20, -5);
-                aCity = 'Talca';
+                transformSphere = new THREE.Matrix4().makeTranslation(135, 20, -8);
+                aDescription = 'Waste exit to the sewer';
+                aColor = "blue";
                 break;
             case PositionAtTunnel.EXITB:
-                transformSphere = new THREE.Matrix4().makeTranslation(0, 20, 50);
-                aCity = 'Temuco';
+                transformSphere = new THREE.Matrix4().makeTranslation(150, -15, -8);
+                aDescription = 'Waste exit to the treatment plant';
+                aColor = "green";
                 break;
             default:
                 console.warn("Unknown tunnel position:", position);
@@ -334,14 +307,14 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
         let userData = {
             name: position.toString(),
-            color: 'blue',
+            description: aDescription,
+            color: aColor,
             id: geomId,
-            city: aCity
         };
 
         this.markerProperties[geomId] = userData;
 
-        modelBuilder.addFragment(sphereBuffer, "blue", transformSphere, { dbId: geomId });
+        modelBuilder.addFragment(sphereBuffer, aColor, transformSphere, { dbId: geomId });
 
     }
 
@@ -671,21 +644,43 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
 
         const viewer = this.viewer;
 
+        this.sceneModel = this.modelBuilder.model;
+        this.viewer.impl.unloadModel(this.sceneModel);
+
+        const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
+
+        const modelBuilder = await ext.addNewModel({
+            conserveMemory: false,
+            modelNameOverride: 'geometry model'
+        });
+
+        this.modelBuilder = modelBuilder;
+
+        this.registerMaterials(modelBuilder);
+
         this.createMarker(PositionAtTunnel.START);
-        this.createMarker(PositionAtTunnel.HALFWAY);
         this.createMarker(PositionAtTunnel.EXITA);
         this.createMarker(PositionAtTunnel.EXITB);
+
+
+        // FIX: Check for the function and use the correct order
+        if (modelBuilder && typeof modelBuilder.done === 'function') {
+            modelBuilder.done();
+        } else if (modelBuilder && typeof modelBuilder.consolidate === 'function') {
+            modelBuilder.consolidate();
+        }
 
         // Redraw
         viewer.impl.invalidate(true, true, true);
 
         console.log("Added interactive ball overlay");
+
+        return true;
     }
 }
 
 export const PositionAtTunnel = Object.freeze({
     START: "Start",
-    HALFWAY: "Vent half-way",
     EXITA: "Exit A",
     EXITB: "Exit B"
 });
