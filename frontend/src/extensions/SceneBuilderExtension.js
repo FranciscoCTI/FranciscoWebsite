@@ -1,6 +1,10 @@
+import MarkerPropertyPanel from '../classes/propertyPanel';
+
 class SceneBuilderExtension extends Autodesk.Viewing.Extension {
     constructor(viewer, options) {
         super(viewer, options);
+
+        this.markerPanel = new MarkerPropertyPanel(viewer);
 
         const materials = {
             purple: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 0, 1) }),
@@ -10,12 +14,50 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
             yellow: new THREE.MeshPhongMaterial({ color: new THREE.Color(1, 1, 0) })
         };
         this.materials = materials;
+
+        this.markerProperties = {};
+
+        this.instanceId = Math.random().toString(36).substring(2, 8);
+        console.log("Constructor:", this.instanceId);
+
+        //Set up raycasting
+        viewer.impl.canvas.addEventListener("click", (e) => {
+            this.onCanvasClick(e);
+        });
+    }
+
+    onCanvasClick(event) {
+
+        const THREE = window.THREE;
+
+        const rect = this.viewer.impl.canvas.getBoundingClientRect();
+
+        const hit = this.viewer.impl.hitTest(
+            event.clientX - rect.left,
+            event.clientY - rect.top,
+            true
+        );
+
+        if (hit) {
+            //alert("This is the BIM model: " + hit.dbId);
+
+            const props = this.markerProperties[hit.object.geometry.id];
+
+            this.markerPanel.showMarker(props);
+
+        } else {
+            if (this.markerPanel) {
+                this.markerPanel.setVisible(false);
+            }
+        }
+
     }
 
     registerMaterials(modelBuilder) {
         Object.keys(this.materials).forEach(name => {
             modelBuilder.addMaterial(name, this.materials[name].clone());
         });
+
 
     }
 
@@ -26,6 +68,9 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         var viewer = this.viewer;
 
         console.log("The current urn is: " + viewer.currentUrn);
+
+        console.log("SceneBuilderExtension instance id:", this.instanceId);
+
 
         viewer.addEventListener(Autodesk.Viewing.OBJECT_TREE_CREATED_EVENT, async () => {
 
@@ -102,13 +147,29 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         console.log("The camera position: " + camera.position);
         console.log("The camera target: " + camera.target);
 
+        viewer.select([]);
+        viewer.isolate([]);
+
+        if (viewer.selectionSet) {
+            viewer.selectionSet.clear();
+        }
+
         const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
+
+        // 1. Get the total count of fragments in this modelBuilder instance
+        let modelBuilder = this.modelBuilder;
+        const count = modelBuilder.fragList.getCount();
+
+        // 2. Loop backwards from the end to remove each fragment
+        for (let fragId = count - 1; fragId >= 0; fragId--) {
+            modelBuilder.removeFragment(fragId);
+        }
 
         this.sceneModel = this.modelBuilder.model;
         this.viewer.impl.unloadModel(this.sceneModel);
 
-        const modelBuilder = await ext.addNewModel({
-            conserveMemory: true,
+        modelBuilder = await ext.addNewModel({
+            conserveMemory: false,
             modelNameOverride: 'geometry model'
         });
 
@@ -201,6 +262,62 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         modelBuilder.addFragment(idSlabRed, 'red', transformBotSlab);
 
     }
+
+    async createMarker(position) {
+        console.log("Creating marker at " + position.toString());
+
+        let modelBuilder = this.modelBuilder;
+
+        const sphereGeom = new THREE.SphereGeometry(5, 32, 16);
+
+        const sphereBuffer = new THREE.BufferGeometry().fromGeometry(sphereGeom);
+
+        modelBuilder.addGeometry(sphereBuffer);
+
+        let transformSphere = new THREE.Matrix4();
+
+        let geomId = 0;
+        let aDescription = '-';
+        let aColor = "";
+
+        switch (position) {
+            case PositionAtTunnel.START:
+                transformSphere = new THREE.Matrix4().makeTranslation(-155, 0, -8);
+                aDescription = 'This is the start of the tunnel ';
+                aColor = "yellow";
+                break;
+            case PositionAtTunnel.EXITA:
+                transformSphere = new THREE.Matrix4().makeTranslation(135, 20, -8);
+                aDescription = 'Waste exit to the sewer';
+                aColor = "blue";
+                break;
+            case PositionAtTunnel.EXITB:
+                transformSphere = new THREE.Matrix4().makeTranslation(150, -15, -8);
+                aDescription = 'Waste exit to the treatment plant';
+                aColor = "green";
+                break;
+            default:
+                console.warn("Unknown tunnel position:", position);
+                transformSphere = new THREE.Matrix4(); // Identity matrix
+                break;
+        }
+
+
+        geomId = sphereBuffer.id;
+
+        let userData = {
+            name: position.toString(),
+            description: aDescription,
+            color: aColor,
+            id: geomId,
+        };
+
+        this.markerProperties[geomId] = userData;
+
+        modelBuilder.addFragment(sphereBuffer, aColor, transformSphere, { dbId: geomId });
+
+    }
+
 
     async markAccessPoints() {
         console.log("Creating access points");
@@ -342,8 +459,6 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
     async goToPlace(viewer, position, target) {
 
         viewer.navigation.setView(position, target);
-
-        console.log(viewer.toolController.getToolNames());
 
         viewer.prefs.set('bimWalkToolPopup', false);
 
@@ -525,8 +640,50 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         */
     }
 
+    async AddElementWithInteractivity() {
 
+        const viewer = this.viewer;
+
+        this.sceneModel = this.modelBuilder.model;
+        this.viewer.impl.unloadModel(this.sceneModel);
+
+        const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
+
+        const modelBuilder = await ext.addNewModel({
+            conserveMemory: false,
+            modelNameOverride: 'geometry model'
+        });
+
+        this.modelBuilder = modelBuilder;
+
+        this.registerMaterials(modelBuilder);
+
+        this.createMarker(PositionAtTunnel.START);
+        this.createMarker(PositionAtTunnel.EXITA);
+        this.createMarker(PositionAtTunnel.EXITB);
+
+
+        // FIX: Check for the function and use the correct order
+        if (modelBuilder && typeof modelBuilder.done === 'function') {
+            modelBuilder.done();
+        } else if (modelBuilder && typeof modelBuilder.consolidate === 'function') {
+            modelBuilder.consolidate();
+        }
+
+        // Redraw
+        viewer.impl.invalidate(true, true, true);
+
+        console.log("Added interactive ball overlay");
+
+        return true;
+    }
 }
+
+export const PositionAtTunnel = Object.freeze({
+    START: "Start",
+    EXITA: "Exit A",
+    EXITB: "Exit B"
+});
 
 Autodesk.Viewing.theExtensionManager.registerExtension('SceneBuilderExtension', SceneBuilderExtension);
 

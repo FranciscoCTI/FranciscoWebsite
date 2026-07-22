@@ -33,13 +33,16 @@ export const initViewer = (container) => {
 
             const viewer = new window.Autodesk.Viewing.GuiViewer3D(container, config);
 
+            viewer.setTheme("light-theme");
+
+            /*
             viewer.loadExtension("SceneBuilderExtension")
-                /*.then(() => viewer.loadExtension("CustomGeometryExtension"))*/
                 .then(() => {
                     viewer.setTheme("light-theme");
                     resolve(viewer);
                 })
                 .catch(reject);
+            */
 
             const startedCode = viewer.start();
             if (startedCode > 0) {
@@ -52,7 +55,7 @@ export const initViewer = (container) => {
     });
 }
 
-export function loadModel(viewer, urn) {
+export async function loadModel(viewer, urn) {
 
     console.log("URN value:", urn);
     console.log("URN type:", typeof urn);
@@ -63,14 +66,25 @@ export function loadModel(viewer, urn) {
 
     const documentId = "urn:" + cleanUrn;
 
+    const models = viewer.getAllModels();
+
+    models.forEach(model => {
+        viewer.impl.unloadModel(model);
+    });
+
     window.Autodesk.Viewing.Document.load(
         documentId,
         //this is the success callback, where we get the document object that contains all the info about the model and its viewables
-        (doc) => {
+        async (doc) => {
 
             const viewable = doc.getRoot().getDefaultGeometry();
 
-            viewer.loadDocumentNode(doc, viewable);
+            const options = {
+                preserveView: true,
+                keepCurrentModels: true
+            };
+
+            await viewer.loadDocumentNode(doc, viewable, options);
 
             console.log("The doc: " + doc);
 
@@ -80,12 +94,22 @@ export function loadModel(viewer, urn) {
 
             viewer.currentUrn = currentUrn;
 
-            zoomToWalls(viewer);
+            const position = new THREE.Vector3(100, 100, 30);
+            const target = new THREE.Vector3(0, 0, 0);
+
+            viewer.navigation.setView(position, target);
+            viewer.navigation.setWorldUpVector(new THREE.Vector3(0, 0, 1));
+            viewer.navigation.setCameraUpVector(new THREE.Vector3(0, 0, 1));
+
+            viewer.setActiveNavigationTool("orbit");
+
+            viewer.fitToView();
+
+            viewer.impl.invalidate(true);
         },
         //this is the error callback, where we can handle any issues that arise during the loading process
         (err) => console.error(err)
     );
-
 }
 
 export const zoomToWalls = (viewer) => {

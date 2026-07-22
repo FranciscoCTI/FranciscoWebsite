@@ -11,8 +11,6 @@ const AVAILABLE_MODELS = [
     { name: "Judicial building - Structural", urn: "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZhdHRiNWRmaTVqd2QzOWVmdXUwY2tzbGVlbmN5cHBwb2pkM2NzaHZveGNqemhwLWJhc2ljLWFwcC9DQVBKX0NlbnRybyUyMGRlJTIwSnVzdGljaWElMjBWYWxkaXZpYShFc3QpLnJ2dA" }
 ];
 
-const chileanLandscape = "/vista-lago-pehoe-y-macizo-1.png";
-
 export const APSPage = () => {
 
     const viewerContainer = useRef(null);
@@ -47,12 +45,25 @@ export const APSPage = () => {
     }, []); // Re-run if the URN changes
 
     useEffect(() => {
+
+        if (!viewerInstance.current)
+            return;
+
+        if (selectedUrn) {
+            loadModel(viewerInstance.current, selectedUrn);
+        }
+
+    }, [selectedUrn]);
+
+    /*
+    useEffect(() => {
         const viewer = viewerInstance.current;
 
         if (viewer && selectedUrn) {
             loadModel(viewer, selectedUrn);
         }
     })
+    */
 
     return (
         <>
@@ -124,7 +135,7 @@ export const APSPage = () => {
                             <Button w={"100%"}
                                 onClick={async () => {
 
-                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+                                    const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
 
                                     console.log(sceneExt);
 
@@ -138,7 +149,7 @@ export const APSPage = () => {
                             <Button w={"100%"}
                                 onClick={async () => {
 
-                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+                                    const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
 
                                     console.log(sceneExt);
 
@@ -175,7 +186,7 @@ export const APSPage = () => {
                                 alt="BookShelf"
                                 width="100%" mt={2} onClick={async () => {
 
-                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+                                    const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
 
                                     console.log(sceneExt);
 
@@ -200,7 +211,7 @@ export const APSPage = () => {
                                 alt="Kitchen"
                                 width="100%" mt={2} onClick={async () => {
 
-                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+                                    const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
 
                                     console.log(sceneExt);
 
@@ -226,7 +237,7 @@ export const APSPage = () => {
                                 alt="MasterBedroom"
                                 width="100%" mt={2} onClick={async () => {
 
-                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+                                    const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
 
                                     console.log(sceneExt);
 
@@ -252,7 +263,7 @@ export const APSPage = () => {
                                 alt="KidsBedroom"
                                 width="100%" mt={2} onClick={async () => {
 
-                                    const sceneExt = await viewerInstance.current.loadExtension("SceneBuilderExtension");
+                                    const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
 
                                     console.log(sceneExt);
 
@@ -273,6 +284,42 @@ export const APSPage = () => {
                                 Kids Bedroom
                             </Text>
                         </Box>
+                    </Box>
+
+                    {/* FLOATING OVERLAY PANEL FOR TUNNEL MODEL(Positioned on the top-right) */}
+                    <Box
+                        position="absolute"
+                        top="20px"
+                        right="20px"
+                        zIndex="10"
+                        bg="white"
+                        p={4}
+                        borderRadius="md"
+                        boxShadow="xl"
+                        width="230px"
+                        border="1px solid"
+                        borderColor="gray.200"
+                        m={2}
+                        visibility={selectedUrn === AVAILABLE_MODELS[1].urn ? 'visible' : 'hidden'}
+                        maxH="550px"
+                        overflowY="auto"
+                    >
+                        <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
+                            Interactivity pannel:
+                        </Text>
+                        <Button w={"100%"}
+                            onClick={async () => {
+
+                                const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
+
+                                console.log(sceneExt);
+
+                                if (sceneExt) {
+                                    await sceneExt.AddElementWithInteractivity();
+                                }
+                            }}>
+                            Elements with props
+                        </Button>
                     </Box>
 
                     {/* THE 3D VIEWING CANVAS */}
