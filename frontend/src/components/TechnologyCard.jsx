@@ -63,7 +63,7 @@ const TechnologyCard = ({ technology }) => {
                 transform: "translateY(-10px)",
                 shadow: 'x1',
                 borderColor: "black",
-                borderWidth: "20px",
+                borderWidth: "1px",
                 background: "gray.900"
             }}
             transition="all 0.4s ease">

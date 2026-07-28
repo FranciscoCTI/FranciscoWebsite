@@ -8,7 +8,6 @@ import { Route, Routes } from "react-router-dom";
 import TechnologiesPage from "./pages/TechnologiesPage";
 import { Footer } from "./components/Footer";
 import ContactPage from "./pages/ContactPage";
-import { APSPage } from "./pages/APSPage";
 import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, UserButton } from "@clerk/clerk-react";
 import "./App.css";
 
@@ -27,7 +26,6 @@ function App() {
               <Route path="/projects" element={<ProjectsPage />} />
               <Route path="/technologies" element={<TechnologiesPage />} />
               <Route path="/Contact" element={<ContactPage />} />
-              <Route path="/APS" element={<APSPage />} />
             </Routes>
           </Box>
           <Footer></Footer>

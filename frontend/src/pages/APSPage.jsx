@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { Box, Center, Container, Spacer, Divider, HStack, Stack, Flex, Link, Text, VStack, Select, Button, Image } from '@chakra-ui/react';
+import { Box, Center, Container, Spacer, Divider, HStack, Stack, Flex, Link, Text, VStack, Select, Button, Image, Heading } from '@chakra-ui/react';
 import { getAccessToken } from "../services/apsToken";
 //import CustomGeometryExtension from '../extensions/customGeometryExtension';
 import SceneBuilderExtension from '../extensions/SceneBuilderExtension';
@@ -69,69 +69,264 @@ export const APSPage = () => {
         <>
             <Container maxW="container.xl" py={5}>
                 {/* The outer box handles layout positioning */}
-                <Box
-                    position="relative"  // CRITICAL: This serves as the anchor point for the absolute child
-                    width="100%"
-                    height="80vh"
-                    borderWidth="1px"
-                    borderRadius="lg"
-                    overflow="hidden"
-                    boxShadow="lg"
-                >
-                    {/* FLOATING OVERLAY PANEL (Positioned on the top-left) */}
+
+                <Box p={5}
+                    bg={'black'}
+                    w={'100 %'}
+                    fontFamily="monospace"
+                    color="green.500"
+                    letterSpacing={'widest'}
+                    border="2px solid transparent"
+                    transition="all 0.4s ease"
+                    m={-3.5}
+                    _hover={{
+                        transform: "translateY(-10px)",
+                        shadow: 'x1',
+                        borderColor: "black",
+                        borderWidth: "1px",
+                        background: "gray.900"
+                    }}>
+                    <Heading as='h2' size='lg' mb={2} color={'yellow'} >
+                        Autodesk Platform Services (APS)
+                    </Heading>
                     <Box
-                        position="absolute"
-                        top="20px"
-                        left="20px"
-                        zIndex="10"       // Ensures it floats on top of the WebGL 3D Canvas
-                        bg="white"        // Solid background so the viewer geometry doesn't bleed through
-                        p={4}
-                        borderRadius="md"
-                        boxShadow="xl"
-                        width="260px"
-                        border="1px solid"
-                        borderColor="gray.200"
+                        position="relative"  // CRITICAL: This serves as the anchor point for the absolute child
+                        width="100%"
+                        height="80vh"
+                        borderWidth="1px"
+                        overflow="hidden"
+                        boxShadow="lg"
+                        padding={10}
                     >
-                        <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
-                            Select Asset View:
-                        </Text>
-                        <Select
-                            value={selectedUrn}
-                            onChange={(e) => setSelectedUrn(e.target.value)}
-                            size="sm"
+                        {/* FLOATING OVERLAY PANEL (Positioned on the top-left) */}
+                        <Box
+                            position="absolute"
+                            top="20px"
+                            left="20px"
+                            zIndex="10"       // Ensures it floats on top of the WebGL 3D Canvas
+                            bg="white"        // Solid background so the viewer geometry doesn't bleed through
+                            p={4}
                             borderRadius="md"
-                            focusBorderColor="teal.500"
+                            boxShadow="xl"
+                            width="260px"
+                            border="1px solid"
+                            borderColor="gray.200"
                         >
-                            {AVAILABLE_MODELS.map((model) => (
-                                <option key={model.urn} value={model.urn}>
-                                    {model.name}
-                                </option>
-                            ))}
-                        </Select>
-
-                        <VStack spacing={2} align={'stretch'} mt={4}>
                             <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
-                                Elements selection:</Text>
-                            <Button w={"100%"}
-                                onClick={() => zoomToDoors(viewerInstance.current)}>
-                                Select all the doors
-                            </Button>
+                                Select Asset View:
+                            </Text>
+                            <Select
+                                value={selectedUrn}
+                                onChange={(e) => setSelectedUrn(e.target.value)}
+                                size="sm"
+                                borderRadius="md"
+                                focusBorderColor="teal.500"
+                            >
+                                {AVAILABLE_MODELS.map((model) => (
+                                    <option key={model.urn} value={model.urn}>
+                                        {model.name}
+                                    </option>
+                                ))}
+                            </Select>
 
-                            <Button w={"100%"}
-                                onClick={() => zoomToWalls(viewerInstance.current)}>
-                                Select all the walls
-                            </Button>
+                            <VStack spacing={2} align={'stretch'} mt={4}>
+                                <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
+                                    Elements selection:</Text>
+                                <Button w={"100%"}
+                                    onClick={() => zoomToDoors(viewerInstance.current)}>
+                                    Select all the doors
+                                </Button>
 
-                            <Button w={"100%"}
-                                onClick={() => zoomToRoofs(viewerInstance.current)}>
-                                Select all the roofs
-                            </Button>
+                                <Button w={"100%"}
+                                    onClick={() => zoomToWalls(viewerInstance.current)}>
+                                    Select all the walls
+                                </Button>
 
-                        </VStack>
+                                <Button w={"100%"}
+                                    onClick={() => zoomToRoofs(viewerInstance.current)}>
+                                    Select all the roofs
+                                </Button>
 
-                        <VStack spacing={2} align={'stretch'} mt={4}>
+                            </VStack>
+
+                            <VStack spacing={2} align={'stretch'} mt={4}>
+                                <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
+                                    Elements Creation:</Text>
+                                <Button w={"100%"}
+                                    onClick={async () => {
+
+                                        const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
+
+                                        console.log(sceneExt);
+
+                                        if (sceneExt) {
+                                            sceneExt.createBuildingClearance();
+                                        }
+                                    }}>
+                                    Create building clearance
+                                </Button>
+
+                                <Button w={"100%"}
+                                    onClick={async () => {
+
+                                        const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
+
+                                        console.log(sceneExt);
+
+                                        if (sceneExt) {
+                                            sceneExt.markAccessPoints();
+                                        }
+                                    }}>
+                                    Mark access points
+                                </Button>
+                            </VStack>
+                        </Box>
+
+                        {/* FLOATING OVERLAY PANEL (Positioned on the top-right) */}
+                        <Box
+                            position="absolute"
+                            top="20px"
+                            right="20px"
+                            zIndex="10"
+                            bg="white"
+                            p={4}
+                            borderRadius="md"
+                            boxShadow="xl"
+                            width="230px"
+                            border="1px solid"
+                            borderColor="gray.200"
+                            m={2}
+                            cursor={'pointer'}
+                            visibility={selectedUrn === AVAILABLE_MODELS[0].urn ? 'visible' : 'hidden'}
+                            maxH="550px"
+                            overflowY="auto"
+                        >
+                            <Box position="relative" cursor="pointer">
+                                <Image src={"/PlacesOnHouse/BookShelf.PNG"}
+                                    alt="BookShelf"
+                                    width="100%" mt={2} onClick={async () => {
+
+                                        const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
+
+                                        console.log(sceneExt);
+
+                                        if (sceneExt) {
+                                            sceneExt.goToBookShelf();
+                                        }
+                                    }} />
+                                <Text position="absolute"
+                                    bottom="5px"
+                                    left="5px"
+                                    color="white"
+                                    fontWeight="bold"
+                                    fontSize="sm"
+                                    bg="rgba(0, 0, 0, 0.6)"
+                                    px={2}
+                                    py={1}
+                                    borderRadius="md">
+                                    BookShelf</Text>
+                            </Box>
+                            <Box position="relative" cursor="pointer">
+                                <Image src="/PlacesOnHouse/Kitchen.PNG"
+                                    alt="Kitchen"
+                                    width="100%" mt={2} onClick={async () => {
+
+                                        const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
+
+                                        console.log(sceneExt);
+
+                                        if (sceneExt) {
+                                            sceneExt.goToKitchen();
+                                        }
+                                    }} />
+                                <Text position="absolute"
+                                    bottom="5px"
+                                    left="5px"
+                                    color="white"
+                                    fontWeight="bold"
+                                    fontSize="sm"
+                                    bg="rgba(0, 0, 0, 0.6)"
+                                    px={2}
+                                    py={1}
+                                    borderRadius="md">
+                                    Kitchen
+                                </Text>
+                            </Box>
+                            <Box position="relative" cursor="pointer">
+                                <Image src="/PlacesOnHouse/MasterBedroom.PNG"
+                                    alt="MasterBedroom"
+                                    width="100%" mt={2} onClick={async () => {
+
+                                        const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
+
+                                        console.log(sceneExt);
+
+                                        if (sceneExt) {
+                                            sceneExt.goToMasterBedroom();
+                                        }
+                                    }} />
+                                <Text position="absolute"
+                                    bottom="5px"
+                                    left="5px"
+                                    color="white"
+                                    fontWeight="bold"
+                                    fontSize="sm"
+                                    bg="rgba(0, 0, 0, 0.6)"
+                                    px={2}
+                                    py={1}
+                                    borderRadius="md">
+                                    Master Bedroom
+                                </Text>
+                            </Box>
+                            <Box position="relative" cursor="pointer">
+                                <Image src="/PlacesOnHouse/KidsBedroom.PNG"
+                                    alt="KidsBedroom"
+                                    width="100%" mt={2} onClick={async () => {
+
+                                        const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
+
+                                        console.log(sceneExt);
+
+                                        if (sceneExt) {
+                                            sceneExt.goToKidsBedroom();
+                                        }
+                                    }} />
+                                <Text position="absolute"
+                                    bottom="5px"
+                                    left="5px"
+                                    color="white"
+                                    fontWeight="bold"
+                                    fontSize="sm"
+                                    bg="rgba(0, 0, 0, 0.6)"
+                                    px={2}
+                                    py={1}
+                                    borderRadius="md">
+                                    Kids Bedroom
+                                </Text>
+                            </Box>
+                        </Box>
+
+                        {/* FLOATING OVERLAY PANEL FOR TUNNEL MODEL(Positioned on the top-right) */}
+                        <Box
+                            position="absolute"
+                            top="20px"
+                            right="20px"
+                            zIndex="10"
+                            bg="white"
+                            p={4}
+                            borderRadius="md"
+                            boxShadow="xl"
+                            width="230px"
+                            border="1px solid"
+                            borderColor="gray.200"
+                            m={2}
+                            visibility={selectedUrn === AVAILABLE_MODELS[1].urn ? 'visible' : 'hidden'}
+                            maxH="550px"
+                            overflowY="auto"
+                        >
                             <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
-                                Elements Creation:</Text>
+                                Interactivity pannel:
+                            </Text>
                             <Button w={"100%"}
                                 onClick={async () => {
 
@@ -140,194 +335,22 @@ export const APSPage = () => {
                                     console.log(sceneExt);
 
                                     if (sceneExt) {
-                                        sceneExt.createBuildingClearance();
+                                        await sceneExt.AddElementWithInteractivity();
                                     }
                                 }}>
-                                Create building clearance
+                                Elements with props
                             </Button>
+                        </Box>
 
-                            <Button w={"100%"}
-                                onClick={async () => {
-
-                                    const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
-
-                                    console.log(sceneExt);
-
-                                    if (sceneExt) {
-                                        sceneExt.markAccessPoints();
-                                    }
-                                }}>
-                                Mark access points
-                            </Button>
-                        </VStack>
+                        {/* THE 3D VIEWING CANVAS */}
+                        <div
+                            ref={viewerContainer}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                        />
                     </Box>
-
-                    {/* FLOATING OVERLAY PANEL (Positioned on the top-right) */}
-                    <Box
-                        position="absolute"
-                        top="20px"
-                        right="20px"
-                        zIndex="10"
-                        bg="white"
-                        p={4}
-                        borderRadius="md"
-                        boxShadow="xl"
-                        width="230px"
-                        border="1px solid"
-                        borderColor="gray.200"
-                        m={2}
-                        cursor={'pointer'}
-                        visibility={selectedUrn === AVAILABLE_MODELS[0].urn ? 'visible' : 'hidden'}
-                        maxH="550px"
-                        overflowY="auto"
-                    >
-                        <Box position="relative" cursor="pointer">
-                            <Image src={"/PlacesOnHouse/BookShelf.PNG"}
-                                alt="BookShelf"
-                                width="100%" mt={2} onClick={async () => {
-
-                                    const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
-
-                                    console.log(sceneExt);
-
-                                    if (sceneExt) {
-                                        sceneExt.goToBookShelf();
-                                    }
-                                }} />
-                            <Text position="absolute"
-                                bottom="5px"
-                                left="5px"
-                                color="white"
-                                fontWeight="bold"
-                                fontSize="sm"
-                                bg="rgba(0, 0, 0, 0.6)"
-                                px={2}
-                                py={1}
-                                borderRadius="md">
-                                BookShelf</Text>
-                        </Box>
-                        <Box position="relative" cursor="pointer">
-                            <Image src="/PlacesOnHouse/Kitchen.PNG"
-                                alt="Kitchen"
-                                width="100%" mt={2} onClick={async () => {
-
-                                    const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
-
-                                    console.log(sceneExt);
-
-                                    if (sceneExt) {
-                                        sceneExt.goToKitchen();
-                                    }
-                                }} />
-                            <Text position="absolute"
-                                bottom="5px"
-                                left="5px"
-                                color="white"
-                                fontWeight="bold"
-                                fontSize="sm"
-                                bg="rgba(0, 0, 0, 0.6)"
-                                px={2}
-                                py={1}
-                                borderRadius="md">
-                                Kitchen
-                            </Text>
-                        </Box>
-                        <Box position="relative" cursor="pointer">
-                            <Image src="/PlacesOnHouse/MasterBedroom.PNG"
-                                alt="MasterBedroom"
-                                width="100%" mt={2} onClick={async () => {
-
-                                    const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
-
-                                    console.log(sceneExt);
-
-                                    if (sceneExt) {
-                                        sceneExt.goToMasterBedroom();
-                                    }
-                                }} />
-                            <Text position="absolute"
-                                bottom="5px"
-                                left="5px"
-                                color="white"
-                                fontWeight="bold"
-                                fontSize="sm"
-                                bg="rgba(0, 0, 0, 0.6)"
-                                px={2}
-                                py={1}
-                                borderRadius="md">
-                                Master Bedroom
-                            </Text>
-                        </Box>
-                        <Box position="relative" cursor="pointer">
-                            <Image src="/PlacesOnHouse/KidsBedroom.PNG"
-                                alt="KidsBedroom"
-                                width="100%" mt={2} onClick={async () => {
-
-                                    const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
-
-                                    console.log(sceneExt);
-
-                                    if (sceneExt) {
-                                        sceneExt.goToKidsBedroom();
-                                    }
-                                }} />
-                            <Text position="absolute"
-                                bottom="5px"
-                                left="5px"
-                                color="white"
-                                fontWeight="bold"
-                                fontSize="sm"
-                                bg="rgba(0, 0, 0, 0.6)"
-                                px={2}
-                                py={1}
-                                borderRadius="md">
-                                Kids Bedroom
-                            </Text>
-                        </Box>
-                    </Box>
-
-                    {/* FLOATING OVERLAY PANEL FOR TUNNEL MODEL(Positioned on the top-right) */}
-                    <Box
-                        position="absolute"
-                        top="20px"
-                        right="20px"
-                        zIndex="10"
-                        bg="white"
-                        p={4}
-                        borderRadius="md"
-                        boxShadow="xl"
-                        width="230px"
-                        border="1px solid"
-                        borderColor="gray.200"
-                        m={2}
-                        visibility={selectedUrn === AVAILABLE_MODELS[1].urn ? 'visible' : 'hidden'}
-                        maxH="550px"
-                        overflowY="auto"
-                    >
-                        <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
-                            Interactivity pannel:
-                        </Text>
-                        <Button w={"100%"}
-                            onClick={async () => {
-
-                                const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
-
-                                console.log(sceneExt);
-
-                                if (sceneExt) {
-                                    await sceneExt.AddElementWithInteractivity();
-                                }
-                            }}>
-                            Elements with props
-                        </Button>
-                    </Box>
-
-                    {/* THE 3D VIEWING CANVAS */}
-                    <div
-                        ref={viewerContainer}
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                    />
+                    <Box mt={10} fontSize={20}>APS is blablabla</Box>
                 </Box>
+
             </Container >
         </>
     );
