@@ -57,8 +57,6 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         Object.keys(this.materials).forEach(name => {
             modelBuilder.addMaterial(name, this.materials[name].clone());
         });
-
-
     }
 
 
@@ -674,6 +672,60 @@ class SceneBuilderExtension extends Autodesk.Viewing.Extension {
         viewer.impl.invalidate(true, true, true);
 
         console.log("Added interactive ball overlay");
+
+        return true;
+    }
+
+    async addElementWithGizmo() {
+        const viewer = this.viewer;
+
+        // 1. Get the total count of fragments in this modelBuilder instance
+        let modelBuilder = this.modelBuilder;
+        const count = modelBuilder.fragList.getCount();
+
+        // 2. Loop backwards from the end to remove each fragment
+        for (let fragId = count - 1; fragId >= 0; fragId--) {
+            modelBuilder.removeFragment(fragId);
+        }
+
+        this.sceneModel = this.modelBuilder.model;
+        this.viewer.impl.unloadModel(this.sceneModel);
+
+        const ext = viewer.getExtension('Autodesk.Viewing.SceneBuilder');
+
+        modelBuilder = await ext.addNewModel({
+            conserveMemory: false,
+            modelNameOverride: 'geometry model'
+        });
+
+        this.modelBuilder = modelBuilder;
+
+        this.registerMaterials(modelBuilder);
+
+        const sphereGeom = await new THREE.SphereGeometry(3, 32, 16);
+        const sphereBuffer = await new THREE.BufferGeometry().fromGeometry(sphereGeom);
+
+        modelBuilder.addGeometry(sphereBuffer);
+
+        let transform = new THREE.Matrix4().makeTranslation(0, 0, 0);
+
+        const fragId = modelBuilder.addFragment(sphereBuffer, 'yellow', transform);
+
+        // FIX: Check for the function and use the correct order
+        if (modelBuilder && typeof modelBuilder.done === 'function') {
+            modelBuilder.done();
+        } else if (modelBuilder && typeof modelBuilder.consolidate === 'function') {
+            modelBuilder.consolidate();
+        }
+
+        const gizmoExt = await viewer.getExtension('TransformGizmoExtension');
+
+        gizmoExt.attachToFragment(modelBuilder, fragId);
+
+        gizmoExt.moveActiveFragment(0, 0, 50);
+        viewer.fitToView([fragId], modelBuilder.model);
+
+        viewer.impl.invalidate(true, true, true);
 
         return true;
     }

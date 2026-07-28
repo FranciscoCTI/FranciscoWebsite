@@ -1,4 +1,5 @@
 import { Autocomplete } from "@react-google-maps/api";
+import { TransformGizmoExtension } from "../extensions/TransformGizmoExtension";
 
 export const initViewer = (container) => {
 
@@ -27,7 +28,7 @@ export const initViewer = (container) => {
         initializerPromise.then(() => {
             const config = {
                 extensions: [
-                    'Autodesk.DocumentBrowser', /*'CustomGeometryExtension', */'SceneBuilderExtension'
+                    'Autodesk.DocumentBrowser', 'SceneBuilderExtension', 'TransformGizmoExtension' /*,'CustomGeometryExtension' */
                 ]
             };
 

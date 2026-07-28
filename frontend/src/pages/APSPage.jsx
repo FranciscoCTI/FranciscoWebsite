@@ -320,6 +320,26 @@ export const APSPage = () => {
                             }}>
                             Elements with props
                         </Button>
+                        <Button w={"100%"}
+                            onClick={async () => {
+
+                                const viewer = viewerInstance.current;
+
+                                viewer.select([]);
+                                viewer.isolate([]);
+
+                                await viewer.loadExtension('TransformGizmoExtension');
+                                const gizmoExt = viewerInstance.current.getExtension('TransformGizmoExtension');
+
+                                const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
+
+                                if (gizmoExt) {
+                                    await sceneExt.addElementWithGizmo();
+                                }
+
+                            }}>
+                            Element with gizmo
+                        </Button>
                     </Box>
 
                     {/* THE 3D VIEWING CANVAS */}
