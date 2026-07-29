@@ -1,7 +1,8 @@
 import { React, useState, useEffect } from 'react'
 import { useTechnologyStore } from '../store/technology';
-import { VStack, Container, Text, SimpleGrid, useColorModeValue } from '@chakra-ui/react'
+import { VStack, Container, Text, SimpleGrid, useColorModeValue, Box } from '@chakra-ui/react'
 import TechnologyCard from '../components/TechnologyCard';
+import { APSPage } from "./APSPage";
 
 const TechnologiesPage = () => {
 
@@ -32,6 +33,7 @@ const TechnologiesPage = () => {
                     >
                         These are all the technologies that I use
                     </Text>
+                    <APSPage></APSPage>
                     {technologies.map((tech) => (
                         (tech != null && tech.name != "") &&
                         (<TechnologyCard key={tech._id} technology={tech} />)

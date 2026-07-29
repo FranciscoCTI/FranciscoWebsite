@@ -23,7 +23,7 @@ const CarrerTimeline = () => {
             color="green.500"
             fontSize={20}
             paddingBottom={10}>
-            <Text justify='left' color={'yellow'} fontSize={40}>My carrer so far</Text>
+            <Text justify='left' color={'yellow'} fontSize={40}>My career so far</Text>
             <VStack>
                 <StepInCareer id={0} openId={openId} setOpenId={setOpenId}
                     title="Self thought 3d and 2d animator"

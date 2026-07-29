@@ -63,7 +63,7 @@ const TechnologyCard = ({ technology }) => {
                 transform: "translateY(-10px)",
                 shadow: 'x1',
                 borderColor: "black",
-                borderWidth: "20px",
+                borderWidth: "1px",
                 background: "gray.900"
             }}
             transition="all 0.4s ease">
@@ -71,18 +71,18 @@ const TechnologyCard = ({ technology }) => {
                 {technology.name}
             </Heading>
             <HStack>
-                <VStack>
+                <VStack fontSize={17}>
                     <HStack align="start" w='full'>
-                        <Text fontSize={20}>{"Used in: " + technology.usedIn}</Text>
+                        <Text >{"Used in: " + technology.usedIn}</Text>
                     </HStack>
                     <HStack align="start" w='full'>
-                        <Text fontSize={20}>{"Year: " + technology.year}</Text>
+                        <Text >{"Year: " + technology.year}</Text>
                     </HStack>
                     <HStack align="start" w='full'>
-                        <Text fontSize={20} >{"My user level: " + technology.userLevel}</Text>
+                        <Text>{"My user level: " + technology.userLevel}</Text>
                     </HStack>
                     <HStack align="start" w='full'>
-                        <Link fontSize={20} href={technology.website} isExternal color="blue.500">
+                        <Link href={technology.website} isExternal color="blue.500">
                             {technology.website}
                         </Link>
                     </HStack>
@@ -103,7 +103,7 @@ const TechnologyCard = ({ technology }) => {
             </Button>
             <Collapse in={isOpen} animateOpacity>
                 <Box mt={2} p={1} bg="gray.800">
-                    <Text fontSize={18}>
+                    <Text fontSize={17}>
                         {technology.description || 'No additional description available.'}
                     </Text>
                 </Box>

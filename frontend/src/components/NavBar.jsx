@@ -52,11 +52,6 @@ const NavBar = () => {
                             Technologies
                         </Button>
                     </Link>
-                    <Link to={"/APS"}>
-                        <Button borderRadius={0}>
-                            APS
-                        </Button>
-                    </Link>
                     <Link to={"/contact"}>
                         <Button borderRadius={0}>
                             Contact me
