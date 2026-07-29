@@ -55,16 +55,6 @@ export const APSPage = () => {
 
     }, [selectedUrn]);
 
-    /*
-    useEffect(() => {
-        const viewer = viewerInstance.current;
-
-        if (viewer && selectedUrn) {
-            loadModel(viewer, selectedUrn);
-        }
-    })
-    */
-
     return (
         <>
             <Container maxW="container.xl" py={5}>
@@ -83,10 +73,9 @@ export const APSPage = () => {
                         transform: "translateY(-10px)",
                         shadow: 'x1',
                         borderColor: "black",
-                        borderWidth: "1px",
-                        background: "gray.900"
+                        borderWidth: "1px"
                     }}>
-                    <Heading as='h2' size='lg' mb={2} color={'yellow'} >
+                    <Heading as='h2' size='lg' mb={5} mt={2} color={'yellow'} >
                         Autodesk Platform Services (APS)
                     </Heading>
                     <Box
@@ -112,7 +101,7 @@ export const APSPage = () => {
                             border="1px solid"
                             borderColor="gray.200"
                         >
-                            <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
+                            <Text fontWeight="bold" fontSize="sm" mb={2} color="black">
                                 Select Asset View:
                             </Text>
                             <Select
@@ -121,6 +110,7 @@ export const APSPage = () => {
                                 size="sm"
                                 borderRadius="md"
                                 focusBorderColor="teal.500"
+                                color={'black'}
                             >
                                 {AVAILABLE_MODELS.map((model) => (
                                     <option key={model.urn} value={model.urn}>
@@ -129,28 +119,34 @@ export const APSPage = () => {
                                 ))}
                             </Select>
 
-                            <VStack spacing={2} align={'stretch'} mt={4}>
-                                <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
+                            <VStack spacing={2} align={'stretch'} mt={4} fontWeight={'medium'}>
+                                <Text fontWeight="bold" fontSize="sm" mb={2} textColor={'black'}>
                                     Elements selection:</Text>
                                 <Button w={"100%"}
-                                    onClick={() => zoomToDoors(viewerInstance.current)}>
+                                    onClick={() => zoomToDoors(viewerInstance.current)}
+                                    fontSize={12}
+                                    fontWeight={'medium'}>
                                     Select all the doors
                                 </Button>
 
                                 <Button w={"100%"}
-                                    onClick={() => zoomToWalls(viewerInstance.current)}>
+                                    onClick={() => zoomToWalls(viewerInstance.current)}
+                                    fontSize={12}
+                                    fontWeight={'medium'}>
                                     Select all the walls
                                 </Button>
 
                                 <Button w={"100%"}
-                                    onClick={() => zoomToRoofs(viewerInstance.current)}>
+                                    onClick={() => zoomToRoofs(viewerInstance.current)}
+                                    fontSize={12}
+                                    fontWeight={'medium'}>
                                     Select all the roofs
                                 </Button>
 
                             </VStack>
 
                             <VStack spacing={2} align={'stretch'} mt={4}>
-                                <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
+                                <Text fontWeight="bold" fontSize="sm" mb={2} color="black">
                                     Elements Creation:</Text>
                                 <Button w={"100%"}
                                     onClick={async () => {
@@ -162,7 +158,8 @@ export const APSPage = () => {
                                         if (sceneExt) {
                                             sceneExt.createBuildingClearance();
                                         }
-                                    }}>
+                                    }} fontSize={12}
+                                    fontWeight={'medium'}>
                                     Create building clearance
                                 </Button>
 
@@ -176,7 +173,8 @@ export const APSPage = () => {
                                         if (sceneExt) {
                                             sceneExt.markAccessPoints();
                                         }
-                                    }}>
+                                    }} fontSize={12}
+                                    fontWeight={'medium'}>
                                     Mark access points
                                 </Button>
                             </VStack>
@@ -319,15 +317,18 @@ export const APSPage = () => {
                             width="230px"
                             border="1px solid"
                             borderColor="gray.200"
+                            color={'black'}
                             m={2}
                             visibility={selectedUrn === AVAILABLE_MODELS[1].urn ? 'visible' : 'hidden'}
                             maxH="550px"
                             overflowY="auto"
                         >
-                            <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
+                            <Text fontWeight="bold" fontSize="sm" mb={2}>
                                 Interactivity pannel:
                             </Text>
                             <Button w={"100%"}
+                                fontSize={12}
+                                fontWeight={'medium'}
                                 onClick={async () => {
 
                                     const sceneExt = await viewerInstance.current.getExtension("SceneBuilderExtension");
@@ -348,7 +349,12 @@ export const APSPage = () => {
                             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
                         />
                     </Box>
-                    <Box mt={10} fontSize={20}>APS is blablabla</Box>
+                    <Box mt={10} fontSize={17}>Autodesk Platform Services (APS) is a developer ecosystem that helps you extend and customize your Autodesk software. It provides APIs and services that let you view 3D models in a web browser, automate workflows, and create custom applications that work with your design and make data. Digital twins, dashboards and automation on the web are some of the things you can create with APS integrated with the Autodesk products </Box>
+                    <HStack align="start" w='full' fontSize={17}>
+                        <Link href={"https://www.autodesk.com/products/autodesk-platform-services/overview"} isExternal color="blue.500">
+                            {"https://www.autodesk.com/products/autodesk-platform-services/overview"}
+                        </Link>
+                    </HStack>
                 </Box>
 
             </Container >
