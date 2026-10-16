@@ -18,12 +18,7 @@ export const ThreeJSPage = () => {
                     border="2px solid transparent"
                     transition="all 0.4s ease"
                     m={-3.5}
-                    _hover={{
-                        transform: "translateY(-10px)",
-                        shadow: 'x1',
-                        borderColor: "black",
-                        borderWidth: "1px"
-                    }}>
+                    >
                     <Heading as='h2' size='lg' mb={5} mt={2} color={'yellow'} >
                         THREE JS
                     </Heading>
