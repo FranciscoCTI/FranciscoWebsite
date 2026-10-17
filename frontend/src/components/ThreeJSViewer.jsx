@@ -3,6 +3,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Box } from '@chakra-ui/react';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import {Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION} from 'three-bvh-csg';
+import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
+
 
 const ThreeJSViewer = () => {
     const containerRef = useRef(null);
@@ -79,15 +82,15 @@ const ThreeJSViewer = () => {
         //#region extrude along path
         const path = new THREE.CurvePath();
         const v1 = new THREE.Vector3(-3,0,-3);
-        const v2 = new THREE.Vector3(3,0,-3);
-        const v3 = new THREE.Vector3(3,0,3);
+        const v2 = new THREE.Vector3(2,0,-3);
+        const v3 = new THREE.Vector3(2,0,3);
         const v4 = new THREE.Vector3(-3,0,3);
 
         path.add(new THREE.LineCurve3(v1,v2));
         path.add(new THREE.LineCurve3(v2,v3));
         path.add(new THREE.LineCurve3(v3,v4));
         path.add(new THREE.LineCurve3(v4,v1));
-        path.closePath();
+        //path.closePath();
 
         const shape = new THREE.Shape();
         const shapeWidth = 0.3;
@@ -100,20 +103,34 @@ const ThreeJSViewer = () => {
         shape.closePath();
 
         const extrudeSettings = {
-            steps: 4,
+            steps: 22,
             bevelEnabled: false,
             extrudePath: path
         };
 
-        const geometryExtrusion = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        const weldedGeometry = BufferGeometryUtils.mergeVertices(geometryExtrusion);
-        const extrudedMesh = new THREE.Mesh(weldedGeometry, redMaterial);
-        extrudedMesh.position.z = 10;
-        extrudedMesh.position.y =1.5;
-        scene.add(extrudedMesh);
+        const room1 = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        const brush1 = new Brush(room1, blueMaterial);
+        //const weldedGeometry = BufferGeometryUtils.mergeVertices(geometryExtrusion);
+        //const extrudedMesh = new THREE.Mesh(geometryExtrusion, redMaterial);
+        brush1.position.z = 10;
+        brush1.position.y =1.5;
+        brush1.updateMatrixWorld();
+        //scene.add(extrudedMesh);
 
+        //const room2 = new THREE.Mesh(geometryExtrusion, blueMaterial);
+        const brush2 = new Brush(room1, blueMaterial);
+        brush2.position.x = 5;
+        brush2.position.y =1.5;
+        brush2.position.z = 12;
+        brush2.updateMatrixWorld();
+        //scene.add(room2);
 
+        const evaluator = new Evaluator();
 
+        const resultGeometry = evaluator.evaluate(brush1, brush2, ADDITION);
+        resultGeometry.material = blueMaterial;
+        
+        scene.add(resultGeometry);
 
         //#endregion
 
