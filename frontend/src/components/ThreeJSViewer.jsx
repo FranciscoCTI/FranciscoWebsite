@@ -5,13 +5,16 @@ import { Box } from '@chakra-ui/react';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION} from 'three-bvh-csg';
 import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
+import GUI from 'three/addons/libs/lil-gui.module.min.js';
 
 
 const ThreeJSViewer = () => {
     const containerRef = useRef(null);
+    const guiContainerRef = useRef(null);
 
     useEffect(() => {
         const currentContainer = containerRef.current;
+        const currentGUIContainer = guiContainerRef.current;
         const width = currentContainer.clientWidth;
         const height = currentContainer.clientHeight;
 
@@ -76,7 +79,10 @@ const ThreeJSViewer = () => {
 
         const dodecahedronGeometry = new THREE.DodecahedronGeometry(2.5, 1);
         const reflectiveMesh = new THREE.Mesh(dodecahedronGeometry, reflectiveMaterial);
-        reflectiveMesh.position.x = 5;
+
+        const dodePos = reflectiveMesh.position;
+        dodePos.x = 5;
+        dodePos.y = 4;
         scene.add(reflectiveMesh);
 
         //#region extrude along path
@@ -137,7 +143,7 @@ const ThreeJSViewer = () => {
         // #endregion
 
         // #region Lighting and Controls
-        const ambientLight = new THREE.AmbientLight(0x404040, 5.5);
+        const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 10);
@@ -148,9 +154,13 @@ const ThreeJSViewer = () => {
         const lightHelper = new THREE.DirectionalLightHelper(directionalLight);
         //scene.add(lightHelper);
 
-        const pointLight = new THREE.PointLight(0xffffff, 1);
-        pointLight.position.set(-5, -10, -7.5);
+        const pointLight = new THREE.PointLight(0x64E538, 3);
+        pointLight.position.set(5, 11, 2);
         scene.add(pointLight);
+
+        const pointLight1 = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(1, 5, 1);
+        scene.add(pointLight1);
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
@@ -158,6 +168,17 @@ const ThreeJSViewer = () => {
         controls.enableZoom = true;
         controls.enablePan = true;
         // #endregion
+
+        //#region GUI
+        const gui = new GUI({ 
+        container: currentGUIContainer, // <--- This forces it to live inside your div!
+        title: 'Franciscos Controls',
+                    // Optional title header
+        });
+
+        gui.addFolder("Geometry");
+        gui.addFolder("Lights");
+        //#endregion
 
         // 5. Animation Loop
         let animationFrameId;
@@ -194,10 +215,24 @@ const ThreeJSViewer = () => {
     }, []);
 
     return (
-        <div 
-      ref={containerRef} 
-      style={{ width: '100%', height: '400px', borderRadius: '8px', overflow: 'hidden' }} 
-    />);
+        <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '8px', overflow: 'hidden' }}>
+            {/* Canvas fills the whole box */}
+            <div 
+                ref={containerRef} 
+                style={{ width: '100%', height: '100%' }} 
+            />
+
+            {/* Floating GUI Container positioned absolutely on top */}
+            <div 
+                ref={guiContainerRef} 
+                style={{ 
+                position: 'absolute', 
+                top: '10px',   // Distance from top
+                right: '10px', // Distance from right
+                zIndex: 10     // Ensures it sits above the canvas
+                }} 
+            />
+    </div>);
 
 };
 export default ThreeJSViewer;
