@@ -1,9 +1,9 @@
-import React, {useEffect, useRef} from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Box } from '@chakra-ui/react';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import {Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION} from 'three-bvh-csg';
+import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 
@@ -55,19 +55,19 @@ const ThreeJSViewer = () => {
             roughness: 0.5,  // Medium matte finish (higher = duller, lower = shinier)
         });
 
-                //Other object to test reflective material
+        //Other object to test reflective material
         const reflectiveMaterial = new THREE.MeshStandardMaterial({
             color: greenMaterial.color, // Use the same color as the green material
-            metalness: 0,   
+            metalness: 0,
             roughness: 0.6,
         });
         // #endregion
 
         //#region Objects
         const knotGeom = new THREE.TorusKnotGeometry(0.8, 0.3, 100, 16);
-        const mesh = new THREE.Mesh(knotGeom, blueMaterial);
-        mesh.position.set(10, 0, 0); // Center the object
-        scene.add(mesh);
+        const knot1 = new THREE.Mesh(knotGeom, blueMaterial);
+        knot1.position.set(10, 0, 0); // Center the object
+        scene.add(knot1);
 
         const knot2 = new THREE.Mesh(knotGeom, greenMaterial);
         knot2.position.x = -1; // Position it to the left of the reflective sphere  
@@ -83,19 +83,19 @@ const ThreeJSViewer = () => {
         const dodePos = reflectiveMesh.position;
         dodePos.x = 5;
         dodePos.y = 4;
-        scene.add(reflectiveMesh);
+        //scene.add(reflectiveMesh);
 
         //#region extrude along path
         const path = new THREE.CurvePath();
-        const v1 = new THREE.Vector3(-3,0,-3);
-        const v2 = new THREE.Vector3(2,0,-3);
-        const v3 = new THREE.Vector3(2,0,3);
-        const v4 = new THREE.Vector3(-3,0,3);
+        const v1 = new THREE.Vector3(-3, 0, -3);
+        const v2 = new THREE.Vector3(2, 0, -3);
+        const v3 = new THREE.Vector3(2, 0, 3);
+        const v4 = new THREE.Vector3(-3, 0, 3);
 
-        path.add(new THREE.LineCurve3(v1,v2));
-        path.add(new THREE.LineCurve3(v2,v3));
-        path.add(new THREE.LineCurve3(v3,v4));
-        path.add(new THREE.LineCurve3(v4,v1));
+        path.add(new THREE.LineCurve3(v1, v2));
+        path.add(new THREE.LineCurve3(v2, v3));
+        path.add(new THREE.LineCurve3(v3, v4));
+        path.add(new THREE.LineCurve3(v4, v1));
         //path.closePath();
 
         const shape = new THREE.Shape();
@@ -119,14 +119,14 @@ const ThreeJSViewer = () => {
         //const weldedGeometry = BufferGeometryUtils.mergeVertices(geometryExtrusion);
         //const extrudedMesh = new THREE.Mesh(geometryExtrusion, redMaterial);
         brush1.position.z = 10;
-        brush1.position.y =1.5;
+        brush1.position.y = 1.5;
         brush1.updateMatrixWorld();
         //scene.add(extrudedMesh);
 
         //const room2 = new THREE.Mesh(geometryExtrusion, blueMaterial);
         const brush2 = new Brush(room1, blueMaterial);
         brush2.position.x = 5;
-        brush2.position.y =1.5;
+        brush2.position.y = 1.5;
         brush2.position.z = 12;
         brush2.updateMatrixWorld();
         //scene.add(room2);
@@ -135,32 +135,70 @@ const ThreeJSViewer = () => {
 
         const resultGeometry = evaluator.evaluate(brush1, brush2, ADDITION);
         resultGeometry.material = blueMaterial;
-        
+
         scene.add(resultGeometry);
+
+        //#endregion
+
+        //#region house for real
+        const hPoint1 = new THREE.Vector3(40, 0, 0);
+        const hPoint2 = new THREE.Vector3(40, 0, 4);
+        const hPoint3 = new THREE.Vector3(35, 0, 4);
+        const hPoint4 = new THREE.Vector3(35, 0, 0);
+
+        const pathR1 = new THREE.CurvePath();
+        pathR1.add(new THREE.LineCurve3(hPoint1, hPoint2));
+        pathR1.add(new THREE.LineCurve3(hPoint2, hPoint3));
+        pathR1.add(new THREE.LineCurve3(hPoint3, hPoint4));
+        pathR1.add(new THREE.LineCurve3(hPoint4, hPoint1));
+
+        const divisions = 100;
+        const hPoints = pathR1.getPoints(divisions);
+        const hGeometry = new THREE.BufferGeometry().setFromPoints(hPoints);
+
+        const lineMat = new THREE.LineBasicMaterial({
+            color: 0x00ff88,
+            linewidth: 1
+        });
+
+        const pathLine = new THREE.Line(hGeometry, lineMat);
+        scene.add(pathLine);
+
 
         //#endregion
 
         // #endregion
 
         // #region Lighting and Controls
+        const allLights = new THREE.Object3D();
+        const allLightHelpers = new THREE.Object3D();
+
         const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
-        scene.add(ambientLight);
+        allLights.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 10);
         directionalLight.position.set(5, 10, 7.5);
         directionalLight.target.position.set(5, 0, 0);
-        scene.add(directionalLight);
+        allLights.add(directionalLight);
 
-        const lightHelper = new THREE.DirectionalLightHelper(directionalLight);
-        //scene.add(lightHelper);
+        const direLightHelper = new THREE.DirectionalLightHelper(directionalLight);
+        allLightHelpers.add(direLightHelper);
 
         const pointLight = new THREE.PointLight(0x64E538, 3);
         pointLight.position.set(5, 11, 2);
-        scene.add(pointLight);
+        allLights.add(pointLight);
+
+        const pointLightHelper = new THREE.PointLightHelper(pointLight);
+        allLightHelpers.add(pointLightHelper);
 
         const pointLight1 = new THREE.PointLight(0xffffff, 1);
         pointLight.position.set(1, 5, 1);
-        scene.add(pointLight1);
+        allLights.add(pointLight1);
+        const pointLight1Helper = new THREE.PointLightHelper(pointLight1);
+        allLightHelpers.add(pointLight1Helper);
+
+        scene.add(allLights);
+        scene.add(allLightHelpers);
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
@@ -170,14 +208,37 @@ const ThreeJSViewer = () => {
         // #endregion
 
         //#region GUI
-        const gui = new GUI({ 
-        container: currentGUIContainer, // <--- This forces it to live inside your div!
-        title: 'Franciscos Controls',
-                    // Optional title header
+        const gui = new GUI({
+            container: currentGUIContainer, // <--- This forces it to live inside your div!
+            title: 'Franciscos Controls',
+            // Optional title header
         });
 
-        gui.addFolder("Geometry");
-        gui.addFolder("Lights");
+        const geomFolder = gui.addFolder("Geometry");
+        const archFolder = gui.addFolder("Architecture");
+
+        const iluminationFolder = gui.addFolder("Ilumination");
+        const lightsFolder = iluminationFolder.addFolder("Lights");
+        const lightHelperFolder = iluminationFolder.addFolder("Helpers");
+
+        const guiParams = {
+            showHouse: resultGeometry.visible,
+            showKnot1: knot1.visible,
+            showKnot2: knot2.visible,
+            showKnot3: knot3.visible,
+            showLights: allLights.visible,
+            showLightHelpers: allLightHelpers.visible
+        };
+
+        archFolder.add(guiParams, 'showHouse').onChange((value) => resultGeometry.visible = value);
+
+        geomFolder.add(guiParams, 'showKnot1').onChange((value) => knot1.visible = value);
+        geomFolder.add(guiParams, 'showKnot2').onChange((value) => knot2.visible = value);
+        geomFolder.add(guiParams, 'showKnot3').onChange((value) => knot3.visible = value);
+
+        lightsFolder.add(guiParams, 'showLights').onChange((value) => allLights.visible = value);
+
+        lightHelperFolder.add(guiParams, 'showLightHelpers').onChange((value) => allLightHelpers.visible = value);
         //#endregion
 
         // 5. Animation Loop
@@ -186,7 +247,7 @@ const ThreeJSViewer = () => {
             animationFrameId = requestAnimationFrame(animate);
 
             // Rotate the object slightly every frame
-            mesh.rotation.y += 0.01;
+            knot1.rotation.y += 0.01;
             knot2.rotation.y += 0.01;
             knot3.rotation.y += 0.01;
             reflectiveMesh.rotation.y += 0.01;
@@ -199,40 +260,40 @@ const ThreeJSViewer = () => {
         };
 
         animate();
-        
+
         // 6. Handle Window/Container Resize
-    const handleResize = () => {
-      if (!currentContainer) return;
-      const newWidth = currentContainer.clientWidth;
-      const newHeight = currentContainer.clientHeight;
+        const handleResize = () => {
+            if (!currentContainer) return;
+            const newWidth = currentContainer.clientWidth;
+            const newHeight = currentContainer.clientHeight;
 
-      camera.aspect = newWidth / newHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(newWidth, newHeight);
-    };
+            camera.aspect = newWidth / newHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(newWidth, newHeight);
+        };
 
-    window.addEventListener('resize', handleResize);
+        window.addEventListener('resize', handleResize);
     }, []);
 
     return (
         <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '8px', overflow: 'hidden' }}>
             {/* Canvas fills the whole box */}
-            <div 
-                ref={containerRef} 
-                style={{ width: '100%', height: '100%' }} 
+            <div
+                ref={containerRef}
+                style={{ width: '100%', height: '100%' }}
             />
 
             {/* Floating GUI Container positioned absolutely on top */}
-            <div 
-                ref={guiContainerRef} 
-                style={{ 
-                position: 'absolute', 
-                top: '10px',   // Distance from top
-                right: '10px', // Distance from right
-                zIndex: 10     // Ensures it sits above the canvas
-                }} 
+            <div
+                ref={guiContainerRef}
+                style={{
+                    position: 'absolute',
+                    top: '10px',   // Distance from top
+                    right: '10px', // Distance from right
+                    zIndex: 10     // Ensures it sits above the canvas
+                }}
             />
-    </div>);
+        </div>);
 
 };
 export default ThreeJSViewer;
