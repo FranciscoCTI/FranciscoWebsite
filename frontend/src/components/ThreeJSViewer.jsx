@@ -6,6 +6,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
+import { createRoom, createWallFromPoints, createRoomFromFootprint } from './geometryMethods';
 
 
 const ThreeJSViewer = () => {
@@ -27,20 +28,23 @@ const ThreeJSViewer = () => {
         scene.add(gridHelper);
 
         const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-        camera.position.z = 10;
-        camera.position.y = 4;
-        camera.position.x = 0;
+        camera.position.z = 70;
+        camera.position.y = 25;
+        camera.position.x = 40;
 
-        // 2. Renderer Setup
+
+        //#region Renderer Setup
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(width, height);
         currentContainer.appendChild(renderer.domElement);
+        //#endregion
 
         // #region Materials
-        const greenMaterial = new THREE.MeshStandardMaterial({
-            color: 0x00ff00, // Vibrant green
-            metalness: 0,    // 0 means it's not a metal (won't reflect darkness)
-            roughness: 0.5,  // Medium matte finish (higher = duller, lower = shinier)
+        const greenMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00ff00,
+            wireframe: false,
+            roughness: 0.5,
+            side: THREE.DoubleSide   // Medium matte finish (higher = duller, lower = shinier)
         });
 
         const redMaterial = new THREE.MeshStandardMaterial({
@@ -51,6 +55,14 @@ const ThreeJSViewer = () => {
 
         const blueMaterial = new THREE.MeshStandardMaterial({
             color: 0x0000ff, // Vibrant blue
+            wireframe: false,
+            roughness: 0.5,
+            side: THREE.DoubleSide
+            // Medium matte finish (higher = duller, lower = shinier)
+        });
+
+        const blackMaterial = new THREE.MeshStandardMaterial({
+            color: 0x000000, // Vibrant blue
             metalness: 0,    // 0 means it's not a metal (won't reflect darkness)
             roughness: 0.5,  // Medium matte finish (higher = duller, lower = shinier)
         });
@@ -61,20 +73,27 @@ const ThreeJSViewer = () => {
             metalness: 0,
             roughness: 0.6,
         });
+
+        const lineMat = new THREE.LineBasicMaterial({
+            color: 0x00ff88,
+            linewidth: 1
+        });
         // #endregion
 
         //#region Objects
+
+        //#region knots
         const knotGeom = new THREE.TorusKnotGeometry(0.8, 0.3, 100, 16);
         const knot1 = new THREE.Mesh(knotGeom, blueMaterial);
-        knot1.position.set(10, 0, 0); // Center the object
+        knot1.position.set(10, 0, 2); // Center the object
         scene.add(knot1);
 
         const knot2 = new THREE.Mesh(knotGeom, greenMaterial);
-        knot2.position.x = -1; // Position it to the left of the reflective sphere  
+        knot2.position.set(14, 0, 2) // Position it to the left of the reflective sphere  
         scene.add(knot2);
 
         const knot3 = new THREE.Mesh(knotGeom, redMaterial);
-        knot3.position.x = -4; // Position it to the left of the reflective sphere  
+        knot3.position.set(18, 0, 2) // Position it to the left of the reflective sphere  
         scene.add(knot3);
 
         const dodecahedronGeometry = new THREE.DodecahedronGeometry(2.5, 1);
@@ -85,7 +104,13 @@ const ThreeJSViewer = () => {
         dodePos.y = 4;
         //scene.add(reflectiveMesh);
 
-        //#region extrude along path
+        const geoCenter = new THREE.SphereGeometry(0.3, 32, 16);
+        const meshCenter = new THREE.Mesh(geoCenter, blackMaterial);
+        scene.add(meshCenter);
+
+        //#endregion
+
+        //#region first house
         const path = new THREE.CurvePath();
         const v1 = new THREE.Vector3(-3, 0, -3);
         const v2 = new THREE.Vector3(2, 0, -3);
@@ -141,10 +166,21 @@ const ThreeJSViewer = () => {
         //#endregion
 
         //#region house for real
+        const allLines = new THREE.Object3D();
+
         const hPoint1 = new THREE.Vector3(40, 0, 0);
         const hPoint2 = new THREE.Vector3(40, 0, 4);
         const hPoint3 = new THREE.Vector3(35, 0, 4);
         const hPoint4 = new THREE.Vector3(35, 0, 0);
+
+        const hPoint5 = new THREE.Vector3(43, 0, 0);
+        const hPoint6 = new THREE.Vector3(43, 0, 2);
+        const hPoint7 = new THREE.Vector3(40, 0, 2);
+
+        const hPoint8 = new THREE.Vector3(36, 0, 4);
+        const hPoint9 = new THREE.Vector3(38, 0, 4);
+        const hPoint10 = new THREE.Vector3(38, 0, 6);
+        const hPoint11 = new THREE.Vector3(36, 0, 6);
 
         const pathR1 = new THREE.CurvePath();
         pathR1.add(new THREE.LineCurve3(hPoint1, hPoint2));
@@ -152,18 +188,61 @@ const ThreeJSViewer = () => {
         pathR1.add(new THREE.LineCurve3(hPoint3, hPoint4));
         pathR1.add(new THREE.LineCurve3(hPoint4, hPoint1));
 
+        const pathR2 = new THREE.CurvePath();
+        pathR2.add(new THREE.LineCurve3(hPoint1, hPoint5));
+        pathR2.add(new THREE.LineCurve3(hPoint5, hPoint6));
+        pathR2.add(new THREE.LineCurve3(hPoint6, hPoint7));
+
+        const pathR3 = new THREE.CurvePath();
+        pathR3.add(new THREE.LineCurve3(hPoint8, hPoint9));
+        pathR3.add(new THREE.LineCurve3(hPoint9, hPoint10));
+        pathR3.add(new THREE.LineCurve3(hPoint10, hPoint11));
+        pathR3.add(new THREE.LineCurve3(hPoint11, hPoint8));
+
         const divisions = 100;
-        const hPoints = pathR1.getPoints(divisions);
-        const hGeometry = new THREE.BufferGeometry().setFromPoints(hPoints);
+        const hPoints1 = pathR1.getPoints(divisions);
+        const hGeometry1 = new THREE.BufferGeometry().setFromPoints(hPoints1);
 
-        const lineMat = new THREE.LineBasicMaterial({
-            color: 0x00ff88,
-            linewidth: 1
-        });
+        const hPoints2 = pathR2.getPoints(divisions);
+        const hGeometry2 = new THREE.BufferGeometry().setFromPoints(hPoints2);
 
-        const pathLine = new THREE.Line(hGeometry, lineMat);
-        scene.add(pathLine);
+        const hPoints3 = pathR3.getPoints(divisions);
+        const hGeometry3 = new THREE.BufferGeometry().setFromPoints(hPoints3);
 
+        const pathLine1 = new THREE.Line(hGeometry1, lineMat);
+        allLines.add(pathLine1);
+
+        const pathLine2 = new THREE.Line(hGeometry2, lineMat);
+        allLines.add(pathLine2);
+
+        const pathLine3 = new THREE.Line(hGeometry3, lineMat);
+        allLines.add(pathLine3);
+
+        scene.add(allLines);
+
+        //Create room geometry
+
+        const pointsRoom1 = [
+            hPoint1, hPoint2, hPoint3, hPoint4
+        ];
+
+        const pointsRoom2 = [
+            hPoint5, hPoint6, hPoint7, hPoint1
+        ];
+
+        const pointsRoom3 = [
+            hPoint8, hPoint9, hPoint10, hPoint11
+        ];
+
+        const roomX = createRoomFromFootprint(pointsRoom1, 0.25, 3.2, blueMaterial);
+        roomX.updateMatrixWorld();
+
+        const roomY = createRoomFromFootprint(pointsRoom2, 0.2, 2.9, redMaterial);
+
+        const roomZ = createRoomFromFootprint(pointsRoom3, 0.2, 2.5, greenMaterial);
+        roomZ.updateMatrixWorld();
+
+        scene.add(roomX, roomY, roomZ);
 
         //#endregion
 
@@ -173,8 +252,9 @@ const ThreeJSViewer = () => {
         const allLights = new THREE.Object3D();
         const allLightHelpers = new THREE.Object3D();
 
-        const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
+        const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.7);
         allLights.add(ambientLight);
+
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 10);
         directionalLight.position.set(5, 10, 7.5);
@@ -185,17 +265,18 @@ const ThreeJSViewer = () => {
         allLightHelpers.add(direLightHelper);
 
         const pointLight = new THREE.PointLight(0x64E538, 3);
-        pointLight.position.set(5, 11, 2);
+        pointLight.position.set(5, 1.5, 12);
         allLights.add(pointLight);
 
         const pointLightHelper = new THREE.PointLightHelper(pointLight);
         allLightHelpers.add(pointLightHelper);
 
         const pointLight1 = new THREE.PointLight(0xffffff, 1);
-        pointLight.position.set(1, 5, 1);
+        pointLight1.position.set(1, 5, 1);
         allLights.add(pointLight1);
         const pointLight1Helper = new THREE.PointLightHelper(pointLight1);
         allLightHelpers.add(pointLight1Helper);
+
 
         scene.add(allLights);
         scene.add(allLightHelpers);
@@ -227,10 +308,12 @@ const ThreeJSViewer = () => {
             showKnot2: knot2.visible,
             showKnot3: knot3.visible,
             showLights: allLights.visible,
-            showLightHelpers: allLightHelpers.visible
+            showLightHelpers: allLightHelpers.visible,
+            showHouseLines: allLines.visible
         };
 
         archFolder.add(guiParams, 'showHouse').onChange((value) => resultGeometry.visible = value);
+        archFolder.add(guiParams, 'showHouseLines').onChange((value) => allLines.visible = value);
 
         geomFolder.add(guiParams, 'showKnot1').onChange((value) => knot1.visible = value);
         geomFolder.add(guiParams, 'showKnot2').onChange((value) => knot2.visible = value);
@@ -251,8 +334,6 @@ const ThreeJSViewer = () => {
             knot2.rotation.y += 0.01;
             knot3.rotation.y += 0.01;
             reflectiveMesh.rotation.y += 0.01;
-
-            directionalLight.target.position.x += 0.01; // Move the light target slightly to create dynamic lighting
 
             controls.update();
 
