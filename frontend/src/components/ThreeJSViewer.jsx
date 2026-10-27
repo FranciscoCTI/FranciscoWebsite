@@ -6,7 +6,8 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
-import { createRoom, createWallFromPoints, createRoomFromFootprint } from './geometryMethods';
+import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint } from './geometryMethods';
+import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, lineMat, reflectiveMaterial } from '../materials/materialsFile';
 
 
 const ThreeJSViewer = () => {
@@ -38,47 +39,6 @@ const ThreeJSViewer = () => {
         renderer.setSize(width, height);
         currentContainer.appendChild(renderer.domElement);
         //#endregion
-
-        // #region Materials
-        const greenMaterial = new THREE.MeshBasicMaterial({
-            color: 0x00ff00,
-            wireframe: false,
-            roughness: 0.5,
-            side: THREE.DoubleSide   // Medium matte finish (higher = duller, lower = shinier)
-        });
-
-        const redMaterial = new THREE.MeshStandardMaterial({
-            color: 0xff0000, // Vibrant red
-            metalness: 0,    // 0 means it's not a metal (won't reflect darkness)
-            roughness: 0.5,  // Medium matte finish (higher = duller, lower = shinier)
-        });
-
-        const blueMaterial = new THREE.MeshStandardMaterial({
-            color: 0x0000ff, // Vibrant blue
-            wireframe: false,
-            roughness: 0.5,
-            side: THREE.DoubleSide
-            // Medium matte finish (higher = duller, lower = shinier)
-        });
-
-        const blackMaterial = new THREE.MeshStandardMaterial({
-            color: 0x000000, // Vibrant blue
-            metalness: 0,    // 0 means it's not a metal (won't reflect darkness)
-            roughness: 0.5,  // Medium matte finish (higher = duller, lower = shinier)
-        });
-
-        //Other object to test reflective material
-        const reflectiveMaterial = new THREE.MeshStandardMaterial({
-            color: greenMaterial.color, // Use the same color as the green material
-            metalness: 0,
-            roughness: 0.6,
-        });
-
-        const lineMat = new THREE.LineBasicMaterial({
-            color: 0x00ff88,
-            linewidth: 1
-        });
-        // #endregion
 
         //#region Objects
 
@@ -170,34 +130,42 @@ const ThreeJSViewer = () => {
 
         const hPoint1 = new THREE.Vector3(40, 0, 0);
         const hPoint2 = new THREE.Vector3(40, 0, 4);
-        const hPoint3 = new THREE.Vector3(35, 0, 4);
-        const hPoint4 = new THREE.Vector3(35, 0, 0);
+        const hPoint3 = new THREE.Vector3(40, 0, 8);
+        const hPoint4 = new THREE.Vector3(38, 0, 8);
+        const hPoint5 = new THREE.Vector3(38, 0, 9);
+        const hPoint6 = new THREE.Vector3(35, 0, 9);
+        const hPoint7 = new THREE.Vector3(35, 0, 4);
+        const hPoint8 = new THREE.Vector3(35, 0, 0);
 
-        const hPoint5 = new THREE.Vector3(43, 0, 0);
-        const hPoint6 = new THREE.Vector3(43, 0, 2);
-        const hPoint7 = new THREE.Vector3(40, 0, 2);
+        const hPoint9 = new THREE.Vector3(43, 0, 0);
+        const hPoint10 = new THREE.Vector3(43, 0, 2);
+        const hPoint11 = new THREE.Vector3(40, 0, 2);
 
-        const hPoint8 = new THREE.Vector3(36, 0, 4);
-        const hPoint9 = new THREE.Vector3(38, 0, 4);
-        const hPoint10 = new THREE.Vector3(38, 0, 6);
-        const hPoint11 = new THREE.Vector3(36, 0, 6);
+        const hPoint12 = new THREE.Vector3(32, 0, 2);
+        const hPoint13 = new THREE.Vector3(35, 0, 2);
+        const hPoint14 = new THREE.Vector3(35, 0, 6);
+        const hPoint15 = new THREE.Vector3(32, 0, 6);
 
         const pathR1 = new THREE.CurvePath();
         pathR1.add(new THREE.LineCurve3(hPoint1, hPoint2));
         pathR1.add(new THREE.LineCurve3(hPoint2, hPoint3));
         pathR1.add(new THREE.LineCurve3(hPoint3, hPoint4));
-        pathR1.add(new THREE.LineCurve3(hPoint4, hPoint1));
+        pathR1.add(new THREE.LineCurve3(hPoint4, hPoint5));
+        pathR1.add(new THREE.LineCurve3(hPoint5, hPoint6));
+        pathR1.add(new THREE.LineCurve3(hPoint6, hPoint7));
+        pathR1.add(new THREE.LineCurve3(hPoint7, hPoint8));
+        pathR1.add(new THREE.LineCurve3(hPoint8, hPoint1));
 
         const pathR2 = new THREE.CurvePath();
-        pathR2.add(new THREE.LineCurve3(hPoint1, hPoint5));
-        pathR2.add(new THREE.LineCurve3(hPoint5, hPoint6));
-        pathR2.add(new THREE.LineCurve3(hPoint6, hPoint7));
+        pathR2.add(new THREE.LineCurve3(hPoint1, hPoint9));
+        pathR2.add(new THREE.LineCurve3(hPoint9, hPoint10));
+        pathR2.add(new THREE.LineCurve3(hPoint10, hPoint11));
 
         const pathR3 = new THREE.CurvePath();
-        pathR3.add(new THREE.LineCurve3(hPoint8, hPoint9));
-        pathR3.add(new THREE.LineCurve3(hPoint9, hPoint10));
-        pathR3.add(new THREE.LineCurve3(hPoint10, hPoint11));
-        pathR3.add(new THREE.LineCurve3(hPoint11, hPoint8));
+        pathR3.add(new THREE.LineCurve3(hPoint12, hPoint13));
+        pathR3.add(new THREE.LineCurve3(hPoint13, hPoint14));
+        pathR3.add(new THREE.LineCurve3(hPoint14, hPoint15));
+        pathR3.add(new THREE.LineCurve3(hPoint15, hPoint12));
 
         const divisions = 100;
         const hPoints1 = pathR1.getPoints(divisions);
@@ -223,26 +191,36 @@ const ThreeJSViewer = () => {
         //Create room geometry
 
         const pointsRoom1 = [
-            hPoint1, hPoint2, hPoint3, hPoint4
+            hPoint1, hPoint2, hPoint3, hPoint4, hPoint5, hPoint6, hPoint7, hPoint8
         ];
 
         const pointsRoom2 = [
-            hPoint5, hPoint6, hPoint7, hPoint1
+            hPoint12, hPoint13, hPoint14, hPoint15
         ];
 
         const pointsRoom3 = [
-            hPoint8, hPoint9, hPoint10, hPoint11
+            hPoint1, hPoint9, hPoint10, hPoint11
         ];
 
-        const roomX = createRoomFromFootprint(pointsRoom1, 0.25, 3.2, blueMaterial);
+        //#region roomx
+        const roomX = createRoomFromFootprint(pointsRoom1, 0.25, 2.7, whiteMaterial);
         roomX.updateMatrixWorld();
 
-        const roomY = createRoomFromFootprint(pointsRoom2, 0.2, 2.9, redMaterial);
+        const roomXFloor = createFloorFromFootprint(pointsRoom1, 0.2, brownMaterial);
+        roomXFloor.updateMatrixWorld();
+        //#endregion
 
-        const roomZ = createRoomFromFootprint(pointsRoom3, 0.2, 2.5, greenMaterial);
+        //#region roomy
+
+        const roomY = createRoomFromFootprint(pointsRoom2, 0.2, 2.5, whiteMaterial);
+        const roomYFloor = createFloorFromFootprint(pointsRoom2, 0.2, brownMaterial);
+
+
+        const roomZ = createRoomFromFootprint(pointsRoom3, 0.2, 2.5, whiteMaterial);
+        const roomZFloor = createFloorFromFootprint(pointsRoom3, 0.2, brownMaterial);
         roomZ.updateMatrixWorld();
 
-        scene.add(roomX, roomY, roomZ);
+        scene.add(roomX, roomXFloor, roomY, roomYFloor, roomZ, roomZFloor);
 
         //#endregion
 
@@ -252,11 +230,11 @@ const ThreeJSViewer = () => {
         const allLights = new THREE.Object3D();
         const allLightHelpers = new THREE.Object3D();
 
-        const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.7);
+        const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.4);
         allLights.add(ambientLight);
 
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 10);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 5);
         directionalLight.position.set(5, 10, 7.5);
         directionalLight.target.position.set(5, 0, 0);
         allLights.add(directionalLight);

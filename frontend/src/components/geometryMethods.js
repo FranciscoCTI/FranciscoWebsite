@@ -163,3 +163,31 @@ export function createRoomFromFootprint(cornerPoints, wallThickness = 0.3, wallH
 
     return brush;
 }
+
+export function createFloorFromFootprint(cornerPoints, floorThickness = 0.3, mat) {
+    //Floorshape
+    cornerPoints = cornerPoints.map(pt => new THREE.Vector2(pt.x, -pt.z));
+
+    const floorShape = new THREE.Shape();
+    floorShape.moveTo(cornerPoints[0].x, cornerPoints[0].y);
+    for (let i = 1; i < cornerPoints.length; i++) {
+        floorShape.lineTo(cornerPoints[i].x, cornerPoints[i].y);
+    }
+    floorShape.closePath();
+
+    const extrudeSettings = {
+        depth: floorThickness,
+        bevelEnabled: false,
+        openEnded: false,
+    };
+    const floorGeometry = new THREE.ExtrudeGeometry(floorShape, extrudeSettings);
+
+    // Rotate geometry so depth matches the world Y-axis
+    floorGeometry.rotateX(-Math.PI / 2);
+
+    const brush = new Brush(floorGeometry, mat);
+    brush.updateMatrixWorld();
+
+    return brush;
+
+}
