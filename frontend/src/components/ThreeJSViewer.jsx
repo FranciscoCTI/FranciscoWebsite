@@ -6,8 +6,9 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
-import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint } from './geometryMethods';
+import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint, createFenestration, createSeveralFenestrations } from './geometryMethods';
 import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, lineMat, reflectiveMaterial } from '../materials/materialsFile';
+import { Vector3 } from 'three';
 
 
 const ThreeJSViewer = () => {
@@ -208,6 +209,8 @@ const ThreeJSViewer = () => {
 
         const roomXFloor = createFloorFromFootprint(pointsRoom1, 0.2, brownMaterial);
         roomXFloor.updateMatrixWorld();
+
+
         //#endregion
 
         //#region roomy
@@ -215,12 +218,21 @@ const ThreeJSViewer = () => {
         const roomY = createRoomFromFootprint(pointsRoom2, 0.2, 2.5, whiteMaterial);
         const roomYFloor = createFloorFromFootprint(pointsRoom2, 0.2, brownMaterial);
 
+        const winPositions = [
+            new Vector3(33, 1, 2),
+            new Vector3(34, 1, 2)
+        ]
+
+        const roomWithSeveralWins = createSeveralFenestrations(roomY, winPositions, 0.5, 0.9, 0.3);
+
+        //let roomWithWin = createFenestration(roomY, new Vector3(34, 1, 2), 0.5, 0.9, 0.3);
+        //roomWithWin = createFenestration(roomWithWin, new Vector3(35.5, 1, 2), 0.5, 0.9, 0.3);
 
         const roomZ = createRoomFromFootprint(pointsRoom3, 0.2, 2.5, whiteMaterial);
         const roomZFloor = createFloorFromFootprint(pointsRoom3, 0.2, brownMaterial);
         roomZ.updateMatrixWorld();
 
-        scene.add(roomX, roomXFloor, roomY, roomYFloor, roomZ, roomZFloor);
+        scene.add(roomX, roomXFloor, roomWithSeveralWins, roomYFloor, roomZ, roomZFloor);
 
         //#endregion
 

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 export function createRoom(path, mat) {
     const extrudeSettings = {
@@ -26,13 +27,7 @@ export function createRoom(path, mat) {
 }
 
 
-/**
- * Generates a wall mesh from an array of 2D floor plan control points.
- * @param {THREE.Vector2[]} points - Array of ordered corner points on the ground plane.
- * @param {number} wallThickness - Width/thickness of the wall.
- * @param {number} wallHeight - Height to extrude vertically.
- * @param {THREE.Material} material - Surface material.
- */
+
 export function createWallFromPoints(points, wallThickness, wallHeight, material) {
     const outerPoints = [];
     const innerPoints = [];
@@ -93,13 +88,6 @@ export function createWallFromPoints(points, wallThickness, wallHeight, material
     return new THREE.Mesh(geometry, material);
 }
 
-/**
- * Creates a room/wall geometry by extruding a 2D floorplan footprint vertically.
- * @param {THREE.Vector2[]} cornerPoints - Ordered array of corner points on the ground plane (X, Z).
- * @param {number} wallThickness - Width of the wall (e.g., 0.3).
- * @param {number} wallHeight - Vertical height of the wall (e.g., 2.6).
- * @param {THREE.Material} mat - Material for the CSG Brush.
- */
 export function createRoomFromFootprint(cornerPoints, wallThickness = 0.3, wallHeight = 2.6, mat) {
     const outerPoints = [];
     const innerPoints = [];
@@ -190,4 +178,50 @@ export function createFloorFromFootprint(cornerPoints, floorThickness = 0.3, mat
 
     return brush;
 
+}
+
+export function createFenestration(wallBrush, point, width, height, depth) {
+    const cutterGeom = new THREE.BoxGeometry(width, height, depth);
+    const cutterBrush = new Brush(cutterGeom);
+
+    cutterBrush.position.set(point.x, point.y + height / 2, point.z);
+
+    cutterBrush.updateMatrixWorld();
+
+    const mat = wallBrush.material;
+
+    const evaluator = new Evaluator();
+    const roomWithHole = evaluator.evaluate(wallBrush, cutterBrush, SUBTRACTION);
+    roomWithHole.material = mat;
+
+    return roomWithHole;
+
+}
+
+export function createSeveralFenestrations(wallBrush, points, width, height, depth) {
+
+    const wallMat = wallBrush.material;
+
+    const evaluator = new Evaluator();
+
+    const geometries = [];
+
+    for (const point of points) {
+        const cutterGeom = new THREE.BoxGeometry(width, height, depth);
+
+        cutterGeom.translate(point.x, point.y + height / 2, point.z);
+
+        geometries.push(cutterGeom);
+
+    }
+
+    const mergedGeom = mergeGeometries(geometries);
+    const masterCutter = new Brush(mergedGeom);
+    masterCutter.updateMatrixWorld();
+
+    const perforatedWall = evaluator.evaluate(wallBrush, masterCutter, SUBTRACTION);
+    perforatedWall.material = wallMat;
+    perforatedWall.updateMatrixWorld();
+
+    return perforatedWall;
 }
