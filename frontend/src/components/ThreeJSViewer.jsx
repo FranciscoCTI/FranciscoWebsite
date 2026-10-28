@@ -6,9 +6,9 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
-import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint, createFenestration, createSeveralFenestrations } from './geometryMethods';
+import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint, createFenestration, createSeveralFenestrations, createSeveralRotatedFenestrations, createLinearWall } from './geometryMethods';
 import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, lineMat, reflectiveMaterial } from '../materials/materialsFile';
-import { Vector3 } from 'three';
+import { Vector3, Vector2 } from 'three';
 
 
 const ThreeJSViewer = () => {
@@ -225,6 +225,25 @@ const ThreeJSViewer = () => {
 
         const roomWithSeveralWins = createSeveralFenestrations(roomY, winPositions, 0.5, 0.9, 0.3);
 
+        const doorPositions = [
+            new Vector3(36, 0, 0),
+            new Vector3(36, 0, 9)
+        ]
+
+        const roomWithDoors = createSeveralFenestrations(roomX, doorPositions, 0.8, 2, 0.3);
+
+        const pointsDrywall = [
+            new Vector3(32, 0, 4), new Vector3(35, 0, 4)
+        ];
+        const drywall = createLinearWall(pointsDrywall, 0.1, 2.5, whiteMaterial);
+        scene.add(drywall);
+
+        const pointsDrywall1 = [
+            new Vector3(35, 0, 4), new Vector3(36, 0, 4), new Vector3(36, 0, 5), new Vector3(40, 0, 5),
+        ];
+        const drywall1 = createLinearWall(pointsDrywall1, 0.2, 2.5, whiteMaterial);
+        scene.add(drywall1);
+
         //let roomWithWin = createFenestration(roomY, new Vector3(34, 1, 2), 0.5, 0.9, 0.3);
         //roomWithWin = createFenestration(roomWithWin, new Vector3(35.5, 1, 2), 0.5, 0.9, 0.3);
 
@@ -232,7 +251,15 @@ const ThreeJSViewer = () => {
         const roomZFloor = createFloorFromFootprint(pointsRoom3, 0.2, brownMaterial);
         roomZ.updateMatrixWorld();
 
-        scene.add(roomX, roomXFloor, roomWithSeveralWins, roomYFloor, roomZ, roomZFloor);
+        const winRotatedPositions = [
+            { pos: new THREE.Vector3(41, 1, 0), size: [0.5, 1, 0.3], rot: 0 }, // Front Door
+            { pos: new THREE.Vector3(43, 1, 1), size: [0.5, 1, 0.3], rot: 90 }, // Left Window
+            { pos: new THREE.Vector3(41.5, 1, 2), size: [1.5, 1, 0.3], rot: 0 }  // Right Window
+        ];
+
+        const roomWithRotatedWindows = createSeveralRotatedFenestrations(roomZ, winRotatedPositions);
+
+        scene.add(roomWithDoors, roomXFloor, roomWithSeveralWins, roomYFloor, roomWithRotatedWindows, roomZFloor);
 
         //#endregion
 

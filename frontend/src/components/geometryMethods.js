@@ -225,3 +225,146 @@ export function createSeveralFenestrations(wallBrush, points, width, height, dep
 
     return perforatedWall;
 }
+
+export function createSeveralRotatedFenestrations(wallBrush, info) {
+
+    const wallMat = wallBrush.material;
+
+    const evaluator = new Evaluator();
+
+    const geometries = [];
+
+    for (const item of info) {
+
+        const cutterGeom = new THREE.BoxGeometry(item.size[0], item.size[1], item.size[2]);
+
+        cutterGeom.rotateY(THREE.MathUtils.degToRad(item.rot));
+        cutterGeom.translate(item.pos.x, item.pos.y + item.size[1] / 2, item.pos.z);
+
+        geometries.push(cutterGeom);
+
+    }
+
+    const mergedGeom = mergeGeometries(geometries);
+    const masterCutter = new Brush(mergedGeom);
+    masterCutter.updateMatrixWorld();
+
+    const perforatedWall = evaluator.evaluate(wallBrush, masterCutter, SUBTRACTION);
+    perforatedWall.material = wallMat;
+    perforatedWall.updateMatrixWorld();
+
+    return perforatedWall;
+}
+
+export function createLinearWall(points, wallThickness = 0.3, wallHeight = 2.6, mat) {
+    const count = points.length;
+    if (count < 2) {
+        console.warn("A linear wall requires at least 2 points.");
+        return null;
+    }
+
+    // 1. Extract 2D Ground Points (X, Z)
+    const pts2D = points.map(pt => new THREE.Vector2(pt.x, pt.z));
+    const halfThick = wallThickness / 2;
+
+    const leftPoints = [];
+    const rightPoints = [];
+
+    // 2. Compute Offsets for Open Polyline
+    for (let i = 0; i < count; i++) {
+        let normal = new THREE.Vector2();
+
+        if (i === 0) {
+            // Start Point: Use the direction of the first segment
+            const dir = new THREE.Vector2().subVectors(pts2D[1], pts2D[0]).normalize();
+
+            const newX = dir.y == 0 ? 0 : -dir.y;
+            const newY = dir.x == 0 ? 0 : dir.x;
+
+            normal.set(newX, newY);
+
+        } else if (i === count - 1) {
+            // End Point: Use the direction of the last segment
+            const dir = new THREE.Vector2().subVectors(pts2D[count - 1], pts2D[count - 2]).normalize();
+            const newX = dir.y == 0 ? 0 : -dir.y;
+            const newY = dir.x == 0 ? 0 : dir.x;
+
+            normal.set(newX, newY);
+        } else {
+            // Middle Points: Compute miter vector between adjacent segments
+            const dir1 = new THREE.Vector2().subVectors(pts2D[i], pts2D[i - 1]).normalize();
+            const dir2 = new THREE.Vector2().subVectors(pts2D[i + 1], pts2D[i]).normalize();
+
+            const newX1 = dir1.y == 0 ? 0 : -dir1.y;
+            const newY1 = dir1.x == 0 ? 0 : dir1.x;
+
+            const newX2 = dir2.y == 0 ? 0 : -dir2.y;
+            const newY2 = dir2.x == 0 ? 0 : dir2.x;
+
+            const norm1 = new THREE.Vector2(newX1, newY1);
+            const norm2 = new THREE.Vector2(newX2, newY2);
+
+            normal.addVectors(norm1, norm2);
+            if (normal.lengthSq() > 0.0001) {
+                normal.normalize();
+                const miterFactor = Math.max(normal.dot(norm1), 0.1);
+                normal.divideScalar(miterFactor);
+            } else {
+                normal.copy(norm1); // Fallback if vectors cancel out
+            }
+        }
+
+        // Push Left and Right offset points
+        leftPoints.push(new THREE.Vector2().copy(pts2D[i]).addScaledVector(normal, halfThick));
+        rightPoints.push(new THREE.Vector2().copy(pts2D[i]).addScaledVector(normal, -halfThick));
+    }
+
+    // 3. Build a Closed 2D Shape (Trace Left side forward, Cap End, Trace Right side backward)
+    const wallShape = new THREE.Shape();
+
+    // Start at first left point
+    wallShape.moveTo(leftPoints[0].x, leftPoints[0].y);
+
+    // Trace forward along the left side
+    for (let i = 1; i < count; i++) {
+        wallShape.lineTo(leftPoints[i].x, leftPoints[i].y);
+    }
+
+    // Cap the far end: connect last left point to last right point
+    wallShape.lineTo(rightPoints[count - 1].x, rightPoints[count - 1].y);
+
+    // Trace backward along the right side
+    for (let i = count - 2; i >= 0; i--) {
+        wallShape.lineTo(rightPoints[i].x, rightPoints[i].y);
+    }
+
+    wallShape.closePath(); // Caps the start point back to leftPoints[0]
+
+    // 4. Extrude Vertically
+    const extrudeSettings = {
+        depth: wallHeight,
+        bevelEnabled: false
+    };
+
+    const wallGeometry = new THREE.ExtrudeGeometry(wallShape, extrudeSettings);
+
+    // 5. Re-orient: Maps 2D Local Z (depth) to World +Y (Up)
+    wallGeometry.rotateX(Math.PI / 2);
+
+    //wallGeometry.position.y+=wallHeight;
+    wallGeometry.translate(0, wallHeight, 0);
+
+    const brush = new Brush(wallGeometry, mat);
+    brush.updateMatrixWorld();
+
+    return brush;
+}
+
+function removeNegativeZero(vector) {
+    vector.x = vector.x === 0 ? 0 : vector.x;
+    vector.y = vector.y === 0 ? 0 : vector.y;
+    if (vector.z !== undefined) {
+        vector.z = vector.z === 0 ? 0 : vector.z;
+    }
+    return vector;
+}
