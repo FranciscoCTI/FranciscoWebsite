@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
 export function createRoom(path, mat) {
     const extrudeSettings = {
@@ -360,11 +362,88 @@ export function createLinearWall(points, wallThickness = 0.3, wallHeight = 2.6, 
     return brush;
 }
 
-function removeNegativeZero(vector) {
-    vector.x = vector.x === 0 ? 0 : vector.x;
-    vector.y = vector.y === 0 ? 0 : vector.y;
-    if (vector.z !== undefined) {
-        vector.z = vector.z === 0 ? 0 : vector.z;
-    }
-    return vector;
+export function createGrid(points, name, mat) {
+    const completeGrid = new THREE.Object3D();
+
+    //line
+    const geomLine = new THREE.BufferGeometry().setFromPoints(points);
+    const line = new THREE.Line(geomLine, mat);
+
+    completeGrid.add(line);
+
+    //line vec
+    const dirStart = new THREE.Vector3().subVectors(points[0], points[1]).normalize();
+    const dirEnd = dirStart.clone().negate();
+
+    //Heads
+    const headStart = createCircle(points[0], dirStart, name, mat);
+    const headEnd = createCircle(points[1], dirEnd, name, mat);
+
+    completeGrid.add(headStart, headEnd);
+
+    return completeGrid;
+}
+
+function createCircle(point, dir, name, mat) {
+    const radius = 0.5;
+    const segments = 64;
+
+    const completeBubble = new THREE.Object3D();
+
+    const rp = point.clone().addScaledVector(dir, radius);
+
+    const curve = new THREE.EllipseCurve(
+        rp.x, rp.z, radius, radius, 0, 2 * Math.PI, false, 0
+    );
+
+    const points2D = curve.getPoints(segments);
+    const points3D = points2D.map(p => new THREE.Vector3(p.x, 0, p.y));
+
+    const geom = new THREE.BufferGeometry().setFromPoints(points3D);
+
+    const circleLine = new THREE.LineLoop(geom, mat)
+
+    createLetter(name, rp, (letterMesh) => {
+        completeBubble.add(letterMesh);
+    });
+
+    completeBubble.add(circleLine);
+
+    return completeBubble;
+
+}
+
+function createLetter(letter, pos, onComplete) {
+    const loader = new FontLoader();
+
+    const cdnFontUrl = 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json';
+
+    loader.load(cdnFontUrl, (font) => {
+
+        const textGeometry = new TextGeometry(letter, {
+            font: font,
+            size: 0.4,
+            depth: 0, // Zero height means no volume/extrusion!
+            curveSegments: 12
+        });
+
+        textGeometry.center();
+
+        // Lay flat on the XZ plane
+        textGeometry.rotateX(Math.PI / 2);
+
+
+        const wireframeMat = new THREE.MeshBasicMaterial({
+            color: 0x00ff00,
+            wireframe: true // Renders it strictly as lines
+        });
+
+        const textMesh = new THREE.Mesh(textGeometry, wireframeMat);
+
+        textMesh.position.copy(pos);
+
+        if (onComplete) {
+            onComplete(textMesh);
+        }
+    });
 }

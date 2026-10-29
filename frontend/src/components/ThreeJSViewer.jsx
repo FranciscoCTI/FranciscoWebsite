@@ -6,7 +6,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
-import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint, createFenestration, createSeveralFenestrations, createSeveralRotatedFenestrations, createLinearWall } from './geometryMethods';
+import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint, createFenestration, createSeveralFenestrations, createSeveralRotatedFenestrations, createLinearWall, createGrid } from './geometryMethods';
 import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, lineMat, reflectiveMaterial } from '../materials/materialsFile';
 import { Vector3, Vector2 } from 'three';
 
@@ -260,6 +260,46 @@ const ThreeJSViewer = () => {
         const roomWithRotatedWindows = createSeveralRotatedFenestrations(roomZ, winRotatedPositions);
 
         scene.add(roomWithDoors, roomXFloor, roomWithSeveralWins, roomYFloor, roomWithRotatedWindows, roomZFloor);
+
+        //#endregion
+
+        //#region grids
+        const gridPointsA = [
+            new Vector3(35, 0, -2),
+            new Vector3(35, 0, 10)
+        ];
+
+        const gridGreenLine = new THREE.LineBasicMaterial({
+            color: 0x00ff00, // Green line
+            linewidth: 1     // Note: See warning below about linewidth
+        });
+
+        const gridA = createGrid(gridPointsA, "A", gridGreenLine);
+        scene.add(gridA);
+
+        const gridPointsB = [
+            new Vector3(32, 0, 0),
+            new Vector3(44, 0, 0)
+        ];
+
+        const gridB = createGrid(gridPointsB, "B", gridGreenLine);
+        scene.add(gridB);
+
+        const gridPointsC = [
+            new Vector3(40, 0, -2),
+            new Vector3(40, 0, 10)
+        ];
+
+        const gridC = createGrid(gridPointsC, "C", gridGreenLine);
+        scene.add(gridC);
+
+        const gridPointsD = [
+            new Vector3(32, 0, 0),
+            new Vector3(32, 0, 7.6)
+        ];
+
+        const gridD = createGrid(gridPointsD, "D", gridGreenLine);
+        scene.add(gridD);
 
         //#endregion
 
