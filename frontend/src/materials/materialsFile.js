@@ -39,6 +39,12 @@ export const brownMaterial = new THREE.MeshStandardMaterial({
     roughness: 0.5,  // Medium matte finish (higher = duller, lower = shinier)
 });
 
+export const bluishMaterial = new THREE.MeshStandardMaterial({
+    color: 0x03396c,
+    metalness: 0,
+    roughness: 0.5,
+});
+
 //Other object to test reflective material
 export const reflectiveMaterial = new THREE.MeshStandardMaterial({
     color: greenMaterial.color, // Use the same color as the green material

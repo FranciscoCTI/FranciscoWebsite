@@ -6,8 +6,8 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
-import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint, createFenestration, createSeveralFenestrations, createSeveralRotatedFenestrations, createLinearWall, createGrid } from './geometryMethods';
-import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, lineMat, reflectiveMaterial } from '../materials/materialsFile';
+import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint, createFenestration, createSeveralFenestrations, createSeveralRotatedFenestrations, createLinearWall, createGrid, createRoofFromFootprint, createSlopedRoofFromFootprint, createThickSlopedRoofFromFootprint } from './geometryMethods';
+import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, bluishMaterial, lineMat, reflectiveMaterial } from '../materials/materialsFile';
 import { Vector3, Vector2 } from 'three';
 
 
@@ -210,13 +210,17 @@ const ThreeJSViewer = () => {
         const roomXFloor = createFloorFromFootprint(pointsRoom1, 0.2, brownMaterial);
         roomXFloor.updateMatrixWorld();
 
-
+        const roomXRoof = createThickSlopedRoofFromFootprint(pointsRoom1, 1.2, 0.9, 2.7, 0.2, bluishMaterial);
+        scene.add(roomXRoof);
         //#endregion
 
         //#region roomy
 
         const roomY = createRoomFromFootprint(pointsRoom2, 0.2, 2.5, whiteMaterial);
         const roomYFloor = createFloorFromFootprint(pointsRoom2, 0.2, brownMaterial);
+
+        const roomYRoof = createThickSlopedRoofFromFootprint(pointsRoom2, 1.5, 0.8, 2.5, 0.2, bluishMaterial);
+        scene.add(roomYRoof);
 
         const winPositions = [
             new Vector3(33, 1, 2),
@@ -250,6 +254,9 @@ const ThreeJSViewer = () => {
         const roomZ = createRoomFromFootprint(pointsRoom3, 0.2, 2.5, whiteMaterial);
         const roomZFloor = createFloorFromFootprint(pointsRoom3, 0.2, brownMaterial);
         roomZ.updateMatrixWorld();
+
+        const roomZRoof = createThickSlopedRoofFromFootprint(pointsRoom3, 1.5, 0.8, 2.5, 0.2, bluishMaterial);
+        scene.add(roomZRoof);
 
         const winRotatedPositions = [
             { pos: new THREE.Vector3(41, 1, 0), size: [0.5, 1, 0.3], rot: 0 }, // Front Door

@@ -182,6 +182,199 @@ export function createFloorFromFootprint(cornerPoints, floorThickness = 0.3, mat
 
 }
 
+export function createRoofFromFootprint(cornerPoints, roofThickness = 0.4, elevation, mat) {
+    // 1. Map 3D footprint points (XZ plane) to 2D shape coordinates
+    const pts2D = cornerPoints.map(pt => new THREE.Vector2(pt.x, -pt.z));
+
+    // 2. Build the roof shape from the footprint
+    const roofShape = new THREE.Shape();
+    roofShape.moveTo(pts2D[0].x, pts2D[0].y);
+    for (let i = 1; i < pts2D.length; i++) {
+        roofShape.lineTo(pts2D[i].x, pts2D[i].y);
+    }
+    roofShape.closePath();
+
+    // 3. Extrude settings (you can adjust thickness independently from floors)
+    const extrudeSettings = {
+        depth: roofThickness,
+        bevelEnabled: false,
+        openEnded: false,
+    };
+
+    const roofGeometry = new THREE.ExtrudeGeometry(roofShape, extrudeSettings);
+
+    // 4. Rotate geometry so extrusion depth aligns with the world Y-axis
+    roofGeometry.rotateX(-Math.PI / 2);
+
+    // 5. Wrap in a CSG Brush
+    const brush = new Brush(roofGeometry, mat);
+
+    const pos = brush.position;
+
+    brush.position.set(pos.x, pos.y + elevation, pos.z);
+    brush.updateMatrixWorld();
+
+    return brush;
+}
+
+export function createSlopedRoofFromFootprint(cornerPoints, roofHeight = 1.5, elevation, overhang, mat) {
+    // 1. Map 3D footprint points to 2D (XZ plane)
+    let pts2D = cornerPoints.map(pt => new THREE.Vector2(pt.x, -pt.z));
+
+    // Optional: Calculate centroid for the roof peak / ridge center
+    let centroid = new THREE.Vector2();
+    pts2D.forEach(p => centroid.add(p));
+    centroid.divideScalar(pts2D.length);
+
+    let offsetPts2D = pts2D.map(p => {
+        const dir = new THREE.Vector2().subVectors(p, centroid).normalize();
+        return p.clone().addScaledVector(dir, overhang);
+    });
+
+    const n = offsetPts2D.length;
+    const positions = [];
+    const uvs = [];
+
+    // Height of eaves vs peak
+    const eaveY = 0;
+    const peakY = roofHeight;
+
+    // 2. Build sloped triangular/quad faces for each side connecting eave to centroid/ridge
+    for (let i = 0; i < n; i++) {
+        const p1 = offsetPts2D[i];
+        const p2 = offsetPts2D[(i + 1) % n];
+
+        const v1 = new THREE.Vector3(p1.x, eaveY, -p1.y);
+        const v2 = new THREE.Vector3(p2.x, eaveY, -p2.y);
+        const vTop = new THREE.Vector3(centroid.x, peakY, -centroid.y);
+
+        // SWAPPED v2 and v1 here to invert the triangle's normal direction
+        positions.push(
+            v2.x, v2.y, v2.z,
+            v1.x, v1.y, v1.z,
+            vTop.x, vTop.y, vTop.z
+        );
+
+        uvs.push(1, 0, 0, 0, 0.5, 1);
+    }
+
+    // 3. Create BufferGeometry
+    const roofGeometry = new THREE.BufferGeometry();
+    roofGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    roofGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+
+    // Automatically calculate smooth/flat lighting normals for the sloped faces
+    roofGeometry.computeVertexNormals();
+
+    // 4. Wrap in a CSG Brush
+    const brush = new Brush(roofGeometry, mat);
+
+    const pos = brush.position;
+
+    brush.position.set(pos.x, pos.y + elevation, pos.z);
+
+    brush.updateMatrixWorld();
+
+    return brush;
+}
+
+export function createThickSlopedRoofFromFootprint(cornerPoints, roofHeight = 1.5, eaveOverhang = 0.4, elevation, roofThickness = 0.2, mat) {
+    // 1. Map 3D footprint points to 2D (XZ plane)
+    let pts2D = cornerPoints.map(pt => new THREE.Vector2(pt.x, -pt.z));
+
+    // 2. Calculate the geometric center (centroid)
+    let centroid = new THREE.Vector2();
+    pts2D.forEach(p => centroid.add(p));
+    centroid.divideScalar(pts2D.length);
+
+    // 3. Outer eave footprint (pushed outward)
+    let outerPts = pts2D.map(p => {
+        const dir = new THREE.Vector2().subVectors(p, centroid).normalize();
+        return p.clone().addScaledVector(dir, eaveOverhang);
+    });
+
+    // 4. Inner eave footprint (offset inward from outer eave by thickness)
+    let innerPts = pts2D.map(p => {
+        const dir = new THREE.Vector2().subVectors(p, centroid).normalize();
+        return p.clone().addScaledVector(dir, Math.max(0, eaveOverhang - roofThickness));
+    });
+
+    const n = outerPts.length;
+    const positions = [];
+    const uvs = [];
+
+    const eaveY = 0;
+    const peakY = roofHeight;
+    const innerPeakY = roofHeight - roofThickness;
+
+    for (let i = 0; i < n; i++) {
+        const o1 = outerPts[i];
+        const o2 = outerPts[(i + 1) % n];
+        const in1 = innerPts[i];
+        const in2 = innerPts[(i + 1) % n];
+
+        // Outer vertices
+        const vOuter1 = new THREE.Vector3(o1.x, eaveY, -o1.y);
+        const vOuter2 = new THREE.Vector3(o2.x, eaveY, -o2.y);
+        const vOuterPeak = new THREE.Vector3(centroid.x, peakY, -centroid.y);
+
+        // Inner vertices (shifted down and inward)
+        const vInner1 = new THREE.Vector3(in1.x, eaveY - roofThickness, -in1.y);
+        const vInner2 = new THREE.Vector3(in2.x, eaveY - roofThickness, -in2.y);
+        const vInnerPeak = new THREE.Vector3(centroid.x, innerPeakY, -centroid.y);
+
+        // --- A. Outer Sloped Surface (Normals facing outward) ---
+        positions.push(
+            vOuter2.x, vOuter2.y, vOuter2.z,
+            vOuter1.x, vOuter1.y, vOuter1.z,
+            vOuterPeak.x, vOuterPeak.y, vOuterPeak.z
+        );
+        uvs.push(1, 0, 0, 0, 0.5, 1);
+
+        // --- B. Inner Sloped Surface (Normals facing inward / reversed winding) ---
+        positions.push(
+            vInner1.x, vInner1.y, vInner1.z,
+            vInner2.x, vInner2.y, vInner2.z,
+            vInnerPeak.x, vInnerPeak.y, vInnerPeak.z
+        );
+        uvs.push(0, 0, 1, 0, 0.5, 1);
+
+        // --- C. Perimeter Eave / Fascia Connecting Faces (Quad split into 2 triangles) ---
+        // Triangle 1
+        positions.push(
+            vOuter1.x, vOuter1.y, vOuter1.z,
+            vOuter2.x, vOuter2.y, vOuter2.z,
+            vInner1.x, vInner1.y, vInner1.z
+        );
+        uvs.push(0, 0, 1, 0, 0, 1);
+
+        // Triangle 2
+        positions.push(
+            vOuter2.x, vOuter2.y, vOuter2.z,
+            vInner2.x, vInner2.y, vInner2.z,
+            vInner1.x, vInner1.y, vInner1.z
+        );
+        uvs.push(1, 0, 1, 1, 0, 1);
+    }
+
+    // 5. Create BufferGeometry
+    const roofGeometry = new THREE.BufferGeometry();
+    roofGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    roofGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    roofGeometry.computeVertexNormals();
+
+    // 6. Wrap in a CSG Brush
+    const brush = new Brush(roofGeometry, mat);
+
+    const pos = brush.position;
+
+    brush.position.set(pos.x, pos.y + elevation, pos.z);
+
+    brush.updateMatrixWorld();
+
+    return brush;
+}
+
 export function createFenestration(wallBrush, point, width, height, depth) {
     const cutterGeom = new THREE.BoxGeometry(width, height, depth);
     const cutterBrush = new Brush(cutterGeom);
