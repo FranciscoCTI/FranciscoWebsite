@@ -6,7 +6,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
-import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint, createFenestration, createSeveralFenestrations, createSeveralRotatedFenestrations, createLinearWall, createGrid, createRoofFromFootprint, createSlopedRoofFromFootprint, createThickSlopedRoofFromFootprint } from './geometryMethods';
+import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint, createFenestration, createSeveralFenestrations, createSeveralRotatedFenestrations, createLinearWall, createGrid, createRoofFromFootprint, createSlopedRoofFromFootprint, createThickSlopedRoofFromFootprint, createCube } from './geometryMethods';
 import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, bluishMaterial, lineMat, reflectiveMaterial } from '../materials/materialsFile';
 import { Vector3, Vector2 } from 'three';
 
@@ -311,6 +311,27 @@ const ThreeJSViewer = () => {
         //#endregion
 
         // #endregion
+
+        //Other personalized geometry
+        let index = 10;
+        const paraleles = new THREE.Object3D();
+
+        const disp = new Vector3(15, 0, 10);
+
+        for (let i = 0; i < index; i++) {
+            for (let j = 0; j < index; j++) {
+                for (let r = 0; r < index; r++) {
+                    const wi = i * 0.1;
+                    const he = r * 0.1;
+                    const de = j * 0.1;
+                    const personalizedCube = createCube(wi, he, de, new Vector3(i - wi / 2, r, j - de / 2).addScaledVector(disp, 1), redMaterial, scene);
+
+                    paraleles.add(personalizedCube);
+                }
+            }
+        }
+
+        scene.add(paraleles);
 
         // #region Lighting and Controls
         const allLights = new THREE.Object3D();
