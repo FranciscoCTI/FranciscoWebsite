@@ -146,6 +146,7 @@ const ThreeJSViewer = () => {
         const hPoint13 = new THREE.Vector3(35, 0, 2);
         const hPoint14 = new THREE.Vector3(35, 0, 6);
         const hPoint15 = new THREE.Vector3(32, 0, 6);
+        const hPoint16 = new THREE.Vector3(40, 0, 9);
 
         const pathR1 = new THREE.CurvePath();
         pathR1.add(new THREE.LineCurve3(hPoint1, hPoint2));
@@ -195,6 +196,10 @@ const ThreeJSViewer = () => {
             hPoint1, hPoint2, hPoint3, hPoint4, hPoint5, hPoint6, hPoint7, hPoint8
         ];
 
+        const pointsRoof1 = [
+            hPoint1, hPoint2, hPoint3, hPoint16, hPoint6, hPoint7, hPoint8
+        ];
+
         const pointsRoom2 = [
             hPoint12, hPoint13, hPoint14, hPoint15
         ];
@@ -210,7 +215,7 @@ const ThreeJSViewer = () => {
         const roomXFloor = createFloorFromFootprint(pointsRoom1, 0.2, brownMaterial);
         roomXFloor.updateMatrixWorld();
 
-        const roomXRoof = createThickSlopedRoofFromFootprint(pointsRoom1, 1.2, 0.9, 2.7, 0.2, bluishMaterial);
+        const roomXRoof = createThickSlopedRoofFromFootprint(pointsRoof1, 1.2, 0.9, 2.7, 0.2, bluishMaterial);
         scene.add(roomXRoof);
         //#endregion
 
@@ -312,7 +317,10 @@ const ThreeJSViewer = () => {
 
         // #endregion
 
-        //Other personalized geometry
+        //#region 3d matrix 
+        const onlyCube = createCube(1, 3, 2, new Vector3(0, 0, 2), redMaterial, scene);
+        scene.add(onlyCube);
+
         let index = 10;
         const paraleles = new THREE.Object3D();
 
@@ -324,7 +332,7 @@ const ThreeJSViewer = () => {
                     const wi = i * 0.1;
                     const he = r * 0.1;
                     const de = j * 0.1;
-                    const personalizedCube = createCube(wi, he, de, new Vector3(i - wi / 2, r, j - de / 2).addScaledVector(disp, 1), redMaterial, scene);
+                    const personalizedCube = createCube(wi, he, de, new Vector3(i - wi / 2, r, j - de / 2 + de).addScaledVector(disp, 1), redMaterial, scene);
 
                     paraleles.add(personalizedCube);
                 }
@@ -332,6 +340,8 @@ const ThreeJSViewer = () => {
         }
 
         scene.add(paraleles);
+
+        //#endregion
 
         // #region Lighting and Controls
         const allLights = new THREE.Object3D();

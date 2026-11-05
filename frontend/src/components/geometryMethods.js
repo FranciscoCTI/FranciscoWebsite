@@ -406,19 +406,51 @@ export function createCube(width, height, depth, origin, mat, scene) {
     );
     uvs.push(1, 0, 0, 0, 0, 1);
 
-    const centroid = new THREE.Vector3()
+    const centroidRight = new THREE.Vector3()
+        .add(p1)
+        .add(p2)
+        .add(p6)
+        .add(p5)
+        .divideScalar(4);
+
+    const arrowHelperRight = new THREE.ArrowHelper(vecRight, centroidRight
+        .addScaledVector(origin, 1)
+        , 0.2, 0x17ff00);
+
+    const centroidLeft = new THREE.Vector3()
+        .add(p3)
+        .add(p4)
+        .add(p7)
+        .add(p8)
+        .divideScalar(4);
+
+    const arrowHelperLeft = new THREE.ArrowHelper(vecLeft, centroidLeft
+        .addScaledVector(origin, 1)
+        , 0.2, 0x17ff00);
+
+    const centroidTop = new THREE.Vector3()
+        .add(p5)
+        .add(p6)
+        .add(p7)
+        .add(p8)
+        .divideScalar(4);
+
+    const arrowHelperTop = new THREE.ArrowHelper(vecUp, centroidTop
+        .addScaledVector(origin, 1)
+        , 0.2, 0x17ff00);
+
+    const centroidBot = new THREE.Vector3()
         .add(p1)
         .add(p2)
         .add(p3)
-        .divideScalar(3);
+        .add(p4)
+        .divideScalar(4);
 
-    const arrowHelper = new THREE.ArrowHelper(vecRight, centroid
+    const arrowHelperBot = new THREE.ArrowHelper(vecDown, centroidBot
         .addScaledVector(origin, 1)
-        .addScaledVector(vecRight, width / 2)
-        .addScaledVector(vecUp, height / 2)
         , 0.2, 0x17ff00);
 
-    scene.add(arrowHelper);
+    scene.add(arrowHelperRight, arrowHelperLeft, arrowHelperTop, arrowHelperBot);
 
     //triangle 2
     positions.push(
@@ -526,6 +558,7 @@ export function createCube(width, height, depth, origin, mat, scene) {
 
     return cubeBrush;
 }
+
 
 
 export function addArrowHelpersToAllFaces(mesh, length = 0.5, color = 0x17ff00, targetScene) {

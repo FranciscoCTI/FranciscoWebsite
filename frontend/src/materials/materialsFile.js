@@ -40,7 +40,7 @@ export const brownMaterial = new THREE.MeshStandardMaterial({
 });
 
 export const bluishMaterial = new THREE.MeshStandardMaterial({
-    color: 0x03396c,
+    color: 0x534b4f,
     metalness: 0,
     roughness: 0.5,
 });
