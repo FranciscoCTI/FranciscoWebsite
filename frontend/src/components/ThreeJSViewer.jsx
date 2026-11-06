@@ -6,8 +6,9 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
-import { createRoom, createWallFromPoints, createRoomFromFootprint, createFloorFromFootprint, createFenestration, createSeveralFenestrations, createSeveralRotatedFenestrations, createLinearWall, createGrid, createRoofFromFootprint, createSlopedRoofFromFootprint, createThickSlopedRoofFromFootprint, createCube } from './geometryMethods';
-import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, bluishMaterial, lineMat, reflectiveMaterial } from '../materials/materialsFile';
+import { createCube } from './geometryMethods';
+import { createHouse } from './houseMethods';
+import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, roofMaterial, lineMat, reflectiveMaterial } from '../materials/materialsFile';
 import { Vector3, Vector2 } from 'three';
 
 
@@ -127,191 +128,17 @@ const ThreeJSViewer = () => {
         //#endregion
 
         //#region house for real
-        const allLines = new THREE.Object3D();
 
-        const hPoint1 = new THREE.Vector3(40, 0, 0);
-        const hPoint2 = new THREE.Vector3(40, 0, 4);
-        const hPoint3 = new THREE.Vector3(40, 0, 8);
-        const hPoint4 = new THREE.Vector3(38, 0, 8);
-        const hPoint5 = new THREE.Vector3(38, 0, 9);
-        const hPoint6 = new THREE.Vector3(35, 0, 9);
-        const hPoint7 = new THREE.Vector3(35, 0, 4);
-        const hPoint8 = new THREE.Vector3(35, 0, 0);
+        const houses = new THREE.Object3D();
 
-        const hPoint9 = new THREE.Vector3(43, 0, 0);
-        const hPoint10 = new THREE.Vector3(43, 0, 2);
-        const hPoint11 = new THREE.Vector3(40, 0, 2);
+        for (let i = 0; i < 5; i++) {
 
-        const hPoint12 = new THREE.Vector3(32, 0, 2);
-        const hPoint13 = new THREE.Vector3(35, 0, 2);
-        const hPoint14 = new THREE.Vector3(35, 0, 6);
-        const hPoint15 = new THREE.Vector3(32, 0, 6);
-        const hPoint16 = new THREE.Vector3(40, 0, 9);
+            const house = createHouse(new THREE.Vector3(-20, 0, i * 17), Math.PI / 2);
 
-        const pathR1 = new THREE.CurvePath();
-        pathR1.add(new THREE.LineCurve3(hPoint1, hPoint2));
-        pathR1.add(new THREE.LineCurve3(hPoint2, hPoint3));
-        pathR1.add(new THREE.LineCurve3(hPoint3, hPoint4));
-        pathR1.add(new THREE.LineCurve3(hPoint4, hPoint5));
-        pathR1.add(new THREE.LineCurve3(hPoint5, hPoint6));
-        pathR1.add(new THREE.LineCurve3(hPoint6, hPoint7));
-        pathR1.add(new THREE.LineCurve3(hPoint7, hPoint8));
-        pathR1.add(new THREE.LineCurve3(hPoint8, hPoint1));
+            houses.add(house);
+        }
 
-        const pathR2 = new THREE.CurvePath();
-        pathR2.add(new THREE.LineCurve3(hPoint1, hPoint9));
-        pathR2.add(new THREE.LineCurve3(hPoint9, hPoint10));
-        pathR2.add(new THREE.LineCurve3(hPoint10, hPoint11));
-
-        const pathR3 = new THREE.CurvePath();
-        pathR3.add(new THREE.LineCurve3(hPoint12, hPoint13));
-        pathR3.add(new THREE.LineCurve3(hPoint13, hPoint14));
-        pathR3.add(new THREE.LineCurve3(hPoint14, hPoint15));
-        pathR3.add(new THREE.LineCurve3(hPoint15, hPoint12));
-
-        const divisions = 100;
-        const hPoints1 = pathR1.getPoints(divisions);
-        const hGeometry1 = new THREE.BufferGeometry().setFromPoints(hPoints1);
-
-        const hPoints2 = pathR2.getPoints(divisions);
-        const hGeometry2 = new THREE.BufferGeometry().setFromPoints(hPoints2);
-
-        const hPoints3 = pathR3.getPoints(divisions);
-        const hGeometry3 = new THREE.BufferGeometry().setFromPoints(hPoints3);
-
-        const pathLine1 = new THREE.Line(hGeometry1, lineMat);
-        allLines.add(pathLine1);
-
-        const pathLine2 = new THREE.Line(hGeometry2, lineMat);
-        allLines.add(pathLine2);
-
-        const pathLine3 = new THREE.Line(hGeometry3, lineMat);
-        allLines.add(pathLine3);
-
-        scene.add(allLines);
-
-        //Create room geometry
-
-        const pointsRoom1 = [
-            hPoint1, hPoint2, hPoint3, hPoint4, hPoint5, hPoint6, hPoint7, hPoint8
-        ];
-
-        const pointsRoof1 = [
-            hPoint1, hPoint2, hPoint3, hPoint16, hPoint6, hPoint7, hPoint8
-        ];
-
-        const pointsRoom2 = [
-            hPoint12, hPoint13, hPoint14, hPoint15
-        ];
-
-        const pointsRoom3 = [
-            hPoint1, hPoint9, hPoint10, hPoint11
-        ];
-
-        //#region roomx
-        const roomX = createRoomFromFootprint(pointsRoom1, 0.25, 2.7, whiteMaterial);
-        roomX.updateMatrixWorld();
-
-        const roomXFloor = createFloorFromFootprint(pointsRoom1, 0.2, brownMaterial);
-        roomXFloor.updateMatrixWorld();
-
-        const roomXRoof = createThickSlopedRoofFromFootprint(pointsRoof1, 1.2, 0.9, 2.7, 0.2, bluishMaterial);
-        scene.add(roomXRoof);
-        //#endregion
-
-        //#region roomy
-
-        const roomY = createRoomFromFootprint(pointsRoom2, 0.2, 2.5, whiteMaterial);
-        const roomYFloor = createFloorFromFootprint(pointsRoom2, 0.2, brownMaterial);
-
-        const roomYRoof = createThickSlopedRoofFromFootprint(pointsRoom2, 1.5, 0.8, 2.5, 0.2, bluishMaterial);
-        scene.add(roomYRoof);
-
-        const winPositions = [
-            new Vector3(33, 1, 2),
-            new Vector3(34, 1, 2)
-        ]
-
-        const roomWithSeveralWins = createSeveralFenestrations(roomY, winPositions, 0.5, 0.9, 0.3);
-
-        const doorPositions = [
-            new Vector3(36, 0, 0),
-            new Vector3(36, 0, 9)
-        ]
-
-        const roomWithDoors = createSeveralFenestrations(roomX, doorPositions, 0.8, 2, 0.3);
-
-        const pointsDrywall = [
-            new Vector3(32, 0, 4), new Vector3(35, 0, 4)
-        ];
-        const drywall = createLinearWall(pointsDrywall, 0.1, 2.5, whiteMaterial);
-        scene.add(drywall);
-
-        const pointsDrywall1 = [
-            new Vector3(35, 0, 4), new Vector3(36, 0, 4), new Vector3(36, 0, 5), new Vector3(40, 0, 5),
-        ];
-        const drywall1 = createLinearWall(pointsDrywall1, 0.2, 2.5, whiteMaterial);
-        scene.add(drywall1);
-
-        //let roomWithWin = createFenestration(roomY, new Vector3(34, 1, 2), 0.5, 0.9, 0.3);
-        //roomWithWin = createFenestration(roomWithWin, new Vector3(35.5, 1, 2), 0.5, 0.9, 0.3);
-
-        const roomZ = createRoomFromFootprint(pointsRoom3, 0.2, 2.5, whiteMaterial);
-        const roomZFloor = createFloorFromFootprint(pointsRoom3, 0.2, brownMaterial);
-        roomZ.updateMatrixWorld();
-
-        const roomZRoof = createThickSlopedRoofFromFootprint(pointsRoom3, 1.5, 0.8, 2.5, 0.2, bluishMaterial);
-        scene.add(roomZRoof);
-
-        const winRotatedPositions = [
-            { pos: new THREE.Vector3(41, 1, 0), size: [0.5, 1, 0.3], rot: 0 }, // Front Door
-            { pos: new THREE.Vector3(43, 1, 1), size: [0.5, 1, 0.3], rot: 90 }, // Left Window
-            { pos: new THREE.Vector3(41.5, 1, 2), size: [1.5, 1, 0.3], rot: 0 }  // Right Window
-        ];
-
-        const roomWithRotatedWindows = createSeveralRotatedFenestrations(roomZ, winRotatedPositions);
-
-        scene.add(roomWithDoors, roomXFloor, roomWithSeveralWins, roomYFloor, roomWithRotatedWindows, roomZFloor);
-
-        //#endregion
-
-        //#region grids
-        const gridPointsA = [
-            new Vector3(35, 0, -2),
-            new Vector3(35, 0, 10)
-        ];
-
-        const gridGreenLine = new THREE.LineBasicMaterial({
-            color: 0x00ff00, // Green line
-            linewidth: 1     // Note: See warning below about linewidth
-        });
-
-        const gridA = createGrid(gridPointsA, "A", gridGreenLine);
-        scene.add(gridA);
-
-        const gridPointsB = [
-            new Vector3(32, 0, 0),
-            new Vector3(44, 0, 0)
-        ];
-
-        const gridB = createGrid(gridPointsB, "B", gridGreenLine);
-        scene.add(gridB);
-
-        const gridPointsC = [
-            new Vector3(40, 0, -2),
-            new Vector3(40, 0, 10)
-        ];
-
-        const gridC = createGrid(gridPointsC, "C", gridGreenLine);
-        scene.add(gridC);
-
-        const gridPointsD = [
-            new Vector3(32, 0, 0),
-            new Vector3(32, 0, 7.6)
-        ];
-
-        const gridD = createGrid(gridPointsD, "D", gridGreenLine);
-        scene.add(gridD);
+        scene.add(houses);
 
         //#endregion
 
@@ -332,7 +159,7 @@ const ThreeJSViewer = () => {
                     const wi = i * 0.1;
                     const he = r * 0.1;
                     const de = j * 0.1;
-                    const personalizedCube = createCube(wi, he, de, new Vector3(i - wi / 2, r, j - de / 2 + de).addScaledVector(disp, 1), redMaterial, scene);
+                    const personalizedCube = createCube(wi, he, de, new Vector3(i - wi / 2, r, j - de / 2 + de).addScaledVector(disp, 1), redMaterial);
 
                     paraleles.add(personalizedCube);
                 }
@@ -393,26 +220,29 @@ const ThreeJSViewer = () => {
         const geomFolder = gui.addFolder("Geometry");
         const archFolder = gui.addFolder("Architecture");
 
+        const matrixFolder = geomFolder.addFolder("3D Matrix");
+
         const iluminationFolder = gui.addFolder("Ilumination");
         const lightsFolder = iluminationFolder.addFolder("Lights");
         const lightHelperFolder = iluminationFolder.addFolder("Helpers");
 
         const guiParams = {
-            showHouse: resultGeometry.visible,
+            showHouse: houses.visible,
             showKnot1: knot1.visible,
             showKnot2: knot2.visible,
             showKnot3: knot3.visible,
             showLights: allLights.visible,
             showLightHelpers: allLightHelpers.visible,
-            showHouseLines: allLines.visible
+            Show3dMatrix: paraleles.visible
         };
 
-        archFolder.add(guiParams, 'showHouse').onChange((value) => resultGeometry.visible = value);
-        archFolder.add(guiParams, 'showHouseLines').onChange((value) => allLines.visible = value);
+        archFolder.add(guiParams, 'showHouse').onChange((value) => houses.visible = value);
 
         geomFolder.add(guiParams, 'showKnot1').onChange((value) => knot1.visible = value);
         geomFolder.add(guiParams, 'showKnot2').onChange((value) => knot2.visible = value);
         geomFolder.add(guiParams, 'showKnot3').onChange((value) => knot3.visible = value);
+
+        matrixFolder.add(guiParams, 'Show3dMatrix').onChange((value) => paraleles.visible = value);
 
         lightsFolder.add(guiParams, 'showLights').onChange((value) => allLights.visible = value);
 

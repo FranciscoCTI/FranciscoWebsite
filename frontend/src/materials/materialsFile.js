@@ -7,6 +7,11 @@ export const greenMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide   // Medium matte finish (higher = duller, lower = shinier)
 });
 
+export const grassMaterial = new THREE.MeshStandardMaterial({
+    color: 0x79D021,
+    wireframe: false,
+});
+
 export const redMaterial = new THREE.MeshStandardMaterial({
     color: 0xff0000, // Vibrant red
     metalness: 0,    // 0 means it's not a metal (won't reflect darkness)
@@ -39,7 +44,7 @@ export const brownMaterial = new THREE.MeshStandardMaterial({
     roughness: 0.5,  // Medium matte finish (higher = duller, lower = shinier)
 });
 
-export const bluishMaterial = new THREE.MeshStandardMaterial({
+export const roofMaterial = new THREE.MeshStandardMaterial({
     color: 0x534b4f,
     metalness: 0,
     roughness: 0.5,
