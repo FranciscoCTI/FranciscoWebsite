@@ -145,28 +145,41 @@ const ThreeJSViewer = () => {
         // #endregion
 
         //#region 3d matrix 
-        const onlyCube = createCube(1, 3, 2, new Vector3(0, 0, 2), redMaterial, scene);
-        scene.add(onlyCube);
+        //const onlyCube = createCube(1, 3, 2, new Vector3(0, 0, 2), redMaterial, scene);
+        //scene.add(onlyCube);
 
         let index = 10;
+        let multiplier = 0.1;
+        let rotation = Math.PI / 2;
         const paraleles = new THREE.Object3D();
+        scene.add(paraleles);
 
         const disp = new Vector3(15, 0, 10);
 
-        for (let i = 0; i < index; i++) {
-            for (let j = 0; j < index; j++) {
-                for (let r = 0; r < index; r++) {
-                    const wi = i * 0.1;
-                    const he = r * 0.1;
-                    const de = j * 0.1;
-                    const personalizedCube = createCube(wi, he, de, new Vector3(i - wi / 2, r, j - de / 2 + de).addScaledVector(disp, 1), redMaterial);
+        function generateCubes() {
 
-                    paraleles.add(personalizedCube);
+            for (let i = paraleles.children.length - 1; i >= 0; i--) {
+                const child = paraleles.children[i];
+                paraleles.remove(child);
+                if (child.geometry) child.geometry.dispose();
+            }
+
+            for (let i = 0; i < index; i++) {
+                for (let j = 0; j < index; j++) {
+                    for (let r = 0; r < index; r++) {
+                        const wi = i * multiplier;
+                        const he = r * multiplier;
+                        const de = j * multiplier;
+                        const personalizedCube = createCube(wi, he, de, new Vector3(i - wi / 2, r, j - de / 2 + de).addScaledVector(disp, 1), redMaterial);
+                        personalizedCube.rotation.y = rotation;
+
+                        paraleles.add(personalizedCube);
+                    }
                 }
             }
         }
+        generateCubes()
 
-        scene.add(paraleles);
 
         //#endregion
 
@@ -233,7 +246,10 @@ const ThreeJSViewer = () => {
             showKnot3: knot3.visible,
             showLights: allLights.visible,
             showLightHelpers: allLightHelpers.visible,
-            Show3dMatrix: paraleles.visible
+            Show3dMatrix: paraleles.visible,
+            index: 10,
+            multiplier: 0.1,
+            rotation: Math.PI / 2
         };
 
         archFolder.add(guiParams, 'showHouse').onChange((value) => houses.visible = value);
@@ -243,6 +259,19 @@ const ThreeJSViewer = () => {
         geomFolder.add(guiParams, 'showKnot3').onChange((value) => knot3.visible = value);
 
         matrixFolder.add(guiParams, 'Show3dMatrix').onChange((value) => paraleles.visible = value);
+        matrixFolder.add(guiParams, 'index', 1, 20, 1).name('Grid Count').onChange((value) => {
+            index = value;
+            generateCubes()
+        });
+
+        matrixFolder.add(guiParams, 'multiplier', 0, 0.06, 0.01).name('Size Multiplier').onChange((value) => {
+            multiplier = value;
+            generateCubes()
+        });
+        matrixFolder.add(guiParams, 'rotation', 0, Math.PI, 0.01).name('Element Rotation').onChange((value) => {
+            rotation = value;
+            generateCubes()
+        });
 
         lightsFolder.add(guiParams, 'showLights').onChange((value) => allLights.visible = value);
 
