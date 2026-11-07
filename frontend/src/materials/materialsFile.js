@@ -61,4 +61,9 @@ export const lineMat = new THREE.LineBasicMaterial({
     color: 0x00ff88,
     linewidth: 1
 });
+
+export const highlightingMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffff00, // Bright yellow highlight
+    emissive: 0x555500
+});
 // #endregion

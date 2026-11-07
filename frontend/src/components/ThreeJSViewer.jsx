@@ -8,7 +8,7 @@ import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { createCube } from './geometryMethods';
 import { createHouse } from './houseMethods';
-import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, roofMaterial, lineMat, reflectiveMaterial } from '../materials/materialsFile';
+import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, roofMaterial, lineMat, reflectiveMaterial, highlightingMaterial } from '../materials/materialsFile';
 import { Vector3, Vector2 } from 'three';
 
 
@@ -308,6 +308,70 @@ const ThreeJSViewer = () => {
         };
 
         window.addEventListener('resize', handleResize);
+
+        //#region highlighting
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        let highlightingMesh = null;
+        let originalMaterial = null;
+
+        const canvas = renderer.domElement;
+
+        window.addEventListener('pointerdown', onPointerDown);
+
+        function onPointerDown(event) {
+            const rect = canvas.getBoundingClientRect();
+
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            // 3. Normalize into -1 to +1 range based on the canvas dimensions
+            mouse.x = (x / rect.width) * 2 - 1;
+            mouse.y = -(y / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            scene.updateMatrixWorld(true);
+
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            if (intersects.length > 0) {
+                const clickedMesh = intersects[0].object;
+
+                if (clickedMesh.isMesh) {
+                    highlightObject(clickedMesh);
+                } else {
+                    clearHighlight();
+                }
+            }
+        }
+
+        function highlightObject(mesh) {
+            if (highlightingMesh && highlightingMesh !== mesh) {
+                highlightingMesh.material = originalMaterial;
+            }
+            if (highlightingMesh == mesh) {
+                clearHighlight();
+                return;
+            }
+
+            highlightingMesh = mesh;
+            originalMaterial = mesh.material;
+
+            mesh.material = highlightingMaterial
+        }
+
+        function clearHighlight() {
+            if (highlightingMesh) {
+                highlightingMesh.material = originalMaterial;
+                highlightingMesh = null;
+                originalMaterial = null;
+            }
+        }
+
+
+        //#endregion
     }, []);
 
     return (
@@ -331,4 +395,6 @@ const ThreeJSViewer = () => {
         </div>);
 
 };
+
+
 export default ThreeJSViewer;
