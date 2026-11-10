@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { Box, Center, Container, Spacer, Divider, HStack, Stack, Flex, Link, Text, VStack, Select, Button, Image, Heading } from '@chakra-ui/react';
-import ThreeJSViewer from '../components/ThreejsViewer.jsx';
+import ThreeJSViewer from '../components/ThreeJSViewer.jsx';
 
 export const ThreeJSPage = () => {
-    
+
     return (
         <>
             <Container maxW="container.xl" py={5}>
@@ -18,7 +18,7 @@ export const ThreeJSPage = () => {
                     border="2px solid transparent"
                     transition="all 0.4s ease"
                     m={-3.5}
-                    >
+                >
                     <Heading as='h2' size='lg' mb={5} mt={2} color={'yellow'} >
                         THREE JS
                     </Heading>
