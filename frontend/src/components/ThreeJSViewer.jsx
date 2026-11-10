@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Box } from '@chakra-ui/react';
@@ -16,6 +16,13 @@ import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 const ThreeJSViewer = () => {
     const containerRef = useRef(null);
     const guiContainerRef = useRef(null);
+    const [houseToggle, setHouseToggle] = useState(false);
+
+    const houseToggleRef = useRef(houseToggle);
+
+    useEffect(() => {
+        houseToggleRef.current = houseToggle;
+    }, [houseToggle]);
 
     useEffect(() => {
         const currentContainer = containerRef.current;
@@ -335,6 +342,9 @@ const ThreeJSViewer = () => {
 
         function onPointerDown(event) {
 
+            if (event.target.closest('button') || event.target.closest('#newHouseButton')) {
+                return;
+            }
             if (event.button !== 0) return;
 
             const rect = canvas.getBoundingClientRect();
@@ -342,7 +352,6 @@ const ThreeJSViewer = () => {
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
 
-            // 3. Normalize into -1 to +1 range based on the canvas dimensions
             mouse.x = (x / rect.width) * 2 - 1;
             mouse.y = -(y / rect.height) * 2 + 1;
 
@@ -350,6 +359,14 @@ const ThreeJSViewer = () => {
 
             scene.updateMatrixWorld(true);
 
+            if (houseToggleRef.current) {
+                instantiateHouse();
+            } else {
+                markGeometry();
+            }
+        }
+
+        function markGeometry() {
             const volumetricObjects = [];
 
             paraleles.traverse((child) => {
@@ -380,6 +397,21 @@ const ThreeJSViewer = () => {
             }
         }
 
+        function instantiateHouse() {
+            const intersects = raycaster.intersectObject(groundPlane, false);
+
+            if (intersects.length > 0) {
+                // Get the exact 3D point where the ray hit the ground
+                const hitPoint = intersects[0].point;
+
+                // Force Y to always be 0
+                const spawnPosition = new THREE.Vector3(hitPoint.x, 0, hitPoint.z);
+
+                // Spawn your house at this exact click location
+                spawnHouseAt(spawnPosition);
+            }
+        }
+
         function highlightObject(mesh) {
             if (highlightingMesh && highlightingMesh !== mesh) {
                 highlightingMesh.material = originalMaterial;
@@ -403,8 +435,29 @@ const ThreeJSViewer = () => {
             }
         }
 
+        function spawnHouseAt(pos) {
+            const newHouse = createHouse(pos.add(new THREE.Vector3(0, 0, 40)), Math.PI / 2);
+
+            scene.add(newHouse);
+        }
+
 
         //#endregion
+
+        //#region house spawning
+        const groundGeometry = new THREE.PlaneGeometry(2000, 2000);
+        groundGeometry.rotateX(-Math.PI / 2); // Rotate flat onto the XZ plane
+
+        // Invisible material so it doesn't block your visual scene
+        const groundMaterial = new THREE.MeshBasicMaterial({ visible: false });
+        const groundPlane = new THREE.Mesh(groundGeometry, groundMaterial);
+
+        // Tag it so we can easily target it
+        groundPlane.userData.isGround = true;
+        scene.add(groundPlane);
+
+
+        //#endregion 
     }, []);
 
     return (
@@ -425,6 +478,30 @@ const ThreeJSViewer = () => {
                     zIndex: 10     // Ensures it sits above the canvas
                 }}
             />
+            <button
+                id="newHouseButton"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (e.nativeEvent) e.nativeEvent.stopImmediatePropagation();
+                    setHouseToggle(prev => !prev);
+
+                }}
+            >
+                {houseToggle ? 'Disable House creation' : 'Enable house creation'}</button>
+            <div style={{
+                position: 'absolute',
+                top: '75px',
+                left: '20px',
+                zIndex: 20,
+                padding: '6px 10px',
+                backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                color: '#e5e7eb',
+                borderRadius: '4px',
+                fontSize: '12px',
+                pointerEvents: 'none'
+            }}>
+                <strong>{houseToggle ? 'Active (Spawning)' : 'Inactive (Selecting)'}</strong>
+            </div>
         </div>);
 
 };

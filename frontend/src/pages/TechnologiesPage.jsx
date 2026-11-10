@@ -34,8 +34,8 @@ const TechnologiesPage = () => {
                     >
                         These are all the technologies that I use
                     </Text>
-                    <ThreeJSPage></ThreeJSPage>    
                     <APSPage></APSPage>
+                    <ThreeJSPage></ThreeJSPage>
                     {technologies.map((tech) => (
                         (tech != null && tech.name != "") &&
                         (<TechnologyCard key={tech._id} technology={tech} />)

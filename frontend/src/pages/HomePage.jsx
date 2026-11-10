@@ -5,6 +5,7 @@ import { useEmployerStore } from '../store/employer.jsx';
 import { useEffect } from 'react';
 import CarrerTimeline from '../components/CarrerTimeline.jsx';
 import { Image } from '@chakra-ui/react';
+import ThreeJSViewer from '../components/ThreeJSViewer.jsx';
 
 const HomePage = () => {
 
@@ -23,9 +24,9 @@ const HomePage = () => {
 
     return (
         <>
-            <Stack spacing="6" my={6}>
+            <Stack spacing="6" my={6} align="center">
 
-                <Flex justify="center"><img src="/fotoSlovenia.jpg" style={{ width: "1020px", height: "300px", objectFit: "cover" }}></img></Flex>
+                <Flex justify="center" align='center' width='1020px'> <ThreeJSViewer /></Flex>
 
                 <BriefInfo information={"Hello, i´m Francisco, an AEC developer from Chile. This is my personal website where you can see all my experience, projects and technologies, so you can hire me to work remotely."} moreInfo={"AEC software developer, Revit Application Developer, BIM specialist, Architect. 15 years of experience in the private construction industry. Autodesk Developer Network member, published in the Autodesk AppStore. Creator of several Revit applications such as: Hanger Generator, Instance Locator, Coordinate Locator, LinkModifier, and more Revit applications for companies in Chile, Australia and the UK. Experience developing a variety of programs in technologies such as: .NET general software, Revit API, Navisworks API, ObjectARX, Autodesk ACC applications, GrassHopper nodes, Rhino Common, 3d Geometry oriented desktop and web software. Currently specializing in web development, focused on MERN stack (MONGODB, Express, React, NodeJS)."} title={"About me"}>
                 </BriefInfo>
