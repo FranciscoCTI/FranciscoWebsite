@@ -6,10 +6,11 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import { Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION } from 'three-bvh-csg';
 import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
-import { createCube } from './geometryMethods';
+import { createCube, createText, createTextAsync } from './geometryMethods';
 import { createHouse } from './houseMethods';
 import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, roofMaterial, lineMat, reflectiveMaterial, highlightingMaterial } from '../materials/materialsFile';
 import { Vector3, Vector2 } from 'three';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 
 
 const ThreeJSViewer = () => {
@@ -48,15 +49,23 @@ const ThreeJSViewer = () => {
         const knotGeom = new THREE.TorusKnotGeometry(0.8, 0.3, 100, 16);
         const knot1 = new THREE.Mesh(knotGeom, blueMaterial);
         knot1.position.set(10, 0, 2); // Center the object
+        knot1.userData.isVolumetric = true;
         scene.add(knot1);
+
+        createTextAsync(scene, "This is clickable", knot1.position.clone().add(new THREE.Vector3(0, 0, -3)), Math.PI / 2, whiteMaterial);
 
         const knot2 = new THREE.Mesh(knotGeom, greenMaterial);
         knot2.position.set(14, 0, 2) // Position it to the left of the reflective sphere  
+        knot2.userData.isVolumetric = true;
         scene.add(knot2);
+
+        createTextAsync(scene, "This is clickable", knot2.position.clone().add(new THREE.Vector3(0, 0, -3)), Math.PI / 2, whiteMaterial);
 
         const knot3 = new THREE.Mesh(knotGeom, redMaterial);
         knot3.position.set(18, 0, 2) // Position it to the left of the reflective sphere  
         scene.add(knot3);
+
+        createTextAsync(scene, "This is NOT clickable", knot3.position.clone().add(new THREE.Vector3(0, 0, -3)), Math.PI / 2, whiteMaterial);
 
         const dodecahedronGeometry = new THREE.DodecahedronGeometry(2.5, 1);
         const reflectiveMesh = new THREE.Mesh(dodecahedronGeometry, reflectiveMaterial);
@@ -107,6 +116,8 @@ const ThreeJSViewer = () => {
         //const extrudedMesh = new THREE.Mesh(geometryExtrusion, redMaterial);
         brush1.position.z = 10;
         brush1.position.y = 1.5;
+        brush1.userData.isVolumetric = true;
+
         brush1.updateMatrixWorld();
         //scene.add(extrudedMesh);
 
@@ -115,13 +126,15 @@ const ThreeJSViewer = () => {
         brush2.position.x = 5;
         brush2.position.y = 1.5;
         brush2.position.z = 12;
-        brush2.updateMatrixWorld();
+        brush2.userData.isVolumetric = true;
+        //brush2.updateMatrixWorld();
         //scene.add(room2);
 
         const evaluator = new Evaluator();
 
         const resultGeometry = evaluator.evaluate(brush1, brush2, ADDITION);
         resultGeometry.material = blueMaterial;
+        resultGeometry.userData.isVolumetric = true;
 
         scene.add(resultGeometry);
 
@@ -321,6 +334,9 @@ const ThreeJSViewer = () => {
         window.addEventListener('pointerdown', onPointerDown);
 
         function onPointerDown(event) {
+
+            if (event.button !== 0) return;
+
             const rect = canvas.getBoundingClientRect();
 
             const x = event.clientX - rect.left;
@@ -334,7 +350,21 @@ const ThreeJSViewer = () => {
 
             scene.updateMatrixWorld(true);
 
-            const intersects = raycaster.intersectObjects(scene.children, true);
+            const volumetricObjects = [];
+
+            paraleles.traverse((child) => {
+                if (child.isMesh && child.userData.isVolumetric) {
+                    volumetricObjects.push(child);
+                }
+            });
+
+            scene.traverse((child) => {
+                if (child.userData.isVolumetric) {
+                    volumetricObjects.push(child);
+                }
+            });
+
+            const intersects = raycaster.intersectObjects(volumetricObjects, true);
 
             if (intersects.length > 0) {
                 const clickedMesh = intersects[0].object;
@@ -344,6 +374,9 @@ const ThreeJSViewer = () => {
                 } else {
                     clearHighlight();
                 }
+            }
+            else {
+                clearHighlight();
             }
         }
 

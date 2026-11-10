@@ -159,6 +159,7 @@ export function createHouse(location, rotation) {
     allhouse.rotation.y = rotation;
 
     allhouse.position.copy(location.clone());
+    allhouse.userData.isVolumetric = true;
 
     return allhouse;
 }
@@ -850,7 +851,8 @@ function createSite(width, depth, location) {
     const allSite = new THREE.Object3D();
 
     const siteBrush = new Brush(siteGeometry, grassMaterial);
-    siteBrush.updateMatrixWorld();
+
+    siteBrush.userData.isVolumetric = true;
 
     allSite.add(siteBrush, post1, post2, post3, post4, post5, post6, post7, post8);
 

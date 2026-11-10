@@ -169,18 +169,19 @@ export function createCube(width, height, depth, origin, mat) {
 
     // 6. Wrap in a CSG Brush
     const cubeBrush = new Brush(cubeGeometry, mat);
+    cubeBrush.userData.isVolumetric = true;
 
-    //addArrowHelpersToAllFaces(cubeBrush, 0.3, 0x17ff00, scene);
+    if (cubeBrush.mesh) {
+        cubeBrush.mesh.userData.isVolumetric = true;
+    }
 
-    cubeBrush.add(arrowHelperRight, arrowHelperLeft, arrowHelperTop, arrowHelperBot);
+    //cubeBrush.add(arrowHelperRight, arrowHelperLeft, arrowHelperTop, arrowHelperBot);
 
     const pos = origin;
 
     cubeBrush.position.set(pos.x, pos.y, pos.z);
 
     cubeBrush.updateMatrixWorld();
-
-
 
     return cubeBrush;
 }
@@ -237,4 +238,54 @@ export function addArrowHelpersToAllFaces(mesh, length = 0.5, color = 0x17ff00, 
         targetScene.add(arrowHelper);
     }
 }
+
+
+export function createText(text, loc, rot, mat) {
+
+    const loaderFont = new FontLoader();
+    const cdnFontUrl = 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json';
+
+    return new Promise((resolve, reject) => {
+        loaderFont.load(
+            cdnFontUrl, (font) => {
+                const textGeometry1 = new TextGeometry(text, {
+                    font: font,
+                    size: 0.5,
+                    depth: 0.1,
+                    curveSegments: 4,
+                    bevelEnabled: true,
+                    bevelThickness: 0.02,
+                    bevelSize: 0.03,
+                    bevelSegments: 5
+                });
+
+                textGeometry1.computeBoundingBox();
+
+                const textMesh1 = new THREE.Mesh(textGeometry1, mat);
+                textMesh1.rotation.x = -rot;
+                textMesh1.rotation.z = rot;
+
+                textMesh1.position.set(loc.x, loc.y, loc.z);
+
+
+
+                resolve(textMesh1);
+            },
+            undefined,
+            (error) => {
+                reject(error);
+            }
+        );
+    });
+}
+
+export async function createTextAsync(scene, text, loc, rot, mat) {
+
+    // Wait for the font to load and the mesh to be created
+    const myTextMesh = await createText(text, loc, rot, mat);
+
+    // Now safely add it to your scene or group!
+    scene.add(myTextMesh);
+}
+
 
