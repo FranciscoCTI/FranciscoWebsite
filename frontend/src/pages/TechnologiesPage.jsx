@@ -3,6 +3,7 @@ import { useTechnologyStore } from '../store/technology';
 import { VStack, Container, Text, SimpleGrid, useColorModeValue, Box } from '@chakra-ui/react'
 import TechnologyCard from '../components/TechnologyCard';
 import { APSPage } from "./APSPage";
+import { ThreeJSPage } from './ThreeJSPage';
 
 const TechnologiesPage = () => {
 
@@ -34,6 +35,7 @@ const TechnologiesPage = () => {
                         These are all the technologies that I use
                     </Text>
                     <APSPage></APSPage>
+                    <ThreeJSPage></ThreeJSPage>
                     {technologies.map((tech) => (
                         (tech != null && tech.name != "") &&
                         (<TechnologyCard key={tech._id} technology={tech} />)
