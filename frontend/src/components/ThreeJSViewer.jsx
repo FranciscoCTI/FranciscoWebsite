@@ -8,6 +8,11 @@ import { materialAO } from 'three/src/nodes/accessors/MaterialNode.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { createCube, createText, createTextAsync } from './geometryMethods';
 import { createHouse } from './houseMethods';
+import {
+    createStretchableBox,
+    createStretchableCylinder,
+    createFaceStretchController
+} from './faceStretching';
 import { blueMaterial, redMaterial, greenMaterial, brownMaterial, blackMaterial, whiteMaterial, roofMaterial, lineMat, reflectiveMaterial, highlightingMaterial } from '../materials/materialsFile';
 import { Vector3, Vector2 } from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
@@ -39,9 +44,9 @@ const ThreeJSViewer = () => {
         scene.add(gridHelper);
 
         const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-        camera.position.z = 70;
-        camera.position.y = 25;
-        camera.position.x = 40;
+        camera.position.z = -70;
+        camera.position.y = 40;
+        camera.position.x = 50;
 
 
         //#region Renderer Setup
@@ -203,6 +208,137 @@ const ThreeJSViewer = () => {
 
         //#endregion
 
+        //#region Face Stretching Solids Studio (Placed in open +X, -Z quadrant)
+        const stretchSolidsGroup = new THREE.Group();
+        scene.add(stretchSolidsGroup);
+
+        // Ground podium floor to demarcate the Face Stretching zone
+        const podiumGeom = new THREE.BoxGeometry(20, 0.04, 34);
+        const podiumMat = new THREE.MeshStandardMaterial({
+            color: 0x334155,
+            roughness: 0.9,
+            metalness: 0.1,
+            transparent: true,
+            opacity: 0.45
+        });
+        const studioPodium = new THREE.Mesh(podiumGeom, podiumMat);
+        studioPodium.position.set(32.5, -0.02, -17);
+        studioPodium.receiveShadow = true;
+        stretchSolidsGroup.add(studioPodium);
+
+        // 1. Classic Cube (Crimson)
+        const stretchCube = createStretchableBox(
+            stretchSolidsGroup,
+            { x: 27, y: 3, z: -28 },
+            { x: 6, y: 6, z: 6 },
+            0xdc143c,
+            'CUBE'
+        );
+
+        // 2. Structural Column (Royal Blue)
+        const stretchColumn = createStretchableBox(
+            stretchSolidsGroup,
+            { x: 38, y: 5.5, z: -28 },
+            { x: 3, y: 11, z: 3 },
+            0x2563eb,
+            'COLUMN'
+        );
+
+        // 3. Partition Wall (Warm Amber)
+        const stretchWall = createStretchableBox(
+            stretchSolidsGroup,
+            { x: 27, y: 2.5, z: -17 },
+            { x: 8, y: 5, z: 1.5 },
+            0xd97706,
+            'WALL'
+        );
+
+        // 4. Horizontal Beam (Teal / Cyan)
+        const stretchBeam = createStretchableBox(
+            stretchSolidsGroup,
+            { x: 38, y: 1.25, z: -17 },
+            { x: 2.5, y: 2.5, z: 10 },
+            0x0891b2,
+            'BEAM'
+        );
+
+        // 5. Floor Slab / Platform (Emerald Green)
+        const stretchSlab = createStretchableBox(
+            stretchSolidsGroup,
+            { x: 27, y: 0.6, z: -6 },
+            { x: 8, y: 1.2, z: 8 },
+            0x10b981,
+            'SLAB'
+        );
+
+        // 6. Round Column / Cylinder (Purple)
+        const stretchCylinder = createStretchableCylinder(
+            stretchSolidsGroup,
+            { x: 38, y: 3.5, z: -6 },
+            2.5,
+            7,
+            0x8b5cf6,
+            'CYLINDER'
+        );
+
+        // Ground Labels for each solid
+        createTextAsync(
+            stretchSolidsGroup,
+            "1. Cube",
+            new THREE.Vector3(25, 0.1, -24),
+            Math.PI / 2,
+            whiteMaterial
+        );
+
+        createTextAsync(
+            stretchSolidsGroup,
+            "2. Column",
+            new THREE.Vector3(36, 0.1, -24),
+            Math.PI / 2,
+            whiteMaterial
+        );
+
+        createTextAsync(
+            stretchSolidsGroup,
+            "3. Wall",
+            new THREE.Vector3(25, 0.1, -13),
+            Math.PI / 2,
+            whiteMaterial
+        );
+
+        createTextAsync(
+            stretchSolidsGroup,
+            "4. Beam",
+            new THREE.Vector3(36, 0.1, -11),
+            Math.PI / 2,
+            whiteMaterial
+        );
+
+        createTextAsync(
+            stretchSolidsGroup,
+            "5. Slab",
+            new THREE.Vector3(25, 0.1, -1),
+            Math.PI / 2,
+            whiteMaterial
+        );
+
+        createTextAsync(
+            stretchSolidsGroup,
+            "6. Cylinder",
+            new THREE.Vector3(35.5, 0.1, -1.5),
+            Math.PI / 2,
+            whiteMaterial
+        );
+
+        createTextAsync(
+            stretchSolidsGroup,
+            "Face-Stretching Studio: Click any face -> Drag -> Click to lock",
+            new THREE.Vector3(22.5, 0.1, -33),
+            Math.PI / 2,
+            whiteMaterial
+        );
+        //#endregion
+
         // #region Lighting and Controls
         const allLights = new THREE.Object3D();
         const allLightHelpers = new THREE.Object3D();
@@ -241,6 +377,13 @@ const ThreeJSViewer = () => {
         controls.dampingFactor = 0.05;
         controls.enableZoom = true;
         controls.enablePan = true;
+
+        const faceController = createFaceStretchController({
+            scene,
+            camera,
+            renderer,
+            controls
+        });
         // #endregion
 
         //#region GUI
@@ -277,6 +420,49 @@ const ThreeJSViewer = () => {
         geomFolder.add(guiParams, 'showKnot1').onChange((value) => knot1.visible = value);
         geomFolder.add(guiParams, 'showKnot2').onChange((value) => knot2.visible = value);
         geomFolder.add(guiParams, 'showKnot3').onChange((value) => knot3.visible = value);
+
+        const stretchFolder = geomFolder.addFolder("Face Stretching");
+        guiParams.showStretchables = true;
+        stretchFolder.add(guiParams, 'showStretchables').name('Show Studio Solids').onChange((val) => {
+            stretchSolidsGroup.visible = val;
+        });
+        guiParams.resetShapes = () => {
+            // 1. Cube
+            stretchCube.geometry.dispose();
+            stretchCube.geometry = new THREE.BoxGeometry();
+            stretchCube.scale.set(6, 6, 6);
+            stretchCube.position.set(27, 3, -28);
+
+            // 2. Column
+            stretchColumn.geometry.dispose();
+            stretchColumn.geometry = new THREE.BoxGeometry();
+            stretchColumn.scale.set(3, 11, 3);
+            stretchColumn.position.set(38, 5.5, -28);
+
+            // 3. Wall
+            stretchWall.geometry.dispose();
+            stretchWall.geometry = new THREE.BoxGeometry();
+            stretchWall.scale.set(8, 5, 1.5);
+            stretchWall.position.set(27, 2.5, -17);
+
+            // 4. Beam
+            stretchBeam.geometry.dispose();
+            stretchBeam.geometry = new THREE.BoxGeometry();
+            stretchBeam.scale.set(2.5, 2.5, 10);
+            stretchBeam.position.set(38, 1.25, -17);
+
+            // 5. Slab
+            stretchSlab.geometry.dispose();
+            stretchSlab.geometry = new THREE.BoxGeometry();
+            stretchSlab.scale.set(8, 1.2, 8);
+            stretchSlab.position.set(27, 0.6, -6);
+
+            // 6. Cylinder
+            stretchCylinder.geometry.dispose();
+            stretchCylinder.geometry = new THREE.CylinderGeometry(2.5, 2.5, 7, 32);
+            stretchCylinder.position.set(38, 3.5, -6);
+        };
+        stretchFolder.add(guiParams, 'resetShapes').name('Reset All Solids');
 
         matrixFolder.add(guiParams, 'Show3dMatrix').onChange((value) => paraleles.visible = value);
         matrixFolder.add(guiParams, 'index', 1, 20, 1).name('Grid Count').onChange((value) => {
@@ -329,7 +515,21 @@ const ThreeJSViewer = () => {
 
         window.addEventListener('resize', handleResize);
 
-        //#region highlighting
+        //#region house spawning ground
+        const groundGeometry = new THREE.PlaneGeometry(2000, 2000);
+        groundGeometry.rotateX(-Math.PI / 2); // Rotate flat onto the XZ plane
+
+        // Invisible material so it doesn't block your visual scene
+        const groundMaterial = new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide });
+        const groundPlane = new THREE.Mesh(groundGeometry, groundMaterial);
+
+        // Tag it so we can easily target it
+        groundPlane.userData.isGround = true;
+        scene.add(groundPlane);
+        groundPlane.updateMatrixWorld(true);
+        //#endregion
+
+        //#region Highlighting and Face Stretching Interaction
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
@@ -338,35 +538,79 @@ const ThreeJSViewer = () => {
 
         const canvas = renderer.domElement;
 
-        window.addEventListener('pointerdown', onPointerDown);
+        const getCanvasMouse = (event, target) => {
+            const rect = canvas.getBoundingClientRect();
+            target.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            target.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            return (
+                event.clientX >= rect.left &&
+                event.clientX <= rect.right &&
+                event.clientY >= rect.top &&
+                event.clientY <= rect.bottom
+            );
+        };
 
         function onPointerDown(event) {
-
             if (event.target.closest('button') || event.target.closest('#newHouseButton')) {
+                return;
+            }
+            if (currentGUIContainer && currentGUIContainer.contains(event.target)) {
                 return;
             }
             if (event.button !== 0) return;
 
-            const rect = canvas.getBoundingClientRect();
+            const isInside = getCanvasMouse(event, mouse);
 
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+            // If user is currently dragging a face, drop it
+            if (faceController.isDragging()) {
+                faceController.dropDraggable(mouse);
+                return;
+            }
 
-            mouse.x = (x / rect.width) * 2 - 1;
-            mouse.y = -(y / rect.height) * 2 + 1;
+            if (!isInside) return;
 
+            // Ensure raycaster is updated with current camera and mouse NDC
             raycaster.setFromCamera(mouse, camera);
-
             scene.updateMatrixWorld(true);
 
             if (houseToggleRef.current) {
                 instantiateHouse();
-            } else {
-                markGeometry();
+                return;
+            }
+
+            // Check if user clicked a stretchable solid face
+            const handled = faceController.handleClick(mouse);
+            if (handled) {
+                clearHighlight();
+                return;
+            }
+
+            markGeometry();
+        }
+
+        function onPointerMove(event) {
+            const isInside = getCanvasMouse(event, mouse);
+
+            if (!isInside && !faceController.isDragging()) {
+                faceController.handleMouseOut();
+                return;
+            }
+
+            faceController.handleMouseMove(mouse);
+        }
+
+        function onPointerOut(event) {
+            if (!event.relatedTarget && !faceController.isDragging()) {
+                faceController.handleMouseOut();
             }
         }
 
+        window.addEventListener('pointerdown', onPointerDown);
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('mouseout', onPointerOut);
+
         function markGeometry() {
+            raycaster.setFromCamera(mouse, camera);
             const volumetricObjects = [];
 
             paraleles.traverse((child) => {
@@ -391,23 +635,18 @@ const ThreeJSViewer = () => {
                 } else {
                     clearHighlight();
                 }
-            }
-            else {
+            } else {
                 clearHighlight();
             }
         }
 
         function instantiateHouse() {
+            raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObject(groundPlane, false);
 
             if (intersects.length > 0) {
-                // Get the exact 3D point where the ray hit the ground
                 const hitPoint = intersects[0].point;
-
-                // Force Y to always be 0
                 const spawnPosition = new THREE.Vector3(hitPoint.x, 0, hitPoint.z);
-
-                // Spawn your house at this exact click location
                 spawnHouseAt(spawnPosition);
             }
         }
@@ -416,7 +655,7 @@ const ThreeJSViewer = () => {
             if (highlightingMesh && highlightingMesh !== mesh) {
                 highlightingMesh.material = originalMaterial;
             }
-            if (highlightingMesh == mesh) {
+            if (highlightingMesh === mesh) {
                 clearHighlight();
                 return;
             }
@@ -424,7 +663,7 @@ const ThreeJSViewer = () => {
             highlightingMesh = mesh;
             originalMaterial = mesh.material;
 
-            mesh.material = highlightingMaterial
+            mesh.material = highlightingMaterial;
         }
 
         function clearHighlight() {
@@ -437,27 +676,31 @@ const ThreeJSViewer = () => {
 
         function spawnHouseAt(pos) {
             const newHouse = createHouse(pos.add(new THREE.Vector3(0, 0, 40)), Math.PI / 2);
-
             scene.add(newHouse);
+            houses.add(newHouse);
         }
-
-
         //#endregion
 
-        //#region house spawning
-        const groundGeometry = new THREE.PlaneGeometry(2000, 2000);
-        groundGeometry.rotateX(-Math.PI / 2); // Rotate flat onto the XZ plane
-
-        // Invisible material so it doesn't block your visual scene
-        const groundMaterial = new THREE.MeshBasicMaterial({ visible: false });
-        const groundPlane = new THREE.Mesh(groundGeometry, groundMaterial);
-
-        // Tag it so we can easily target it
-        groundPlane.userData.isGround = true;
-        scene.add(groundPlane);
-
-
-        //#endregion 
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('pointerdown', onPointerDown);
+            window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('mouseout', onPointerOut);
+            faceController.dispose();
+            gui.destroy();
+            stretchSolidsGroup.traverse((child) => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) child.material.forEach((m) => m.dispose());
+                    else child.material.dispose();
+                }
+            });
+            if (currentContainer && renderer.domElement) {
+                currentContainer.removeChild(renderer.domElement);
+            }
+            renderer.dispose();
+        };
     }, []);
 
     return (
